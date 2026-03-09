@@ -10,7 +10,7 @@ Admin frontend for MAS (critical company project). Backend is implemented separa
 
 ```bash
 npm ci
-cp .env.example .env.local   # then edit .env.local with your values
+# copy .env.example to .env.local, then edit .env.local with your values
 npm run dev
 ```
 
@@ -43,7 +43,7 @@ src/
 ├── app/                    # Next.js App Router (layout, pages, globals.css)
 ├── components/
 │   ├── ui/                 # Reusable UI primitives (export via index.ts)
-│   └── features/          # Feature-specific components (admin tables, sidebars, etc.)
+│   └── features/           # Feature-specific components (admin tables, sidebars, etc.)
 ├── config/                 # App config (e.g. env.ts for typed env)
 ├── hooks/                  # Custom React hooks
 ├── lib/

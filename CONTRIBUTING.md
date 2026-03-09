@@ -22,9 +22,9 @@ Thank you for contributing. Please follow the guidelines below.
 
 ## Branch, commit, and PR workflow
 
-- Create a **branch** from `master` (e.g. `feature/xyz`, `fix/abc`).
+- Create a **branch** from `main` (e.g. `feature/xyz`, `fix/abc`).
 - Make **focused commits** with clear messages.
-- Open a **Pull Request** against `master`. Describe what changed and why.
+- Open a **Pull Request** against `main`. Describe what changed and why.
 - Ensure **build and lint pass** before requesting review.
 
 ---

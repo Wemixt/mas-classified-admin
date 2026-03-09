@@ -17,7 +17,7 @@ Prerequisites, one-time setup, daily workflow, and troubleshooting.
 1. **Clone the repository**
    ```bash
    git clone <repo-url>
-   cd mass-classified-admin
+   cd mas-classified-admin
    ```
 
 2. **Install dependencies**

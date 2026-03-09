@@ -26,13 +26,19 @@ export async function apiFetch<T = unknown>(
   const base = getApiUrl();
   const finalUrl =
     url ?? (path ? `${base}${path.startsWith("/") ? path : `/${path}`}` : base);
+  const headers = new Headers(init.headers);
+
+  if (!headers.has("Accept")) {
+    headers.set("Accept", "application/json");
+  }
+
+  if (init.body && !(init.body instanceof FormData) && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
 
   const res = await fetch(finalUrl, {
     ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...init.headers,
-    },
+    headers,
   });
 
   if (!res.ok) {
