@@ -1,8 +1,12 @@
+"use client";
+
+import { useAuth } from "@/hooks";
 import StatCard from "./StatCard";
 import QuickActions from "./QuickActions";
 import AdStatistics from "./AdStatistics";
 import RecentAds from "./RecentAds";
 import RecentActivity from "./RecentActivity";
+import Messages from "./Messages";
 
 const stats = [
   { value: 245, label: "Total Ads", bgColor: "#0F467F" },
@@ -12,6 +16,8 @@ const stats = [
 ];
 
 export default function DashboardContent() {
+  const { role } = useAuth();
+
   return (
     <div className="py-[28px] pl-[28px]">
       {/* Title */}
@@ -45,15 +51,19 @@ export default function DashboardContent() {
         ))}
       </div>
 
-      {/* 2-Column Layout: Left + Right columns flow independently */}
+      {/* 2-Column Layout: both columns equal height, bottom cards stretch to align */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-[16px] mt-[20px]">
         <div className="flex flex-col gap-[16px]">
           <QuickActions />
-          <RecentAds />
+          <div className="flex-1 flex flex-col">
+            <RecentAds />
+          </div>
         </div>
         <div className="flex flex-col gap-[16px]">
           <AdStatistics />
-          <RecentActivity />
+          <div className="flex-1 flex flex-col">
+            {role === "admin" ? <RecentActivity /> : <Messages />}
+          </div>
         </div>
       </div>
     </div>

@@ -10,7 +10,7 @@ export default function Home() {
       <Header />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <div className="flex-1 bg-[#F5F5F5] overflow-auto pr-6 xl:pr-[100px]">
+        <div className="flex-1 bg-[#F5F5F5] overflow-auto pr-6 xl:pr-[50px]">
           <DashboardContent />
         </div>
       </div>

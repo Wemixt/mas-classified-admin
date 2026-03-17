@@ -1,11 +1,29 @@
-import Link from "next/link";
+"use client";
 
-const actions = [
-  { label: "Manage Moderator", icon: "moderator", path: "/moderators" },
-  { label: "Manage sellers", icon: "sellers", path: "/sellers" },
-  { label: "Ad Reports", icon: "reports", path: "/reports" },
-  { label: "Add Categories", icon: "categories", path: "/categories" },
-];
+import Link from "next/link";
+import { useAuth } from "@/hooks";
+import type { UserRole } from "@/types";
+
+interface QuickAction {
+  label: string;
+  icon: string;
+  path: string;
+}
+
+const actionsByRole: Record<UserRole, QuickAction[]> = {
+  admin: [
+    { label: "Manage Moderator", icon: "moderator", path: "/moderators" },
+    { label: "Manage sellers", icon: "sellers", path: "/sellers" },
+    { label: "Ad Reports", icon: "reports", path: "/reports" },
+    { label: "Add Categories", icon: "categories", path: "/categories" },
+  ],
+  moderator: [
+    { label: "Review Ads", icon: "review", path: "/ad-review" },
+    { label: "Manage sellers", icon: "sellers", path: "/sellers" },
+    { label: "View Reports", icon: "reports", path: "/reports" },
+    { label: "View Categories", icon: "categories", path: "/categories" },
+  ],
+};
 
 function ActionIcon({ type }: { type: string }) {
   switch (type) {
@@ -19,6 +37,12 @@ function ActionIcon({ type }: { type: string }) {
       return (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z" fill="white"/>
+        </svg>
+      );
+    case "review":
+      return (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 2h5v7l-2.5-1.5L12 12V5zM7 17l3.5-4.5 2.5 3.01L15.5 12l3.5 5H7z" fill="white"/>
         </svg>
       );
     case "reports":
@@ -39,8 +63,11 @@ function ActionIcon({ type }: { type: string }) {
 }
 
 export default function QuickActions() {
+  const { role } = useAuth();
+  const actions = actionsByRole[role];
+
   return (
-    <div className="bg-[#DAECFF] rounded-[10px] overflow-hidden">
+    <div className="bg-[#DAECFF] rounded-[10px] overflow-hidden mt-4">
       {/* Header: 50px, navy, only top corners rounded */}
       <div className="flex items-center justify-between h-[50px] px-[20px] bg-[#0F467F] rounded-t-[10px]">
         <span

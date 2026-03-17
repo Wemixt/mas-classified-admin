@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks";
 export default function Header() {
   const { user } = useAuth();
   return (
-    <header className="w-full h-[96px] bg-white flex items-center px-6 xl:px-[100px] border-b border-[#E0E0E0]">
+    <header className="w-full h-[96px] bg-white flex items-center px-6 xl:px-[65px] border-b border-[#E0E0E0]">
       {/* Logo */}
       <Link href="/" className="shrink-0">
         <Image
