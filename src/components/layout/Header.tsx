@@ -1,16 +1,20 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useAuth } from "@/hooks";
 
 export default function Header() {
+  const { user } = useAuth();
   return (
-    <header className="w-full h-[96px] bg-white flex items-center px-6 xl:px-[160px] shadow-sm">
+    <header className="w-full h-[96px] bg-white flex items-center px-6 xl:px-[100px] border-b border-[#E0E0E0]">
       {/* Logo */}
       <Link href="/" className="shrink-0">
         <Image
           src="/logos/mass logo.png"
           alt="MAS Logo"
-          width={163}
-          height={62}
+          width={156}
+          height={60}
           className="object-contain"
           priority
         />
@@ -19,7 +23,7 @@ export default function Header() {
       {/* All Ads Button - left:522 on 1728 design, logo ends at 323, gap=199px */}
       <Link
         href="/ads"
-        className="ml-auto xl:ml-[199px] shrink-0 flex items-center justify-center w-[134px] h-[44px] rounded-[10px] bg-[#0F467F] text-white text-[20px] font-normal leading-[100%] tracking-normal hover:bg-[#0F467F]/90 transition-colors"
+        className="ml-auto xl:ml-[195px] shrink-0 flex items-center justify-center w-[130px] h-[40px] rounded-[10px] bg-[#0F467F] text-white text-[20px] font-normal leading-[100%] tracking-normal hover:bg-[#0F467F]/90 transition-colors"
         style={{ fontFamily: "Eurostile, sans-serif" }}
       >
         All Ads
@@ -32,7 +36,7 @@ export default function Header() {
         {/* Profile Image - 38x38, radius 19px */}
         <div className="w-[38px] h-[38px] rounded-full overflow-hidden shrink-0">
           <Image
-            src="/logos/mass logo.png"
+            src={user.avatar || "/logos/mass logo.png"}
             alt="Profile"
             width={38}
             height={38}
@@ -45,7 +49,7 @@ export default function Header() {
           className="ml-[7px] text-[#5E5E5E] text-[20px] font-normal leading-[100%] tracking-normal whitespace-nowrap"
           style={{ fontFamily: "Eurostile, sans-serif" }}
         >
-          Ishan
+          {user.name}
         </span>
 
         {/* Notification Icon - 35x37 bg #E9E9E9 radius 4.22px */}
