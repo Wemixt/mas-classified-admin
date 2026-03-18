@@ -2,12 +2,19 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks";
 import { getMenuForRole } from "@/config/menuConfig";
 
 export default function Sidebar() {
   const { user, role } = useAuth();
+  const pathname = usePathname();
   const menuItems = getMenuForRole(role);
+
+  const isActive = (path: string) => {
+    if (path === "/dashboard") return pathname === "/" || pathname === "/dashboard";
+    return pathname === path;
+  };
 
   return (
     <aside className="w-[390px] bg-[#1174BB] flex flex-col shrink-0">
@@ -29,7 +36,7 @@ export default function Sidebar() {
             <Link
               href={item.path}
               className={`flex items-center justify-between h-[44px] mx-[8px] px-[12px] text-white text-[14px] font-normal leading-[100%] tracking-normal rounded-[6px] transition-colors ${
-                item.path === "/dashboard"
+                isActive(item.path)
                   ? "bg-[#0E63A0]"
                   : "hover:bg-[#0E63A0]/50"
               }`}

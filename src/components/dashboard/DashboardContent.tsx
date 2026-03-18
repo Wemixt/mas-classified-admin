@@ -22,7 +22,7 @@ export default function DashboardContent() {
     <div className="py-[28px] pl-[28px]">
       {/* Title */}
       <h1
-        className="text-[#333333] text-[28px] font-normal leading-[100%] tracking-normal"
+        className="text-[#5E5E5E] text-[28px] font-normal leading-[100%] tracking-normal"
         style={{ fontFamily: "Eurostile, sans-serif" }}
       >
         Dashboard
