@@ -1,8 +1,15 @@
-/**
- * Shared TypeScript types and API DTOs.
- * Import from "@/types" for app-wide types.
- */
+export type UserRole = "admin" | "moderator";
 
-// Add shared types and API response/request DTOs here, e.g.:
-// export type User = { id: string; email: string };
-// export type ApiResponse<T> = { data: T; error?: string };
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  avatar?: string;
+}
+
+export interface MenuItem {
+  label: string;
+  path: string;
+  roles: UserRole[];
+}
