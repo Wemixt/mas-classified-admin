@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { useAuth } from "@/hooks";
 
 interface Moderator {
   id: string;
@@ -62,6 +63,16 @@ const moderators: Moderator[] = [
 ];
 
 export default function ModeratorsContent() {
+  const { role } = useAuth();
+
+  // Redirect or block rendering if not admin
+  if (role !== "admin") {
+    return (
+      <div className="py-[28px] pl-[28px] text-[#5E5E5E]">
+        Access Denied. You do not have permission to view this page.
+      </div>
+    );
+  }
   const [moderatorList, setModeratorList] = useState<Moderator[]>(moderators);
   const [showForm, setShowForm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
