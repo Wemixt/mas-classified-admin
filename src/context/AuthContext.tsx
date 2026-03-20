@@ -29,7 +29,7 @@ const hardcodedUsers: Record<UserRole, User> = {
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [role, setRole] = useState<UserRole>("admin");
+  const [role, setRole] = useState<UserRole>("moderator");
 
   const user = hardcodedUsers[role];
 
