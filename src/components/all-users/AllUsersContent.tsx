@@ -112,11 +112,11 @@ export default function AllUsersContent() {
 
   return (
     <div
-      className="pb-[28px] h-full flex flex-col bg-white"
+      className="pt-[28px] pl-[28px] pb-[28px] flex flex-col"
       onClick={handleContainerClick}
     >
       {/* Title */}
-      <div className="pt-[28px] pl-[28px] pr-[28px]">
+      <div>
         <h1
           className="text-[#5E5E5E] text-[22px] font-normal leading-[100%] tracking-normal"
           style={{ fontFamily: "Eurostile, sans-serif" }}
@@ -126,7 +126,7 @@ export default function AllUsersContent() {
         <div className="border-t border-[#5E5E5E] opacity-70 mt-[16px]" />
       </div>
 
-      <div className="pl-[28px] pr-[28px] mt-[24px] flex-1 flex flex-col">
+      <div className="mt-[24px] flex flex-col">
         {/* Search and Export Row */}
         <div className="flex items-center justify-between">
           <div className="w-[493px] h-[44px] border border-[#D2D2D2] rounded-[8px] flex items-center px-[16px] gap-[12px] bg-white">
