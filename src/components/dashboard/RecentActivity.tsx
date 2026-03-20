@@ -15,7 +15,7 @@ const activities = [
     id: 2,
     user: "Suraj Prasanna (Moderator)",
     action: "rejected an ad:",
-    detail: '"Cotton M T-Shirt \u2013 Hi Quality" by Kasun Suraj',
+    detail: '"Cotton M T-Shirt – Hi Quality" by Kasun Suraj',
     reason: "Incomplete product details",
     date: "Today",
     time: "Today at 6:15 PM",
@@ -45,17 +45,17 @@ function ClockIcon() {
 export default function RecentActivity() {
   return (
     <div className="bg-[#EAEAEA] rounded-[10px] overflow-hidden h-full flex flex-col mt-4">
-      {/* Header: 50px, navy, top corners rounded */}
-      <div className="flex items-center justify-between h-[50px] px-[20px] bg-[#0F467F]">
+      {/* Header */}
+      <div className="flex items-center justify-between h-[44px] md:h-[50px] px-[16px] md:px-[20px] bg-[#0F467F] shrink-0">
         <h3
-          className="text-white text-[20px] font-normal leading-[100%]"
+          className="text-white text-[14px] md:text-[20px] font-normal leading-[100%]"
           style={{ fontFamily: "Eurostile, sans-serif" }}
         >
           Recent User Activity
         </h3>
         <Link
           href="/activity"
-          className="text-white text-[12px] font-normal leading-[150%] hover:underline flex items-center gap-[4px]"
+          className="text-white text-[11px] md:text-[12px] font-normal leading-[150%] hover:underline flex items-center gap-[4px]"
         >
           View All
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -69,12 +69,12 @@ export default function RecentActivity() {
         {activities.map((activity, index) => (
           <div
             key={activity.id}
-            className={`flex gap-[12px] px-[20px] py-[12px] ${
+            className={`flex gap-[10px] md:gap-[12px] px-[14px] md:px-[20px] py-[10px] md:py-[12px] ${
               index < activities.length - 1 ? "border-b border-[#D8D8D8]" : ""
             }`}
           >
-            {/* Avatar: 40x40 circular */}
-            <div className="w-[40px] h-[40px] rounded-full overflow-hidden bg-[#D0D0D0] shrink-0">
+            {/* Avatar: scales from 32→40px */}
+            <div className="w-[32px] md:w-[40px] h-[32px] md:h-[40px] rounded-full overflow-hidden bg-[#D0D0D0] shrink-0">
               <Image
                 src={activity.avatar}
                 alt={activity.user}
@@ -86,18 +86,18 @@ export default function RecentActivity() {
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              {/* User + action: Poppins 600 12px #000000 */}
-              <p className="text-[12px] leading-[150%]">
+              {/* User + action */}
+              <p className="text-[11px] md:text-[12px] leading-[150%]">
                 <span className="font-semibold text-[#000000]">{activity.user}</span>{" "}
                 <span className="font-semibold text-[#000000]">{activity.action}</span>
               </p>
 
-              {/* Detail: Poppins 400 10px #000000 */}
-              <p className="text-[#000000] text-[10px] font-normal leading-[150%] mt-[1px]">
+              {/* Detail */}
+              <p className="text-[#000000] text-[9px] md:text-[10px] font-normal leading-[150%] mt-[1px]">
                 {activity.detail}
               </p>
 
-              {/* Reason line: label 600 9px, value 400 9px */}
+              {/* Reason */}
               {activity.reason && (
                 <p className="text-[9px] leading-[150%] mt-[1px]">
                   <span className="font-semibold text-[#000000]">Reason:</span>{" "}
@@ -105,7 +105,7 @@ export default function RecentActivity() {
                 </p>
               )}
 
-              {/* Changes line: label 600 9px, value 400 9px */}
+              {/* Changes */}
               {activity.changes && (
                 <p className="text-[9px] leading-[150%] mt-[1px]">
                   <span className="font-semibold text-[#000000]">Changes:</span>{" "}
@@ -113,12 +113,12 @@ export default function RecentActivity() {
                 </p>
               )}
 
-              {/* Footer: Today > ○ timestamp — right-aligned */}
-              <div className="flex items-center justify-end gap-[6px] mt-[3px]">
-                <span className="text-[10px] font-semibold leading-[150%] text-[#000000]/60">
+              {/* Footer timestamp */}
+              <div className="flex items-center justify-end gap-[4px] md:gap-[6px] mt-[3px] flex-wrap">
+                <span className="text-[9px] md:text-[10px] font-semibold leading-[150%] text-[#000000]/60">
                   {activity.date}
                 </span>
-                <span className="text-[10px] text-[#000000]/60">&gt;</span>
+                <span className="text-[9px] md:text-[10px] text-[#000000]/60">&gt;</span>
                 <span className="text-[8px] font-normal leading-[150%] text-[#000000]/80 flex items-center gap-[3px]">
                   <ClockIcon />
                   {activity.time}
