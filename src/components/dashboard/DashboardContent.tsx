@@ -19,10 +19,10 @@ export default function DashboardContent() {
   const { role } = useAuth();
 
   return (
-    <div className="py-[28px] pl-[28px]">
+    <div className="py-4 md:py-[28px] px-4 md:pl-[28px] md:pr-0">
       {/* Title */}
       <h1
-        className="text-[#5E5E5E] text-[22px] font-normal leading-[100%] tracking-normal"
+        className="text-[#5E5E5E] text-[18px] md:text-[22px] font-normal leading-[100%] tracking-normal"
         style={{ fontFamily: "Eurostile, sans-serif" }}
       >
         Dashboard
@@ -33,14 +33,14 @@ export default function DashboardContent() {
 
       {/* Subtitle */}
       <p
-        className="text-[#333333] text-[14px] font-normal leading-[100%] tracking-normal opacity-60 mt-[10px]"
+        className="text-[#333333] text-[12px] md:text-[14px] font-normal leading-[100%] tracking-normal opacity-60 mt-[10px]"
         style={{ fontFamily: "Eurostile, sans-serif" }}
       >
         Overview Of ad and user statistics in your marketplace.
       </p>
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-[16px] mt-[20px]">
+      {/* Stat Cards — 1 col mobile, 2 col sm, 4 col xl */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-[12px] md:gap-[16px] mt-[20px]">
         {stats.map((stat) => (
           <StatCard
             key={stat.label}
@@ -51,15 +51,15 @@ export default function DashboardContent() {
         ))}
       </div>
 
-      {/* 2-Column Layout: both columns equal height, bottom cards stretch to align */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-[16px] mt-[20px]">
-        <div className="flex flex-col gap-[16px]">
+      {/* 2-Column Layout — stacked on mobile, side by side on lg+ */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-[12px] md:gap-[16px] mt-[16px] md:mt-[20px]">
+        <div className="flex flex-col gap-[12px] md:gap-[16px]">
           <QuickActions />
           <div className="flex-1 flex flex-col">
             <RecentAds />
           </div>
         </div>
-        <div className="flex flex-col gap-[16px]">
+        <div className="flex flex-col gap-[12px] md:gap-[16px]">
           <AdStatistics />
           <div className="flex-1 flex flex-col">
             {role === "admin" ? <RecentActivity /> : <Messages />}
