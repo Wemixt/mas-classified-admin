@@ -41,9 +41,10 @@ export default function AdminProfileContent() {
   });
 
   return (
-    <div className="py-[28px] pl-[28px] pr-[8px]">
+    <div className="py-4 md:py-[28px] px-4 md:pl-[28px] md:pr-[8px]">
+      {/* Page Header */}
       <h1
-        className="text-[#5E5E5E] text-[22px] font-normal leading-[100%] tracking-normal"
+        className="text-[#5E5E5E] text-[18px] md:text-[22px] font-normal leading-[100%] tracking-normal"
         style={{ fontFamily: "Eurostile, sans-serif" }}
       >
         Admin Profile
@@ -52,7 +53,7 @@ export default function AdminProfileContent() {
       <div className="border-t border-[#5E5E5E] opacity-70 mt-[16px]" />
 
       <p
-        className="text-[#333333] text-[14px] font-normal leading-[100%] tracking-normal opacity-60 mt-[10px]"
+        className="text-[#333333] text-[12px] md:text-[14px] font-normal leading-[100%] tracking-normal opacity-60 mt-[10px]"
         style={{ fontFamily: "Eurostile, sans-serif" }}
       >
         Manage your account information and personal settings
@@ -60,10 +61,12 @@ export default function AdminProfileContent() {
 
       <div className="mt-[22px] max-w-[1020px] flex flex-col gap-[18px]">
         {/* Profile card */}
-        <section className="bg-white border border-[#E0E0E0] rounded-[10px] p-[22px] md:p-[28px]">
-          <div className="flex flex-col md:flex-row gap-[22px] md:gap-[28px]">
-            <div className="shrink-0 flex items-start gap-[18px]">
-              <div className="w-[110px] h-[110px] md:w-[126px] md:h-[126px] rounded-full overflow-hidden bg-[#E9E9E9]">
+        <section className="bg-white border border-[#E0E0E0] rounded-[10px] p-4 md:p-[28px]">
+          {/* Avatar row */}
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 md:gap-[28px]">
+            {/* Avatar */}
+            <div className="shrink-0">
+              <div className="w-[90px] h-[90px] sm:w-[110px] sm:h-[110px] md:w-[126px] md:h-[126px] rounded-full overflow-hidden bg-[#E9E9E9]">
                 <Image
                   src={user.avatar || "/logos/mass logo.png"}
                   alt="Admin profile photo"
@@ -74,7 +77,8 @@ export default function AdminProfileContent() {
               </div>
             </div>
 
-            <div className="flex-1 min-w-0">
+            {/* Admin Name + photo actions */}
+            <div className="flex-1 min-w-0 w-full">
               <label className="block text-[#000000] text-[14px] font-semibold leading-[100%] tracking-normal">
                 Admin Name
               </label>
@@ -132,72 +136,87 @@ export default function AdminProfileContent() {
                   Remove Photo
                 </button>
               </div>
-
-              <div className="mt-[18px] grid grid-cols-1 lg:grid-cols-2 gap-x-[28px] gap-y-[14px]">
-                <div className="grid grid-cols-[120px_1fr] items-center gap-[14px]">
-                  <label className="text-[#000000] text-[14px] font-semibold leading-[100%] tracking-normal">
-                    First Name
-                  </label>
-                  <input
-                    type="text"
-                    value={profile.firstName}
-                    onChange={(e) =>
-                      setProfile((p) => ({ ...p, firstName: e.target.value }))
-                    }
-                    className="h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
-                  />
-                </div>
-
-                <div className="grid grid-cols-[80px_1fr] items-center gap-[14px]">
-                  <label className="text-[#000000] text-[14px] font-semibold leading-[100%] tracking-normal">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={profile.email}
-                    onChange={(e) =>
-                      setProfile((p) => ({ ...p, email: e.target.value }))
-                    }
-                    className="h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
-                  />
-                </div>
-
-                <div className="grid grid-cols-[120px_1fr] items-center gap-[14px]">
-                  <label className="text-[#000000] text-[14px] font-semibold leading-[100%] tracking-normal">
-                    Second Name
-                  </label>
-                  <input
-                    type="text"
-                    value={profile.secondName}
-                    onChange={(e) =>
-                      setProfile((p) => ({ ...p, secondName: e.target.value }))
-                    }
-                    className="h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
-                  />
-                </div>
-
-                <div className="grid grid-cols-[80px_1fr] items-center gap-[14px]">
-                  <label className="text-[#000000] text-[14px] font-semibold leading-[100%] tracking-normal">
-                    Phone
-                  </label>
-                  <input
-                    type="tel"
-                    value={profile.phone}
-                    onChange={(e) =>
-                      setProfile((p) => ({ ...p, phone: e.target.value }))
-                    }
-                    className="h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
-                  />
-                </div>
-              </div>
             </div>
+          </div>
+
+          {/* Form fields grid */}
+          <div className="mt-[22px] grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[14px]">
+            {/* First Name */}
+            <div className="flex flex-col gap-[8px]">
+              <label className="text-[#000000] text-[13px] font-semibold leading-[100%] tracking-normal">
+                First Name
+              </label>
+              <input
+                type="text"
+                value={profile.firstName}
+                onChange={(e) =>
+                  setProfile((p) => ({ ...p, firstName: e.target.value }))
+                }
+                className="w-full h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
+              />
+            </div>
+
+            {/* Email */}
+            <div className="flex flex-col gap-[8px]">
+              <label className="text-[#000000] text-[13px] font-semibold leading-[100%] tracking-normal">
+                Email
+              </label>
+              <input
+                type="email"
+                value={profile.email}
+                onChange={(e) =>
+                  setProfile((p) => ({ ...p, email: e.target.value }))
+                }
+                className="w-full h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
+              />
+            </div>
+
+            {/* Second Name */}
+            <div className="flex flex-col gap-[8px]">
+              <label className="text-[#000000] text-[13px] font-semibold leading-[100%] tracking-normal">
+                Second Name
+              </label>
+              <input
+                type="text"
+                value={profile.secondName}
+                onChange={(e) =>
+                  setProfile((p) => ({ ...p, secondName: e.target.value }))
+                }
+                className="w-full h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
+              />
+            </div>
+
+            {/* Phone */}
+            <div className="flex flex-col gap-[8px]">
+              <label className="text-[#000000] text-[13px] font-semibold leading-[100%] tracking-normal">
+                Phone
+              </label>
+              <input
+                type="tel"
+                value={profile.phone}
+                onChange={(e) =>
+                  setProfile((p) => ({ ...p, phone: e.target.value }))
+                }
+                className="w-full h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
+              />
+            </div>
+          </div>
+
+          {/* Save button */}
+          <div className="mt-[20px] flex justify-end">
+            <button
+              type="button"
+              className="h-[40px] px-[24px] bg-[#1174BB] rounded-[8px] text-white text-[13px] font-semibold leading-[100%] tracking-normal hover:bg-[#0E63A0] transition-colors"
+            >
+              Save Changes
+            </button>
           </div>
         </section>
 
         {/* General Setting */}
-        <section className="bg-white border border-[#E0E0E0] rounded-[10px] p-[22px] md:p-[28px]">
+        <section className="bg-white border border-[#E0E0E0] rounded-[10px] p-4 md:p-[28px]">
           <h2
-            className="text-[#5E5E5E] text-[18px] font-normal leading-[100%] tracking-normal"
+            className="text-[#5E5E5E] text-[16px] md:text-[18px] font-normal leading-[100%] tracking-normal"
             style={{ fontFamily: "Eurostile, sans-serif" }}
           >
             General Setting
@@ -205,8 +224,9 @@ export default function AdminProfileContent() {
           <div className="border-t border-[#5E5E5E] opacity-40 mt-[14px]" />
 
           <div className="mt-[18px] max-w-[640px] flex flex-col gap-[14px]">
-            <div className="grid grid-cols-[170px_1fr] items-center gap-[16px]">
-              <label className="text-[#5E5E5E] text-[14px] font-normal leading-[100%] tracking-normal">
+            {/* Current Password */}
+            <div className="flex flex-col gap-[8px]">
+              <label className="text-[#5E5E5E] text-[13px] font-normal leading-[100%] tracking-normal">
                 Current Password
               </label>
               <input
@@ -218,12 +238,13 @@ export default function AdminProfileContent() {
                     currentPassword: e.target.value,
                   }))
                 }
-                className="h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
+                className="w-full h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
               />
             </div>
 
-            <div className="grid grid-cols-[170px_1fr] items-center gap-[16px]">
-              <label className="text-[#5E5E5E] text-[14px] font-normal leading-[100%] tracking-normal">
+            {/* New Password */}
+            <div className="flex flex-col gap-[8px]">
+              <label className="text-[#5E5E5E] text-[13px] font-normal leading-[100%] tracking-normal">
                 New Password
               </label>
               <input
@@ -232,12 +253,13 @@ export default function AdminProfileContent() {
                 onChange={(e) =>
                   setPasswords((p) => ({ ...p, newPassword: e.target.value }))
                 }
-                className="h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
+                className="w-full h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
               />
             </div>
 
-            <div className="grid grid-cols-[170px_1fr] items-center gap-[16px]">
-              <label className="text-[#5E5E5E] text-[14px] font-normal leading-[100%] tracking-normal">
+            {/* Confirm New Password */}
+            <div className="flex flex-col gap-[8px]">
+              <label className="text-[#5E5E5E] text-[13px] font-normal leading-[100%] tracking-normal">
                 Confirm New Password
               </label>
               <input
@@ -249,13 +271,22 @@ export default function AdminProfileContent() {
                     confirmNewPassword: e.target.value,
                   }))
                 }
-                className="h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
+                className="w-full h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
               />
             </div>
+          </div>
+
+          {/* Update Password button */}
+          <div className="mt-[20px] flex justify-end max-w-[640px]">
+            <button
+              type="button"
+              className="h-[40px] px-[24px] bg-[#1174BB] rounded-[8px] text-white text-[13px] font-semibold leading-[100%] tracking-normal hover:bg-[#0E63A0] transition-colors"
+            >
+              Update Password
+            </button>
           </div>
         </section>
       </div>
     </div>
   );
 }
-

@@ -57,10 +57,10 @@ export default function SellersContent() {
   };
 
   return (
-    <div className="py-[28px] pl-[28px]">
+    <div className="p-[16px] md:py-[28px] md:px-[28px] w-full max-w-full overflow-hidden">
       {/* Title */}
       <h1
-        className="text-[#5E5E5E] text-[22px] font-normal leading-[100%] tracking-normal"
+        className="text-[#5E5E5E] text-[18px] md:text-[22px] font-normal leading-[100%] tracking-normal"
         style={{ fontFamily: "Eurostile, sans-serif" }}
       >
         Sellers
@@ -70,101 +70,105 @@ export default function SellersContent() {
       <div className="border-t border-[#5E5E5E] opacity-70 mt-[16px]" />
 
       {/* Table */}
-      <div className="mt-[20px]">
-        {/* Table Header */}
-        <div className="grid grid-cols-[1.4fr_1.6fr_1fr_0.8fr_0.8fr] bg-[#1174BB] h-[47px] items-center">
-          <div
-            className="px-[16px] text-white text-[17px] font-normal leading-[100%] tracking-normal"
-            style={{ fontFamily: "Eurostile, sans-serif" }}
-          >
-            Name
-          </div>
-          <div
-            className="px-[16px] text-white text-[17px] font-normal leading-[100%] tracking-normal"
-            style={{ fontFamily: "Eurostile, sans-serif" }}
-          >
-            Email
-          </div>
-          <div
-            className="px-[20px] text-white text-[17px] font-normal leading-[100%] tracking-normal"
-            style={{ fontFamily: "Eurostile, sans-serif" }}
-          >
-            Phone
-          </div>
-          <div
-            className="px-[-2px] text-white text-[17px] font-normal leading-[100%] tracking-normal"
-            style={{ fontFamily: "Eurostile, sans-serif" }}
-          >
-            Total Ads
-          </div>
-          <div
-            className="px-[16px] text-white text-[17px] font-normal leading-[100%] tracking-normal"
-            style={{ fontFamily: "Eurostile, sans-serif" }}
-          >
-            Status
-          </div>
-        </div>
-
-        {/* Table Body */}
-        <div className="flex flex-col">
-          {sellerList.map((seller) => (
-            <div key={seller.id}>
-              <div className="grid grid-cols-[1.4fr_1.6fr_1fr_0.8fr_0.8fr] items-center h-[58px]">
-                {/* Name with Avatar */}
-                <div className="px-[16px] flex items-center gap-[12px]">
-                  <div className="w-[38px] h-[38px] rounded-full overflow-hidden shrink-0 bg-[#D9D9D9]">
-                    <Image
-                      src={seller.avatar}
-                      alt={seller.name}
-                      width={38}
-                      height={38}
-                      className="object-cover w-full h-full"
-                    />
-                  </div>
-                  <span className="text-[#5E5E5E] text-[12px] font-normal leading-[100%] tracking-normal">
-                    {seller.name}
-                  </span>
-                </div>
-
-                {/* Email */}
-                <div className="px-[16px] text-[#5E5E5E] text-[12px] font-normal leading-[100%] tracking-normal">
-                  {seller.email}
-                </div>
-
-                {/* Phone */}
-                <div className="px-[16px] text-[#5E5E5E] text-[12px] font-normal leading-[100%] tracking-normal">
-                  {seller.phone}
-                </div>
-
-                {/* Total Ads */}
-                <div className="px-[16px] text-[#5E5E5E] text-[12px] font-normal leading-[100%] tracking-normal">
-                  {String(seller.totalAds).padStart(2, "0")}
-                </div>
-
-                {/* Status Toggle */}
-                <div className="px-[16px] flex items-center gap-[8px]">
-                  <button
-                    onClick={() => handleToggleStatus(seller.id)}
-                    className={`relative w-[28px] h-[16px] rounded-full transition-colors ${
-                      seller.active ? "bg-[#0F792F]" : "bg-[#CCCCCC]"
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-[2px] w-[12px] h-[12px] rounded-full bg-white transition-transform ${
-                        seller.active ? "left-[14px]" : "left-[2px]"
-                      }`}
-                    />
-                  </button>
-                  <span className="text-[#5E5E5E] text-[12px] font-normal leading-[100%] tracking-normal">
-                    {seller.active ? "Active" : "Inactive"}
-                  </span>
-                </div>
-              </div>
-
-              {/* Row Divider */}
-              <div className="border-t border-[#E0E0E0]" />
+      <div className="mt-[20px] overflow-x-auto pb-4 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full">
+        <div className="min-w-[800px]">
+          {/* Table Header */}
+          <div className="grid grid-cols-[1.4fr_1.6fr_1fr_0.8fr_0.8fr] bg-[#1174BB] h-[47px] items-center rounded-t-lg">
+            <div
+              className="px-[16px] text-white text-[14px] md:text-[17px] font-normal leading-[100%] tracking-normal"
+              style={{ fontFamily: "Eurostile, sans-serif" }}
+            >
+              Name
             </div>
-          ))}
+            <div
+              className="px-[16px] text-white text-[14px] md:text-[17px] font-normal leading-[100%] tracking-normal"
+              style={{ fontFamily: "Eurostile, sans-serif" }}
+            >
+              Email
+            </div>
+            <div
+              className="px-[20px] text-white text-[14px] md:text-[17px] font-normal leading-[100%] tracking-normal"
+              style={{ fontFamily: "Eurostile, sans-serif" }}
+            >
+              Phone
+            </div>
+            <div
+              className="px-[16px] md:px-[-2px] text-white text-[14px] md:text-[17px] font-normal leading-[100%] tracking-normal"
+              style={{ fontFamily: "Eurostile, sans-serif" }}
+            >
+              Total Ads
+            </div>
+            <div
+              className="px-[16px] text-white text-[14px] md:text-[17px] font-normal leading-[100%] tracking-normal"
+              style={{ fontFamily: "Eurostile, sans-serif" }}
+            >
+              Status
+            </div>
+          </div>
+
+          {/* Table Body */}
+          <div className="flex flex-col border-b border-l border-r border-[#E0E0E0] rounded-b-lg">
+            {sellerList.map((seller, index) => (
+              <div key={seller.id}>
+                <div className="grid grid-cols-[1.4fr_1.6fr_1fr_0.8fr_0.8fr] items-center h-[58px]">
+                  {/* Name with Avatar */}
+                  <div className="px-[16px] flex items-center gap-[12px]">
+                    <div className="w-[30px] h-[30px] md:w-[38px] md:h-[38px] rounded-full overflow-hidden shrink-0 bg-[#D9D9D9]">
+                      <Image
+                        src={seller.avatar}
+                        alt={seller.name}
+                        width={38}
+                        height={38}
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
+                    <span className="text-[#5E5E5E] text-[11px] md:text-[12px] font-normal leading-[100%] tracking-normal">
+                      {seller.name}
+                    </span>
+                  </div>
+
+                  {/* Email */}
+                  <div className="px-[16px] text-[#5E5E5E] text-[11px] md:text-[12px] font-normal leading-[100%] tracking-normal truncate">
+                    {seller.email}
+                  </div>
+
+                  {/* Phone */}
+                  <div className="px-[16px] text-[#5E5E5E] text-[11px] md:text-[12px] font-normal leading-[100%] tracking-normal">
+                    {seller.phone}
+                  </div>
+
+                  {/* Total Ads */}
+                  <div className="px-[16px] text-[#5E5E5E] text-[11px] md:text-[12px] font-normal leading-[100%] tracking-normal">
+                    {String(seller.totalAds).padStart(2, "0")}
+                  </div>
+
+                  {/* Status Toggle */}
+                  <div className="px-[16px] flex items-center gap-[8px]">
+                    <button
+                      onClick={() => handleToggleStatus(seller.id)}
+                      className={`relative w-[28px] h-[16px] rounded-full transition-colors ${
+                        seller.active ? "bg-[#0F792F]" : "bg-[#CCCCCC]"
+                      }`}
+                    >
+                      <span
+                        className={`absolute top-[2px] w-[12px] h-[12px] rounded-full bg-white transition-transform ${
+                          seller.active ? "left-[14px]" : "left-[2px]"
+                        }`}
+                      />
+                    </button>
+                    <span className="text-[#5E5E5E] text-[11px] md:text-[12px] font-normal leading-[100%] tracking-normal">
+                      {seller.active ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Row Divider - don't show on last item if we added borders to container */}
+                {index < sellerList.length - 1 && (
+                  <div className="border-t border-[#E0E0E0]" />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
