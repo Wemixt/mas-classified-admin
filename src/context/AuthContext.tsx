@@ -10,7 +10,7 @@ interface AuthContextType {
   setRole: (role: UserRole) => void;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const hardcodedUsers: Record<UserRole, User> = {
@@ -61,10 +61,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const logout = () => {
-    setUser(hardcodedUsers.moderator);
-    setRole("moderator");
-    setIsAuthenticated(false);
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.error("Logout API failed", error);
+    } finally {
+      setUser(hardcodedUsers.moderator);
+      setRole("moderator");
+      setIsAuthenticated(false);
+    }
   };
 
   return (

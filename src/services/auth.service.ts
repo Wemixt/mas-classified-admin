@@ -6,4 +6,8 @@ export const authService = {
     const response = await authApi.login(credentials);
     return response.data;
   },
+  logout: async () => {
+    const response = await authApi.logout();
+    return response.data;
+  },
 };

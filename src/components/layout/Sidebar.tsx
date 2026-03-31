@@ -94,8 +94,8 @@ export default function Sidebar() {
         
         {/* Logout */}
         <button
-          onClick={() => {
-            logout();
+          onClick={async () => {
+            await logout();
             document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
             router.push("/login");
             close();
