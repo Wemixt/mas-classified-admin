@@ -10,7 +10,8 @@ function getEnv(key: string, fallback = ""): string {
 
 /** Backend API base URL (e.g. https://api.example.com), no trailing slash. */
 export function getApiBaseUrl(): string {
-  return getEnv("NEXT_PUBLIC_API_URL", "").replace(/\/$/, "");
+  const url = process.env.NEXT_PUBLIC_API_URL || process.env.VITE_API_URL || "http://localhost:3000";
+  return url.replace(/\/$/, "");
 }
 
 export const env = {

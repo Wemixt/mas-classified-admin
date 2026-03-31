@@ -36,7 +36,11 @@ export interface LoginResponse {
   statusCode: number;
   message: string;
   data: {
-    user: User;
-    token: string;
+    accessToken: string;
+    refreshToken: string;
   } | null;
+  meta?: {
+    timestamp: string;
+    path: string;
+  };
 }
