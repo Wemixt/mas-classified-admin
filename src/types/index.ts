@@ -13,3 +13,30 @@ export interface MenuItem {
   path: string;
   roles: UserRole[];
 }
+
+export interface LoginCredentials {
+  email: string;
+  password?: string;
+}
+
+export interface ApiErrorResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: any;
+  error?: {
+    code: string;
+  };
+  timestamp: string;
+  path: string;
+}
+
+export interface LoginResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: {
+    user: User;
+    token: string;
+  } | null;
+}

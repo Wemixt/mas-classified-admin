@@ -2,13 +2,14 @@
 
 import { createContext, useState, ReactNode } from "react";
 import type { User, UserRole } from "@/types";
+import { authService } from "@/services/auth.service";
 
 interface AuthContextType {
   user: User;
   role: UserRole;
   setRole: (role: UserRole) => void;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => void;
+  login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
 }
 
@@ -36,16 +37,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<UserRole>("moderator");
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
-  const login = (email: string, password: string) => {
-    // Basic testing login logic
-    if (email === "admin@mas.com") {
-      setUser(hardcodedUsers.admin);
-      setRole("admin");
-    } else {
-      setUser(hardcodedUsers.moderator);
-      setRole("moderator");
+  const login = async (email: string, password: string) => {
+    try {
+      const response = await authService.login({ email, password });
+      
+      if (response && response.success && response.data) {
+        const { user: userData, token } = response.data;
+        setUser(userData);
+        setRole(userData.role || "moderator");
+        setIsAuthenticated(true);
+        // Set the token securely so the Next.js middleware allows navigation
+        document.cookie = `auth_token=${token}; path=/`;
+        return { success: true };
+      }
+      
+      return { success: false, message: response?.message || "Login failed" };
+    } catch (error: any) {
+      // Check if it's our custom API Error format from Axios
+      if (error.response?.data?.message) {
+        return { success: false, message: error.response.data.message };
+      }
+      return { success: false, message: "An unexpected error occurred." };
     }
-    setIsAuthenticated(true);
   };
 
   const logout = () => {
