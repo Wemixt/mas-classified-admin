@@ -4,7 +4,11 @@ import { useAuth } from "@/hooks";
 import { useState } from "react";
 
 export default function SettingsContent() {
-  const { role } = useAuth();
+  const { role, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div className="p-8">Loading settings...</div>;
+  }
   const [searchQuery, setSearchQuery] = useState("");
 
   const [name, setName] = useState("Ishan Nayanajith");
@@ -113,11 +117,11 @@ export default function SettingsContent() {
               className="text-[#5E5E5E] text-[16px] md:text-[18px] font-normal mb-[12px]"
               style={{ fontFamily: "Eurostile, sans-serif" }}
             >
-              {role === "admin" ? "User Management Settings" : "Ad Management Settings"}
+              {role?.toLowerCase() === "admin" ? "User Management Settings" : "Ad Management Settings"}
             </h2>
             <div className="border-t border-[#E0E0E0]/60 mb-[20px] md:mb-[24px]" />
 
-            {role === "admin" ? (
+              {role?.toLowerCase() === "admin" || role?.toLowerCase() === "super_admin" ? (
               <div className="flex flex-col gap-[16px] md:gap-[20px]">
                 <div>
                   <div className="text-[#A0A0A0] text-[12px] md:text-[13px] mb-[12px]">Ad Approval Mode</div>
@@ -204,7 +208,7 @@ export default function SettingsContent() {
             <div className="border-t border-[#E0E0E0]/60 mb-[20px] md:mb-[24px]" />
 
             <div className="flex flex-col gap-[10px] md:gap-[12px] mb-[20px] md:mb-[24px]">
-              {role === "admin" ? (
+              {role?.toLowerCase() === "admin" || role?.toLowerCase() === "super_admin" ? (
                 <>
                   {[
                     { val: notifSellerRegistration, set: setNotifSellerRegistration, label: "New seller registration" },
@@ -242,7 +246,7 @@ export default function SettingsContent() {
                 <span className="text-[#5E5E5E] text-[13px] md:text-[14.5px]">Show Alerts on dashboard</span>
                 <Toggle active={showAlertsDashboard} onChange={() => setShowAlertsDashboard(!showAlertsDashboard)} />
               </div>
-              {role === "admin" ? (
+                {role?.toLowerCase() === "admin" || role?.toLowerCase() === "super_admin" ? (
                 <div className="flex items-center justify-between gap-[12px]">
                   <span className="text-[#5E5E5E] text-[13px] md:text-[14.5px]">Email notifications</span>
                   <Toggle active={emailNotifications} onChange={() => setEmailNotifications(!emailNotifications)} />

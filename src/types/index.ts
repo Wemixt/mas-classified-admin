@@ -1,11 +1,18 @@
-export type UserRole = "admin" | "moderator";
+export type UserRole = "admin" | "moderator" | "super_admin";
 
 export interface User {
   id: string;
-  name: string;
+  uuid: string;
+  fullName: string;
   email: string;
+  employeeId?: string;
+  address?: string;
+  nic?: string;
+  phoneNo?: string;
   role: UserRole;
+  status: "ACTIVE" | "INACTIVE";
   avatar?: string;
+  createdAt?: string;
 }
 
 export interface MenuItem {
@@ -40,6 +47,19 @@ export interface LoginResponse {
     refreshToken: string;
   } | null;
   meta?: {
+    timestamp: string;
+    path: string;
+  };
+}
+
+export interface UserDetailsResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: {
+    user: User;
+  };
+  meta: {
     timestamp: string;
     path: string;
   };

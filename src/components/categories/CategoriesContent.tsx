@@ -68,7 +68,7 @@ const PlusCircleIcon = ({ color }: { color: string }) => (
 );
 
 export default function CategoriesContent() {
-  const { role } = useAuth(); // "admin" | "moderator"
+  const { role } = useAuth(); // "admin" | "moderator" | "super_admin"
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedCategoryId, setExpandedCategoryId] = useState<string>("5"); // Pre-expand clothing for mockup fidelity
 
@@ -101,7 +101,7 @@ export default function CategoriesContent() {
           />
         </div>
         
-        {role === "admin" && (
+        {(role === "admin" || role === "super_admin") && (
           <button className="h-[44px] px-[20px] bg-[#1174BB] text-white rounded-[6px] text-[14.5px] font-medium flex items-center gap-[10px] hover:bg-[#0E63A0] transition-colors w-full md:w-auto justify-center md:justify-start shrink-0">
             <PlusCircleIcon color="#1174BB" />
             Add Category
@@ -117,7 +117,7 @@ export default function CategoriesContent() {
       <div className="flex flex-col mb-[40px] overflow-x-auto pb-4 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full">
         <div className="min-w-[1000px]">
           {/* Table Header */}
-          {role === "admin" ? (
+          {role === "admin" || role === "super_admin" ? (
             <div className="grid grid-cols-[1.5fr_1.5fr_1.2fr_1fr_2.5fr] bg-[#1174BB] rounded-[8px] h-[47px] items-center">
               <div className="pl-[24px] text-white text-[12px] md:text-[14px] font-medium" style={{ fontFamily: "Eurostile, sans-serif" }}>Category Name</div>
               <div className="text-white text-[12px] md:text-[14px] font-medium" style={{ fontFamily: "Eurostile, sans-serif" }}>Code</div>
@@ -225,7 +225,7 @@ export default function CategoriesContent() {
       </div>
 
       {/* All Subcategories Section (Admin Only) */}
-      {role === "admin" && (
+      {(role === "admin" || role === "super_admin") && (
         <div className="mt-[20px]">
           <h2 className="text-[#000000] text-[18px] md:text-[20px] font-medium leading-[100%] mb-[20px]" style={{ fontFamily: "Eurostile, sans-serif" }}>
             All Subcategories

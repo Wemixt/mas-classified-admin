@@ -19,16 +19,20 @@ type PasswordFormState = {
 };
 
 export default function AdminProfileContent() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div className="p-8">Loading profile...</div>;
+  }
 
   const initialProfile = useMemo<ProfileFormState>(
     () => ({
-      adminName: user?.name || "",
-      firstName: (user?.name || "").split(" ").filter(Boolean)[0] || "",
+      adminName: user?.fullName || "",
+      firstName: (user?.fullName || "").split(" ").filter(Boolean)[0] || "",
       secondName:
-        (user?.name || "").split(" ").filter(Boolean).slice(1).join(" ") || "",
+        (user?.fullName || "").split(" ").filter(Boolean).slice(1).join(" ") || "",
       email: user?.email || "",
-      phone: "",
+      phone: user?.phoneNo || "",
     }),
     [user]
   );
@@ -68,7 +72,7 @@ export default function AdminProfileContent() {
             <div className="shrink-0">
               <div className="w-[90px] h-[90px] sm:w-[110px] sm:h-[110px] md:w-[126px] md:h-[126px] rounded-full overflow-hidden bg-[#E9E9E9]">
                 <Image
-                  src={user.avatar || "/logos/mass logo.png"}
+                  src={user?.avatar || "/logos/mass logo.png"}
                   alt="Admin profile photo"
                   width={126}
                   height={126}

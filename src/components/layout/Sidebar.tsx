@@ -11,7 +11,7 @@ export default function Sidebar() {
   const { user, role, logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
-  const menuItems = getMenuForRole(role);
+  const menuItems = role ? getMenuForRole(role) : [];
   const { isOpen, close } = useSidebar();
 
   const isActive = (path: string) => {
@@ -69,34 +69,45 @@ export default function Sidebar() {
         <div className="flex-1" />
 
         {/* My Profile */}
-        <div className="border-t border-[#FAFAFA]/30 mx-[20px]" />
-        <Link
-          href="/profile"
-          onClick={close}
-          className="flex items-center gap-[10px] h-[50px] px-[20px] hover:bg-[#0E63A0]/50 transition-colors"
-        >
-          <div className="w-[32px] h-[32px] rounded-full overflow-hidden shrink-0">
-            <Image
-              src={user.avatar || "/logos/mass logo.png"}
-              alt="Profile"
-              width={32}
-              height={32}
-              className="object-cover w-full h-full"
-            />
-          </div>
-          <span
-            className="text-[#FAFAFA] text-[16px] font-normal leading-[100%] tracking-normal"
-            style={{ fontFamily: "Eurostile, sans-serif" }}
-          >
-            My Profile
-          </span>
-        </Link>
+        {user && (
+          <>
+            <div className="border-t border-[#FAFAFA]/30 mx-[20px]" />
+            <Link
+              href="/profile"
+              onClick={close}
+              className="flex items-center gap-[10px] h-[50px] px-[20px] hover:bg-[#0E63A0]/50 transition-colors"
+            >
+              <div className="w-[32px] h-[32px] rounded-full overflow-hidden shrink-0">
+                <Image
+                  src={user.avatar || "/logos/mass logo.png"}
+                  alt="Profile"
+                  width={32}
+                  height={32}
+                  className="object-cover w-full h-full"
+                />
+              </div>
+              <div className="flex flex-col">
+                <span
+                  className="text-[#FAFAFA] text-[14px] font-normal leading-[100%] tracking-normal"
+                  style={{ fontFamily: "Eurostile, sans-serif" }}
+                >
+                  {user.fullName}
+                </span>
+                <span
+                  className="text-[#FAFAFA]/70 text-[11px] font-normal leading-[100%] tracking-normal"
+                  style={{ fontFamily: "Eurostile, sans-serif" }}
+                >
+                  {user.role}
+                </span>
+              </div>
+            </Link>
+          </>
+        )}
         
         {/* Logout */}
         <button
           onClick={async () => {
             await logout();
-            document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
             router.push("/login");
             close();
           }}

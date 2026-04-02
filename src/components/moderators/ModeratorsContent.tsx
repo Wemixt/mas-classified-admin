@@ -63,9 +63,13 @@ const moderators: Moderator[] = [
 ];
 
 export default function ModeratorsContent() {
-  const { role } = useAuth();
+  const { role, isLoading } = useAuth();
 
-  if (role !== "admin") {
+  if (isLoading) {
+    return <div className="p-8">Loading...</div>;
+  }
+
+  if (role !== "admin" && role !== "super_admin") {
     return (
       <div className="py-[28px] pl-[28px] text-[#5E5E5E]">
         Access Denied. You do not have permission to view this page.

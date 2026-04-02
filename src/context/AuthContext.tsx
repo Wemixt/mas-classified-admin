@@ -1,41 +1,71 @@
 "use client";
 
-import { createContext, useState, ReactNode } from "react";
+import { createContext, useState, ReactNode, useEffect } from "react";
 import type { User, UserRole } from "@/types";
 import { authService } from "@/services/auth.service";
 
 interface AuthContextType {
-  user: User;
-  role: UserRole;
+  user: User | null;
+  role: UserRole | null;
   setRole: (role: UserRole) => void;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<{ success: boolean; message?: string; user?: User }>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
-
-const hardcodedUsers: Record<UserRole, User> = {
-  admin: {
-    id: "1",
-    name: "Ishan",
-    email: "ishan@mas.com",
-    role: "admin",
-    avatar: "/logos/mass logo.png",
-  },
-  moderator: {
-    id: "2",
-    name: "Ishan",
-    email: "ishan@mas.com",
-    role: "moderator",
-    avatar: "/logos/mass logo.png",
-  },
-};
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User>(hardcodedUsers.moderator);
-  const [role, setRole] = useState<UserRole>("moderator");
+  const [user, setUser] = useState<User | null>(null);
+  const [role, setRole] = useState<UserRole | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const normalizeRole = (role: string): UserRole => {
+    const lowerRole = role.toLowerCase();
+    if (lowerRole === "admin" || lowerRole === "moderator" || lowerRole === "super_admin" || lowerRole === "superadmin") {
+      return (lowerRole === "superadmin" ? "super_admin" : lowerRole) as UserRole;
+    }
+    return "moderator"; // Default fallback
+  };
+
+  const fetchUserDetails = async () => {
+    try {
+      const response = await authService.getDetails();
+      if (response && response.success && response.data?.user) {
+        const userData = response.data.user;
+        setUser(userData);
+        setRole(normalizeRole(userData.role));
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+        setUser(null);
+        setRole(null);
+      }
+    } catch (error) {
+      console.error("Failed to fetch user details", error);
+      setIsAuthenticated(false);
+      setUser(null);
+      setRole(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const token = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("auth_token="))
+      ?.split("=")[1];
+
+    if (token) {
+      fetchUserDetails();
+    } else {
+      setIsLoading(false);
+    }
+  }, []);
 
   const login = async (email: string, password: string) => {
     try {
@@ -43,18 +73,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (response && response.success && response.data) {
         const { accessToken } = response.data;
-        // Currently API only returns tokens, so we'll set a default user to prevent crashes
-        setUser(hardcodedUsers.admin);
-        setRole("admin");
-        setIsAuthenticated(true);
         // Set the token securely so the Next.js middleware allows navigation
-        document.cookie = `auth_token=${accessToken}; path=/`;
-        return { success: true };
+        document.cookie = `auth_token=${accessToken}; path=/; max-age=86400; SameSite=Lax`;
+        
+        // Fetch real user details with the token immediately
+        const detailsResponse = await authService.getDetails(accessToken);
+        if (detailsResponse && detailsResponse.success && detailsResponse.data?.user) {
+          const userData = detailsResponse.data.user;
+          setUser(userData);
+          setRole(normalizeRole(userData.role));
+          setIsAuthenticated(true);
+          return { success: true, user: userData };
+        }
+        
+        return { success: false, message: "Failed to retrieve profile details" };
       }
       
       return { success: false, message: response?.message || "Login failed" };
     } catch (error: any) {
-      // Check if it's our custom API Error format from Axios
       if (error.response?.data?.message) {
         return { success: false, message: error.response.data.message };
       }
@@ -68,10 +104,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Logout API failed", error);
     } finally {
-      setUser(hardcodedUsers.moderator);
-      setRole("moderator");
+      document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      setUser(null);
+      setRole(null);
       setIsAuthenticated(false);
     }
+  };
+
+  const refreshUser = async () => {
+    setIsLoading(true);
+    await fetchUserDetails();
   };
 
   return (
@@ -79,10 +121,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         role,
-        setRole,
+        setRole: (r) => setRole(r as UserRole),
         isAuthenticated,
+        isLoading,
         login,
         logout,
+        refreshUser,
       }}
     >
       {children}

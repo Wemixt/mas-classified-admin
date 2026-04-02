@@ -16,7 +16,11 @@ const stats = [
 ];
 
 export default function DashboardContent() {
-  const { role } = useAuth();
+  const { role, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div className="p-8">Loading dashboard...</div>;
+  }
 
   return (
     <div className="py-4 md:py-[28px] px-4 md:pl-[28px] md:pr-0">
@@ -62,7 +66,7 @@ export default function DashboardContent() {
         <div className="flex flex-col gap-[12px] md:gap-[16px]">
           <AdStatistics />
           <div className="flex-1 flex flex-col">
-            {role === "admin" ? <RecentActivity /> : <Messages />}
+            {role === "admin" || role === "super_admin" ? <RecentActivity /> : <Messages />}
           </div>
         </div>
       </div>

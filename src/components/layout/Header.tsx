@@ -88,7 +88,7 @@ export default function Header() {
           w-[28px] h-[28px] sm:w-[30px] sm:h-[30px] md:w-[34px] md:h-[34px] xl:w-[38px] xl:h-[38px]
           mr-[6px] xl:mr-[7px]">
           <Image
-            src={user.avatar || "/logos/mass logo.png"}
+            src={user?.avatar || "/logos/mass logo.png"}
             alt="Profile"
             width={38}
             height={38}
@@ -103,7 +103,7 @@ export default function Header() {
             mr-[10px] xl:mr-[30px]"
           style={{ fontFamily: "Eurostile, sans-serif" }}
         >
-          {user.name}
+          {user?.fullName || "Guest Account"}
         </span>
 
         {/* ── Notification bell (always visible) ── */}

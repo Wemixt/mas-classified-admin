@@ -23,6 +23,12 @@ const actionsByRole: Record<UserRole, QuickAction[]> = {
     { label: "View Reports", icon: "reports", path: "/reports" },
     { label: "View Categories", icon: "categories", path: "/categories" },
   ],
+  super_admin: [
+    { label: "Manage Moderator", icon: "moderator", path: "/moderators" },
+    { label: "Manage sellers", icon: "sellers", path: "/sellers" },
+    { label: "Ad Reports", icon: "reports", path: "/reports" },
+    { label: "Add Categories", icon: "categories", path: "/categories" },
+  ],
 };
 
 function ActionIcon({ type }: { type: string }) {
@@ -59,7 +65,7 @@ function ActionIcon({ type }: { type: string }) {
 
 export default function QuickActions() {
   const { role } = useAuth();
-  const actions = actionsByRole[role];
+  const actions = role ? actionsByRole[role as UserRole] || actionsByRole["moderator"] : [];
 
   return (
     <div className="bg-[#DAECFF] rounded-[10px] overflow-hidden mt-4">
@@ -78,7 +84,7 @@ export default function QuickActions() {
 
       {/* Action buttons: 2×2 grid, responsive padding */}
       <div className="grid grid-cols-2 gap-[10px] md:gap-[16px] px-[16px] md:px-[34px] pt-[14px] md:pt-[18px] pb-[20px] md:pb-[32px]">
-        {actions.map((action) => (
+        {(actions || []).map((action) => (
           <Link
             key={action.label}
             href={action.path}

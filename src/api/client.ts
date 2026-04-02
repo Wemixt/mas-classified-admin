@@ -15,11 +15,16 @@ const apiClient = axios.create({
 // Request Interceptor: Add Auth Token if available
 apiClient.interceptors.request.use(
   (config) => {
-    // You can add token retrieval logic here (e.g. from localStorage or Cookies)
-    // const token = localStorage.getItem("token");
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    if (typeof document !== "undefined") {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("auth_token="))
+        ?.split("=")[1];
+
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
     return config;
   },
   (error) => {

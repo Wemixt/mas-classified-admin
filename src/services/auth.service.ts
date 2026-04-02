@@ -10,4 +10,8 @@ export const authService = {
     const response = await authApi.logout();
     return response.data;
   },
+  getDetails: async (token?: string) => {
+    const response = await authApi.getDetails(token);
+    return response.data;
+  },
 };
