@@ -12,6 +12,7 @@ interface PublishedAd {
   category: string;
   clicks: number;
   datePublished: string;
+  timePublished: string;
   approvedBy: string;
 }
 
@@ -23,6 +24,7 @@ const publishedAds: PublishedAd[] = [
     category: "Laptop",
     clicks: 153,
     datePublished: "2026/01/28",
+    timePublished: "02.32 PM",
     approvedBy: "Kasun Prasanna",
   },
   {
@@ -32,6 +34,7 @@ const publishedAds: PublishedAd[] = [
     category: "T shirt",
     clicks: 123,
     datePublished: "2026/01/14",
+    timePublished: "10.30 AM",
     approvedBy: "Kasun Prasanna",
   },
   {
@@ -41,6 +44,7 @@ const publishedAds: PublishedAd[] = [
     category: "Headset",
     clicks: 76,
     datePublished: "2026/02/03",
+    timePublished: "09.15 AM",
     approvedBy: "Sugath Kalhara",
   },
 ];
@@ -305,16 +309,29 @@ export default function PublishedAdsContent() {
 
                 {/* Action Row */}
                 <div className="flex flex-wrap items-center justify-between gap-[8px] min-h-[50px] md:h-[57px] pl-[12px] md:pl-[16px] pr-[6px] py-[8px] md:py-0">
-                  <div className="flex items-center">
-                    <span
-                      className="text-[#242424] text-[12px] md:text-[14px] font-normal leading-[100%] tracking-normal opacity-70"
-                      style={{ fontFamily: "Eurostile, sans-serif" }}
-                    >
-                      Date Published
-                    </span>
-                    <span className="text-[#000000] text-[12px] md:text-[14px] font-normal leading-[150%] tracking-normal ml-[8px]">
-                      {ad.datePublished}
-                    </span>
+                  <div className="flex flex-wrap items-center gap-[24px] md:gap-[40px]">
+                    <div className="flex items-center">
+                      <span
+                        className="text-[#242424] text-[12px] md:text-[14px] font-normal leading-[100%] tracking-normal opacity-70"
+                        style={{ fontFamily: "Eurostile, sans-serif" }}
+                      >
+                        Published Date
+                      </span>
+                      <span className="text-[#000000] text-[12px] md:text-[14px] font-semibold leading-[150%] tracking-normal ml-[8px]">
+                        {ad.datePublished}
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <span
+                        className="text-[#242424] text-[12px] md:text-[14px] font-normal leading-[100%] tracking-normal opacity-70"
+                        style={{ fontFamily: "Eurostile, sans-serif" }}
+                      >
+                        Published Time
+                      </span>
+                      <span className="text-[#000000] text-[12px] md:text-[14px] font-semibold leading-[150%] tracking-normal ml-[8px]">
+                        {ad.timePublished}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-[8px] md:gap-[12px]">
                     <span className="text-[#242424] text-[11px] md:text-[12px] font-normal leading-[150%] tracking-normal whitespace-nowrap">

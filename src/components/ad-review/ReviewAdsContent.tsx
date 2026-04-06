@@ -93,6 +93,7 @@ export default function ReviewAdsContent() {
   const [selectedActions, setSelectedActions] = useState<
     Record<string, ReviewAction>
   >({});
+  const [feedback, setFeedback] = useState<Record<string, string>>({});
   const [viewingAdId, setViewingAdId] = useState<string | null>(null);
 
   const handleActionChange = (adId: string, action: ReviewAction) => {
@@ -199,7 +200,7 @@ export default function ReviewAdsContent() {
             {pendingAds.map((ad) => (
               <div
                 key={ad.id}
-                className="bg-[#F4F4F4] rounded-[8px] overflow-hidden"
+                className="bg-[#F4F4F4] rounded-[8px]"
               >
                 {/* ── Desktop Data Row (md+) ── */}
                 <div className="hidden md:flex items-center h-[57px]">
@@ -266,32 +267,78 @@ export default function ReviewAdsContent() {
                     </label>
 
                     {/* Reject */}
-                    <label className="flex items-center gap-[6px] md:gap-[8px] cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={selectedActions[ad.id] === "reject"}
-                        onChange={() => handleActionChange(ad.id, "reject")}
-                        className="appearance-none w-[14px] h-[14px] md:w-[16px] md:h-[16px] rounded-[5px] border border-black/70 cursor-pointer checked:bg-[#ED1C24] checked:border-[#ED1C24] relative after:content-['✓'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:text-white after:text-[9px] md:after:text-[10px] after:font-bold after:opacity-0 checked:after:opacity-100"
-                      />
-                      <span className="text-[#ED1C24] text-[11px] md:text-[12px] font-semibold leading-[100%] tracking-normal">
-                        Reject
-                      </span>
-                    </label>
+                    <div className="relative">
+                      <label className="flex items-center gap-[6px] md:gap-[8px] cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={selectedActions[ad.id] === "reject"}
+                          onChange={() => handleActionChange(ad.id, "reject")}
+                          className="appearance-none w-[14px] h-[14px] md:w-[16px] md:h-[16px] rounded-[5px] border border-black/70 cursor-pointer checked:bg-[#ED1C24] checked:border-[#ED1C24] relative after:content-['✓'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:text-white after:text-[9px] md:after:text-[10px] after:font-bold after:opacity-0 checked:after:opacity-100"
+                        />
+                        <span className="text-[#ED1C24] text-[11px] md:text-[12px] font-semibold leading-[100%] tracking-normal">
+                          Reject
+                        </span>
+                      </label>
+                      {selectedActions[ad.id] === "reject" && (
+                        <div className="absolute top-full left-0 mt-[12px] z-20 w-[240px]">
+                          <div className="relative bg-[#EDEDED] rounded-[8px] p-[10px] border border-black/5 shadow-md">
+                            {/* Arrow */}
+                            <div className="absolute -top-[6px] left-[6px] md:left-[7px] w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[6px] border-b-[#EDEDED]" />
+                            <textarea
+                              autoFocus
+                              className="w-full bg-transparent text-[#000000] text-[11px] font-normal leading-relaxed resize-none outline-none placeholder:text-[#5E5E5E]"
+                              placeholder="Reason for rejection..."
+                              rows={2}
+                              value={feedback[ad.id] || ""}
+                              onChange={(e) =>
+                                setFeedback((prev) => ({
+                                  ...prev,
+                                  [ad.id]: e.target.value,
+                                }))
+                              }
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
 
                     {/* Request Changes */}
-                    <label className="flex items-center gap-[6px] md:gap-[8px] cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={selectedActions[ad.id] === "requestChanges"}
-                        onChange={() =>
-                          handleActionChange(ad.id, "requestChanges")
-                        }
-                        className="appearance-none w-[14px] h-[14px] md:w-[16px] md:h-[16px] rounded-[5px] border border-black/70 cursor-pointer checked:bg-[#E3800F] checked:border-[#E3800F] relative after:content-['✓'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:text-white after:text-[9px] md:after:text-[10px] after:font-bold after:opacity-0 checked:after:opacity-100"
-                      />
-                      <span className="text-[#E3800F] text-[11px] md:text-[12px] font-semibold leading-[100%] tracking-normal">
-                        Request Changes
-                      </span>
-                    </label>
+                    <div className="relative">
+                      <label className="flex items-center gap-[6px] md:gap-[8px] cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={selectedActions[ad.id] === "requestChanges"}
+                          onChange={() =>
+                            handleActionChange(ad.id, "requestChanges")
+                          }
+                          className="appearance-none w-[14px] h-[14px] md:w-[16px] md:h-[16px] rounded-[5px] border border-black/70 cursor-pointer checked:bg-[#E3800F] checked:border-[#E3800F] relative after:content-['✓'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:text-white after:text-[9px] md:after:text-[10px] after:font-bold after:opacity-0 checked:after:opacity-100"
+                        />
+                        <span className="text-[#E3800F] text-[11px] md:text-[12px] font-semibold leading-[100%] tracking-normal">
+                          Request Changes
+                        </span>
+                      </label>
+                      {selectedActions[ad.id] === "requestChanges" && (
+                        <div className="absolute top-full left-0 mt-[12px] z-20 w-[240px]">
+                          <div className="relative bg-[#EDEDED] rounded-[8px] p-[10px] border border-black/5 shadow-md">
+                            {/* Arrow */}
+                            <div className="absolute -top-[6px] left-[6px] md:left-[7px] w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[6px] border-b-[#EDEDED]" />
+                            <textarea
+                              autoFocus
+                              className="w-full bg-transparent text-[#000000] text-[11px] font-normal leading-relaxed resize-none outline-none placeholder:text-[#5E5E5E]"
+                              placeholder="Describe needed changes..."
+                              rows={2}
+                              value={feedback[ad.id] || ""}
+                              onChange={(e) =>
+                                setFeedback((prev) => ({
+                                  ...prev,
+                                  [ad.id]: e.target.value,
+                                }))
+                              }
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Submit Button */}

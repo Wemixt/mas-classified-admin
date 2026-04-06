@@ -160,21 +160,6 @@ export default function AdminProfileContent() {
               />
             </div>
 
-            {/* Email */}
-            <div className="flex flex-col gap-[8px]">
-              <label className="text-[#000000] text-[13px] font-semibold leading-[100%] tracking-normal">
-                Email
-              </label>
-              <input
-                type="email"
-                value={profile.email}
-                onChange={(e) =>
-                  setProfile((p) => ({ ...p, email: e.target.value }))
-                }
-                className="w-full h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
-              />
-            </div>
-
             {/* Second Name */}
             <div className="flex flex-col gap-[8px]">
               <label className="text-[#000000] text-[13px] font-semibold leading-[100%] tracking-normal">
@@ -185,6 +170,21 @@ export default function AdminProfileContent() {
                 value={profile.secondName}
                 onChange={(e) =>
                   setProfile((p) => ({ ...p, secondName: e.target.value }))
+                }
+                className="w-full h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
+              />
+            </div>
+
+            {/* Email */}
+            <div className="flex flex-col gap-[8px]">
+              <label className="text-[#000000] text-[13px] font-semibold leading-[100%] tracking-normal">
+                Email
+              </label>
+              <input
+                type="email"
+                value={profile.email}
+                onChange={(e) =>
+                  setProfile((p) => ({ ...p, email: e.target.value }))
                 }
                 className="w-full h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
               />

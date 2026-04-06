@@ -40,7 +40,7 @@ export default function RecentAds() {
           Recent Ads
         </h3>
         <Link
-          href="/ads"
+          href="/published-ads"
           className="text-white text-[11px] md:text-[12px] font-normal leading-[150%] hover:underline transition-colors"
         >
           View All

@@ -228,7 +228,7 @@ export default function RejectedAdsContent() {
                       onClick={() => handleViewAd(ad.id)}
                       className="w-[88px] xl:w-[108px] h-[26px] bg-[#D2D2D2] rounded-[8px] text-[#101010] text-[12px] font-normal leading-[150%] tracking-normal hover:bg-[#C5C5C5] transition-colors cursor-pointer"
                     >
-                      View Ad
+                      View Reason
                     </button>
                   </div>
                 </div>
