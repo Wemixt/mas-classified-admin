@@ -15,6 +15,8 @@ const apiClient = axios.create({
 // Request Interceptor: Add Auth Token if available
 apiClient.interceptors.request.use(
   (config) => {
+    console.log(`[apiClient Request] ${config.method?.toUpperCase()} ${config.url}`, { baseURL: config.baseURL });
+    
     if (typeof document !== "undefined") {
       const token = document.cookie
         .split("; ")
@@ -22,7 +24,10 @@ apiClient.interceptors.request.use(
         ?.split("=")[1];
 
       if (token) {
+        console.log("[apiClient Request] Attaching auth_token from cookie");
         config.headers.Authorization = `Bearer ${token}`;
+      } else {
+        console.log("[apiClient Request] No auth_token found in cookies");
       }
     }
     return config;

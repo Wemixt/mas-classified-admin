@@ -64,3 +64,51 @@ export interface UserDetailsResponse {
     path: string;
   };
 }
+
+export interface Ad {
+  id: string;
+  uuid: string;
+  title: string;
+  slug: string;
+  brand: string;
+  model: string;
+  price: string;
+  currency: string;
+  isNegotiable: boolean;
+  condition: string;
+  status: string;
+  viewCount: number;
+  contactDetails?: string;
+  countryName: string;
+  districtName: string;
+  cityName: string;
+  categoryName: string;
+  images: string[];
+  createdAt: string;
+  seller?: {
+    fullName: string;
+    email: string;
+    avatar?: string;
+  };
+}
+
+export interface PaginatedResponse<T> {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: {
+    data: T[];
+    meta: {
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+    };
+  };
+  meta: {
+    timestamp: string;
+    path: string;
+  };
+}

@@ -20,7 +20,10 @@ export default function Sidebar() {
   };
 
   const SidebarContent = () => (
-    <aside className="w-full h-full bg-[#1174BB] flex flex-col relative">
+    <aside 
+      suppressHydrationWarning
+      className="w-full h-full bg-[#1174BB] flex flex-col relative"
+    >
       {/* Close Button — inside sidebar, top-right corner, mobile only */}
       <button
         onClick={close}

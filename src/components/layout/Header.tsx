@@ -10,7 +10,10 @@ export default function Header() {
   const { toggle } = useSidebar();
 
   return (
-    <header className="w-full bg-white border-b border-[#E0E0E0] shrink-0">
+    <header 
+      suppressHydrationWarning
+      className="w-full bg-white border-b border-[#E0E0E0] shrink-0"
+    >
       {/*
         Layout strategy — single flat flex row, all elements shrink-0 except
         the two flex-1 spacer divs which absorb leftover space.

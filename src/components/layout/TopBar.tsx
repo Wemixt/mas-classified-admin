@@ -2,7 +2,10 @@ import Link from "next/link";
 
 export default function TopBar() {
   return (
-    <div className="w-full h-[35px] bg-[#0F467F] flex items-center justify-end px-4 md:px-6 xl:px-[63px] shrink-0">
+    <div 
+      suppressHydrationWarning
+      className="w-full h-[35px] bg-[#0F467F] flex items-center justify-end px-4 md:px-6 xl:px-[63px] shrink-0"
+    >
       <nav className="flex items-center gap-[16px] md:gap-[31px]">
         <Link
           href="/help"
