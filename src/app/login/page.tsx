@@ -3,6 +3,7 @@
 import { useState, useContext } from "react";
 import { AuthContext } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import MasLoginButton from "@/components/MasLoginButton";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -144,6 +145,19 @@ export default function LoginPage() {
             </button>
           </div>
         </form>
+
+        <div className="relative mt-6">
+          <div className="absolute inset-0 flex items-center" aria-hidden="true">
+            <div className="w-full border-t border-gray-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm font-medium leading-6">
+            <span className="bg-white px-6 text-gray-900">Or continue with</span>
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <MasLoginButton />
+        </div>
       </div>
     </div>
   );
