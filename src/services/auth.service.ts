@@ -3,15 +3,12 @@ import type { LoginCredentials } from "@/types";
 
 export const authService = {
   login: async (credentials: LoginCredentials) => {
-    const response = await authApi.login(credentials);
-    return response.data;
+    // Logic removed
   },
   logout: async () => {
-    const response = await authApi.logout();
-    return response.data;
+    // Logic removed
   },
   getDetails: async (token?: string) => {
-    const response = await authApi.getDetails(token);
-    return response.data;
+    // Logic removed
   },
 };
