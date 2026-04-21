@@ -21,8 +21,7 @@ const MasLoginButton: React.FC = () => {
       return;
     }
 
-    // Build Cognito login URL
-    // Format: https://<domain>/login/continue?client_id=<client_id>&redirect_uri=<redirect_uri>&response_type=code&scope=email+openid+profile
+    // Build Cognito login URL using requested format
     const baseUrl = domain.endsWith("/") ? domain.slice(0, -1) : domain;
     const loginUrl = `${baseUrl}/login/continue?client_id=${clientId}&redirect_uri=${encodeURIComponent(
       redirectUri

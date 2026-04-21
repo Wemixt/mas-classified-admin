@@ -5,7 +5,7 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Define public routes
-  const isPublicRoute = pathname === "/login";
+  const isPublicRoute = pathname === "/login" || pathname === "/";
 
   // Check for 'auth_token' cookie
   const authToken = request.cookies.get("auth_token");

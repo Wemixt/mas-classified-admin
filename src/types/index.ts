@@ -45,6 +45,7 @@ export interface LoginResponse {
   data: {
     accessToken: string;
     refreshToken: string;
+    user?: User;
   } | null;
   meta?: {
     timestamp: string;
