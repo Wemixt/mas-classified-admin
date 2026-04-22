@@ -4,293 +4,305 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import { useAuth } from "@/hooks";
 
-type ProfileFormState = {
-  adminName: string;
-  firstName: string;
-  secondName: string;
-  email: string;
-  phone: string;
-};
+const Toggle = ({ active }: { active: boolean }) => (
+  <div className={`w-[40px] h-[22px] rounded-[11px] flex items-center p-[2px] transition-colors cursor-pointer ${active ? 'bg-[#4CAF50] justify-end' : 'bg-[#A0A0A0] justify-start'}`}>
+    <div className="w-[18px] h-[18px] bg-white rounded-full shadow-sm" />
+  </div>
+);
 
-type PasswordFormState = {
-  currentPassword: string;
-  newPassword: string;
-  confirmNewPassword: string;
-};
+const RadioChecked = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="9" cy="9" r="8" stroke="#0F792F" strokeWidth="2"/>
+    <circle cx="9" cy="9" r="4" fill="#0F792F"/>
+  </svg>
+);
+
+const RadioUnchecked = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="9" cy="9" r="8" stroke="#666666" strokeWidth="2"/>
+  </svg>
+);
 
 export default function AdminProfileContent() {
   const { user, isLoading } = useAuth();
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [showDoneModal, setShowDoneModal] = useState(false);
 
   if (isLoading) {
     return <div className="p-8">Loading profile...</div>;
   }
 
-  const initialProfile = useMemo<ProfileFormState>(
-    () => ({
-      adminName: user?.fullName || "",
-      firstName: (user?.fullName || "").split(" ").filter(Boolean)[0] || "",
-      secondName:
-        (user?.fullName || "").split(" ").filter(Boolean).slice(1).join(" ") || "",
-      email: user?.email || "",
-      phone: user?.phoneNo || "",
-    }),
-    [user]
-  );
-
-  const [profile, setProfile] = useState<ProfileFormState>(initialProfile);
-  const [passwords, setPasswords] = useState<PasswordFormState>({
-    currentPassword: "",
-    newPassword: "",
-    confirmNewPassword: "",
-  });
-
   return (
-    <div className="py-4 md:py-[28px] px-4 md:pl-[28px] md:pr-[8px]">
+    <div className="py-4 md:py-[28px] px-4 md:pl-[28px] md:pr-[28px] max-w-[1200px]">
       {/* Page Header */}
       <h1
-        className="text-[#5E5E5E] text-[18px] md:text-[22px] font-normal leading-[100%] tracking-normal"
+        className="text-[#333333] text-[20px] md:text-[24px] font-normal leading-[100%] tracking-normal"
         style={{ fontFamily: "Eurostile, sans-serif" }}
       >
         Admin Profile
       </h1>
-
-      <div className="border-t border-[#5E5E5E] opacity-70 mt-[16px]" />
-
       <p
-        className="text-[#333333] text-[12px] md:text-[14px] font-normal leading-[100%] tracking-normal opacity-60 mt-[10px]"
-        style={{ fontFamily: "Eurostile, sans-serif" }}
+        className="text-[#666666] text-[13px] md:text-[14px] font-normal leading-[100%] tracking-normal mt-[8px]"
       >
         Manage your account information and personal settings
       </p>
 
-      <div className="mt-[22px] max-w-[1020px] flex flex-col gap-[18px]">
-        {/* Profile card */}
-        <section className="bg-white border border-[#E0E0E0] rounded-[10px] p-4 md:p-[28px]">
-          {/* Avatar row */}
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 md:gap-[28px]">
-            {/* Avatar */}
-            <div className="shrink-0">
-              <div className="w-[90px] h-[90px] sm:w-[110px] sm:h-[110px] md:w-[126px] md:h-[126px] rounded-full overflow-hidden bg-[#E9E9E9]">
-                <Image
-                  src={user?.avatar || "/logos/mass logo.png"}
-                  alt="Admin profile photo"
-                  width={126}
-                  height={126}
-                  className="w-full h-full object-cover"
-                />
+      <div className="border-t border-[#D0D0D0] mt-[16px] mb-[24px]" />
+
+      {/* Profile Card */}
+      <div className="border border-[#D0D0D0] rounded-[16px] p-[24px] md:p-[32px] bg-white">
+        <div className="flex flex-col md:flex-row items-start gap-[24px]">
+          <div className="w-[120px] h-[120px] rounded-full overflow-hidden bg-[#E9E9E9] shrink-0">
+            <Image
+              src={user?.avatar || "/logos/mass logo.png"}
+              alt="Admin profile photo"
+              width={120}
+              height={120}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="flex flex-col pt-[10px]">
+            <h2 className="text-[#000000] text-[24px] font-medium leading-[100%] mb-[8px]">Ishan Nayanajith</h2>
+            <p className="text-[#666666] text-[15px] font-normal leading-[100%] mb-[16px]">@kwinayanajith</p>
+            <div className="flex items-center gap-[12px]">
+              <button 
+                onClick={() => setShowPhotoModal(true)}
+                className="h-[36px] px-[16px] bg-[#114A82] text-white rounded-[8px] text-[13px] font-medium flex items-center gap-[8px] hover:bg-[#0E3A66] transition-colors"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 7L11 5H13L15 7H18C19.1 7 20 7.9 20 9V18C20 19.1 19.1 20 18 20H6C4.9 20 4 19.1 4 18V9C4 7.9 4.9 7 6 7H9Z" fill="white" opacity="0.9"/>
+                  <path d="M12 17C14.2091 17 16 15.2091 16 13C16 10.7909 14.2091 9 12 9C9.79086 9 8 10.7909 8 13C8 15.2091 9.79086 17 12 17Z" stroke="#114A82" strokeWidth="2" fill="white"/>
+                </svg>
+                Change Photo
+              </button>
+              <button className="h-[36px] px-[16px] bg-[#EAEAEA] text-[#333333] rounded-[8px] text-[13px] font-medium flex items-center gap-[8px] hover:bg-[#DFDFDF] transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 21C6.45 21 5.98 20.8 5.59 20.41C5.2 20.02 5 19.55 5 19V7H4V5H9V4H15V5H20V7H19V19C19 19.55 18.8 20.02 18.41 20.41C18.02 20.8 17.55 21 17 21H7ZM17 7H7V19H17V7ZM9 17H11V9H9V17ZM13 17H15V9H13V17Z" fill="#333333"/>
+                </svg>
+                Remove Photo
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-[40px]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-[8px] mb-[12px]">
+            <h3 className="text-[#000000] text-[15px] font-bold">Profile Info</h3>
+            <span className="text-[#666666] text-[13px]">Update profile Info</span>
+          </div>
+          <div className="border-t border-[#333333] mb-[24px]" />
+          
+          <div className="flex flex-col md:flex-row justify-between items-start gap-[24px]">
+            <div className="flex flex-col gap-[20px] w-full">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-[20px] sm:gap-[60px]">
+                <p className="text-[#555555] text-[14px]"><span className="text-[#000000] font-bold">First Name :</span> Ishan</p>
+                <p className="text-[#555555] text-[14px]"><span className="text-[#000000] font-bold">Second Name :</span> Nayanajith</p>
               </div>
+              <p className="text-[#555555] text-[14px]"><span className="text-[#000000] font-bold">Email :</span> kwinayanajith@gmail.com</p>
+              <p className="text-[#555555] text-[14px]"><span className="text-[#000000] font-bold">Phone :</span> 0712414095</p>
             </div>
-
-            {/* Admin Name + photo actions */}
-            <div className="flex-1 min-w-0 w-full">
-              <label className="block text-[#000000] text-[14px] font-semibold leading-[100%] tracking-normal">
-                Admin Name
-              </label>
-              <input
-                type="text"
-                value={profile.adminName}
-                onChange={(e) =>
-                  setProfile((p) => ({ ...p, adminName: e.target.value }))
-                }
-                className="mt-[10px] w-full h-[44px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
-              />
-
-              <div className="mt-[12px] flex flex-wrap items-center gap-[10px]">
-                <button
-                  type="button"
-                  className="flex items-center gap-[8px] h-[34px] px-[14px] bg-[#1174BB] rounded-[8px] text-white text-[13px] font-semibold leading-[100%] tracking-normal hover:bg-[#0E63A0] transition-colors"
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M9 7L11 5H13L15 7H18C19.1 7 20 7.9 20 9V18C20 19.1 19.1 20 18 20H6C4.9 20 4 19.1 4 18V9C4 7.9 4.9 7 6 7H9Z"
-                      fill="white"
-                      opacity="0.9"
-                    />
-                    <path
-                      d="M12 17C14.2091 17 16 15.2091 16 13C16 10.7909 14.2091 9 12 9C9.79086 9 8 10.7909 8 13C8 15.2091 9.79086 17 12 17Z"
-                      stroke="#1174BB"
-                      strokeWidth="2"
-                      fill="white"
-                    />
-                  </svg>
-                  Change Photo
-                </button>
-                <button
-                  type="button"
-                  className="flex items-center gap-[8px] h-[34px] px-[14px] bg-[#E9E9E9] rounded-[8px] text-[#5E5E5E] text-[13px] font-semibold leading-[100%] tracking-normal hover:bg-[#DFDFDF] transition-colors"
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M7 21C6.45 21 5.98 20.8 5.59 20.41C5.2 20.02 5 19.55 5 19V7H4V5H9V4H15V5H20V7H19V19C19 19.55 18.8 20.02 18.41 20.41C18.02 20.8 17.55 21 17 21H7ZM17 7H7V19H17V7ZM9 17H11V9H9V17ZM13 17H15V9H13V17Z"
-                      fill="#5E5E5E"
-                    />
-                  </svg>
-                  Remove Photo
-                </button>
-              </div>
+            <div className="flex flex-col gap-[16px] items-start md:items-end shrink-0 w-full md:w-auto">
+              <button className="h-[32px] px-[20px] bg-[#F5F5F5] rounded-full text-[13px] font-medium flex items-center gap-[6px] hover:bg-[#EAEAEA] transition-colors">
+                <svg width="12" height="12" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 11.5H12M1.5 11.5L5.5 10.5L12 4C12.5 3.5 12.5 2.5 12 2C11.5 1.5 10.5 1.5 10 2L3.5 8.5L2.5 12.5L1.5 11.5Z" stroke="#333333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Edit
+              </button>
+              <button className="h-[40px] px-[20px] bg-white border border-[#333333] rounded-[8px] text-[14px] font-medium hover:bg-gray-50 transition-colors">
+                 Change Password
+              </button>
             </div>
           </div>
-
-          {/* Form fields grid */}
-          <div className="mt-[22px] grid grid-cols-1 md:grid-cols-2 gap-x-[28px] gap-y-[14px]">
-            {/* First Name */}
-            <div className="flex flex-col gap-[8px]">
-              <label className="text-[#000000] text-[13px] font-semibold leading-[100%] tracking-normal">
-                First Name
-              </label>
-              <input
-                type="text"
-                value={profile.firstName}
-                onChange={(e) =>
-                  setProfile((p) => ({ ...p, firstName: e.target.value }))
-                }
-                className="w-full h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
-              />
-            </div>
-
-            {/* Second Name */}
-            <div className="flex flex-col gap-[8px]">
-              <label className="text-[#000000] text-[13px] font-semibold leading-[100%] tracking-normal">
-                Second Name
-              </label>
-              <input
-                type="text"
-                value={profile.secondName}
-                onChange={(e) =>
-                  setProfile((p) => ({ ...p, secondName: e.target.value }))
-                }
-                className="w-full h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
-              />
-            </div>
-
-            {/* Email */}
-            <div className="flex flex-col gap-[8px]">
-              <label className="text-[#000000] text-[13px] font-semibold leading-[100%] tracking-normal">
-                Email
-              </label>
-              <input
-                type="email"
-                value={profile.email}
-                onChange={(e) =>
-                  setProfile((p) => ({ ...p, email: e.target.value }))
-                }
-                className="w-full h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
-              />
-            </div>
-
-            {/* Phone */}
-            <div className="flex flex-col gap-[8px]">
-              <label className="text-[#000000] text-[13px] font-semibold leading-[100%] tracking-normal">
-                Phone
-              </label>
-              <input
-                type="tel"
-                value={profile.phone}
-                onChange={(e) =>
-                  setProfile((p) => ({ ...p, phone: e.target.value }))
-                }
-                className="w-full h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
-              />
-            </div>
-          </div>
-
-          {/* Save button */}
-          <div className="mt-[20px] flex justify-end">
-            <button
-              type="button"
-              className="h-[40px] px-[24px] bg-[#1174BB] rounded-[8px] text-white text-[13px] font-semibold leading-[100%] tracking-normal hover:bg-[#0E63A0] transition-colors"
-            >
-              Save Changes
-            </button>
-          </div>
-        </section>
-
-        {/* General Setting */}
-        <section className="bg-white border border-[#E0E0E0] rounded-[10px] p-4 md:p-[28px]">
-          <h2
-            className="text-[#5E5E5E] text-[16px] md:text-[18px] font-normal leading-[100%] tracking-normal"
-            style={{ fontFamily: "Eurostile, sans-serif" }}
-          >
-            General Setting
-          </h2>
-          <div className="border-t border-[#5E5E5E] opacity-40 mt-[14px]" />
-
-          <div className="mt-[18px] max-w-[640px] flex flex-col gap-[14px]">
-            {/* Current Password */}
-            <div className="flex flex-col gap-[8px]">
-              <label className="text-[#5E5E5E] text-[13px] font-normal leading-[100%] tracking-normal">
-                Current Password
-              </label>
-              <input
-                type="password"
-                value={passwords.currentPassword}
-                onChange={(e) =>
-                  setPasswords((p) => ({
-                    ...p,
-                    currentPassword: e.target.value,
-                  }))
-                }
-                className="w-full h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
-              />
-            </div>
-
-            {/* New Password */}
-            <div className="flex flex-col gap-[8px]">
-              <label className="text-[#5E5E5E] text-[13px] font-normal leading-[100%] tracking-normal">
-                New Password
-              </label>
-              <input
-                type="password"
-                value={passwords.newPassword}
-                onChange={(e) =>
-                  setPasswords((p) => ({ ...p, newPassword: e.target.value }))
-                }
-                className="w-full h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
-              />
-            </div>
-
-            {/* Confirm New Password */}
-            <div className="flex flex-col gap-[8px]">
-              <label className="text-[#5E5E5E] text-[13px] font-normal leading-[100%] tracking-normal">
-                Confirm New Password
-              </label>
-              <input
-                type="password"
-                value={passwords.confirmNewPassword}
-                onChange={(e) =>
-                  setPasswords((p) => ({
-                    ...p,
-                    confirmNewPassword: e.target.value,
-                  }))
-                }
-                className="w-full h-[42px] px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors"
-              />
-            </div>
-          </div>
-
-          {/* Update Password button */}
-          <div className="mt-[20px] flex justify-end max-w-[640px]">
-            <button
-              type="button"
-              className="h-[40px] px-[24px] bg-[#1174BB] rounded-[8px] text-white text-[13px] font-semibold leading-[100%] tracking-normal hover:bg-[#0E63A0] transition-colors"
-            >
-              Update Password
-            </button>
-          </div>
-        </section>
+        </div>
       </div>
+
+      {/* Search Settings */}
+      <div className="mt-[32px] max-w-[400px]">
+        <div className="h-[44px] border border-[#A0A0A0] rounded-[8px] flex items-center px-[16px] gap-[12px] bg-white">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12.5 11H11.71L11.43 10.73C12.41 9.59 13 8.11 13 6.5C13 2.91 10.09 0 6.5 0C2.91 0 0 2.91 0 6.5C0 10.09 2.91 13 6.5 13C8.11 13 9.59 12.41 10.73 11.43L11 11.71V12.5L16 17.49L17.49 16L12.5 11ZM6.5 11C4.01 11 2 8.99 2 6.5C2 4.01 4.01 2 6.5 2C8.99 2 11 4.01 11 6.5C11 8.99 8.99 11 6.5 11Z" fill="#5E5E5E" fillOpacity="0.7" />
+          </svg>
+          <input type="text" placeholder="Search Setting" className="flex-1 outline-none text-[14px] placeholder:text-[#5E5E5E]/70" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-[60px] gap-y-[40px] mt-[40px]">
+        {/* Notification Settings */}
+        <div>
+          <h3 className="text-[#666666] text-[20px] font-normal mb-[12px]" style={{ fontFamily: "Eurostile, sans-serif" }}>Notification Settings</h3>
+          <div className="border-t border-[#D0D0D0] mb-[20px]" />
+          <div className="flex flex-col gap-[16px]">
+            {[
+              "New ad submitted",
+              "New message from seller",
+              "New seller registration",
+              "Moderator activity reports",
+              "System alerts"
+            ].map(setting => (
+              <div key={setting} className="flex items-center gap-[12px]">
+                <RadioChecked />
+                <span className="text-[#555555] text-[14px] font-bold">{setting}</span>
+              </div>
+            ))}
+            
+            <div className="mt-[16px] flex flex-col gap-[20px]">
+              <div className="flex items-center justify-between">
+                <span className="text-[#555555] text-[14px] font-bold">Show Alerts on Navbar</span>
+                <Toggle active={true} />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[#555555] text-[14px] font-bold">Play Sound for new messages</span>
+                <Toggle active={true} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* System Settings */}
+        <div>
+          <h3 className="text-[#666666] text-[20px] font-normal mb-[12px]" style={{ fontFamily: "Eurostile, sans-serif" }}>System Settings</h3>
+          <div className="border-t border-[#D0D0D0] mb-[20px]" />
+          <div className="flex flex-col gap-[20px]">
+            <div className="flex items-center justify-between">
+              <span className="text-[#555555] text-[14px] font-bold">Language</span>
+              <select className="h-[36px] w-[180px] px-[16px] border border-[#A0A0A0] rounded-[8px] text-[13px] text-[#333333] font-medium outline-none bg-white">
+                <option>English</option>
+              </select>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[#555555] text-[14px] font-bold">Time Zone</span>
+              <select className="h-[36px] w-[180px] px-[16px] border border-[#A0A0A0] rounded-[8px] text-[13px] text-[#333333] font-medium outline-none bg-white">
+                <option>Sri Lanka (GMT +5.30)</option>
+              </select>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[#555555] text-[14px] font-bold">Maintains Mode</span>
+              <Toggle active={false} />
+            </div>
+            
+            <div className="mt-[20px] flex items-center justify-between">
+              <h4 className="text-[#555555] text-[16px] font-normal" style={{ fontFamily: "Eurostile, sans-serif" }}>Default Ad Status</h4>
+              <select className="h-[36px] w-[180px] px-[16px] border border-[#A0A0A0] rounded-[8px] text-[13px] text-[#333333] font-medium outline-none bg-white">
+                <option>Pending</option>
+              </select>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-[12px]">
+                <RadioChecked />
+                <span className="text-[#555555] text-[14px] font-normal">Allow Edit After Publish</span>
+              </div>
+              <Toggle active={true} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* User Management Settings */}
+      <div className="mt-[50px]">
+        <h3 className="text-[#666666] text-[20px] font-normal mb-[12px]" style={{ fontFamily: "Eurostile, sans-serif" }}>User Management Settings</h3>
+        <div className="border-t border-[#D0D0D0] mb-[24px]" />
+        
+        <div className="flex flex-col md:flex-row items-start justify-between gap-[32px]">
+          <div className="flex flex-col gap-[16px]">
+            <span className="text-[#888888] text-[14px] font-bold mb-[4px]">Ad Approval Mode</span>
+            <div className="flex items-center gap-[12px]">
+              <RadioUnchecked />
+              <span className="text-[#555555] text-[14px] font-bold">Require approval before activation</span>
+            </div>
+            <div className="flex items-center gap-[12px]">
+              <RadioChecked />
+              <span className="text-[#555555] text-[14px] font-bold">Allow new seller registrations</span>
+            </div>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row items-center gap-[16px]">
+            <button className="w-full sm:w-auto h-[44px] px-[24px] bg-[#1174BB] text-white rounded-[8px] text-[14px] font-bold hover:bg-[#0E63A0] transition-colors shadow-sm">
+              Manage Moderators
+            </button>
+            <button className="w-full sm:w-auto h-[44px] px-[24px] bg-[#1174BB] text-white rounded-[8px] text-[14px] font-bold hover:bg-[#0E63A0] transition-colors shadow-sm">
+              Manage Sellers
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer Buttons */}
+      <div className="mt-[60px] flex items-center gap-[16px]">
+        <button className="h-[44px] px-[32px] bg-[#114A82] text-white rounded-[8px] text-[14px] font-bold hover:bg-[#0E3A66] transition-colors shadow-sm">
+          Save Changes
+        </button>
+        <button className="h-[44px] px-[32px] bg-[#F5F5F5] text-[#000000] rounded-[8px] text-[14px] font-bold hover:bg-[#EAEAEA] transition-colors shadow-sm">
+          Cancel
+        </button>
+      </div>
+
+      {/* Change Photo Modal */}
+      {showPhotoModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4" onClick={() => setShowPhotoModal(false)}>
+          <div className="bg-white w-full max-w-[600px] rounded-[16px] p-[24px] md:p-[32px] shadow-2xl relative" onClick={e => e.stopPropagation()}>
+            <button
+              onClick={() => setShowPhotoModal(false)}
+              className="absolute top-[24px] right-[24px] w-[28px] h-[28px] flex items-center justify-center rounded-full bg-[#6B6B6B] hover:bg-[#555555] transition-colors cursor-pointer"
+            >
+              <svg width="10" height="10" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1L13 13M1 13L13 1" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            <div className="bg-[#F5F5F5] rounded-[10px] w-full h-[250px] mt-[16px] flex items-center justify-center border border-[#E0E0E0]">
+              <div className="bg-white rounded-[8px] px-[24px] py-[12px] shadow-sm font-bold text-[#000000] text-[15px]">
+                Upload here
+              </div>
+            </div>
+            <div className="flex items-center gap-[16px] mt-[24px]">
+              <button onClick={() => { setShowPhotoModal(false); setShowDoneModal(true); }} className="flex-1 h-[48px] bg-[#114A82] text-white rounded-[8px] text-[15px] font-medium hover:bg-[#0E3A66] transition-colors">
+                Save Change
+              </button>
+              <button onClick={() => setShowPhotoModal(false)} className="flex-1 h-[48px] bg-[#F5F5F5] text-[#000000] rounded-[8px] text-[15px] font-medium hover:bg-[#EAEAEA] transition-colors border border-[#D0D0D0]">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Done Modal */}
+      {showDoneModal && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setShowDoneModal(false)}
+        >
+          <div 
+            className="bg-[#F4F5F7] w-full max-w-[400px] rounded-[16px] p-[40px] flex flex-col items-center justify-center shadow-2xl relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setShowDoneModal(false)}
+              className="absolute top-[16px] right-[16px] w-[28px] h-[28px] flex items-center justify-center rounded-full bg-[#6B6B6B] hover:bg-[#555555] transition-colors cursor-pointer"
+            >
+              <svg width="10" height="10" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1L13 13M1 13L13 1" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+
+            {/* Checkmark Icon */}
+            <div className="mb-[24px]">
+              <svg width="100" height="100" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="60" cy="60" r="56" fill="#1174BB" />
+                <path d="M34 62L52 80L86 42" stroke="white" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+
+            <h2 
+              className="text-[#000000] text-[28px] md:text-[32px] font-normal leading-[100%]"
+              style={{ fontFamily: "Eurostile, sans-serif" }}
+            >
+              Done!
+            </h2>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

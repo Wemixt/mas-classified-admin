@@ -78,6 +78,7 @@ export default function ModeratorsContent() {
   }
 
   const [moderatorList, setModeratorList] = useState<Moderator[]>(moderators);
+  const [selectedModerator, setSelectedModerator] = useState<Moderator | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [createdData, setCreatedData] = useState({ name: "", role: "" });
@@ -321,7 +322,10 @@ export default function ModeratorsContent() {
           {moderatorList.map((moderator) => (
             <div key={moderator.id}>
               {/* ── Desktop Row (md+) ── */}
-              <div className="hidden md:grid grid-cols-[1.6fr_1fr_1.2fr_1.4fr] items-center h-[72px]">
+              <div 
+                className="hidden md:grid grid-cols-[1.6fr_1fr_1.2fr_1.4fr] items-center h-[72px] cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => setSelectedModerator(moderator)}
+              >
                 {/* Name with Avatar */}
                 <div className="px-[16px] flex items-center gap-[10px] xl:gap-[12px]">
                   <div className="w-[44px] h-[44px] xl:w-[54px] xl:h-[54px] rounded-full overflow-hidden shrink-0 bg-[#D9D9D9]">
@@ -356,7 +360,10 @@ export default function ModeratorsContent() {
                 {/* Status + View Profile */}
                 <div className="px-[16px] flex items-center gap-[10px] xl:gap-[16px]">
                   <button
-                    onClick={() => handleToggleStatus(moderator.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleStatus(moderator.id);
+                    }}
                     className={`relative w-[28px] h-[16px] rounded-full transition-colors shrink-0 ${moderator.active ? "bg-[#0F792F]" : "bg-[#CCCCCC]"}`}
                   >
                     <span
@@ -367,8 +374,11 @@ export default function ModeratorsContent() {
                     {moderator.active ? "Active" : "Block"}
                   </span>
                   <button
-                    onClick={() => handleViewProfile(moderator.id)}
-                    className="h-[25px] px-[10px] xl:px-[14px] bg-[#D9D9D9] rounded-[10px] text-[#000000] text-[11px] xl:text-[12px] font-semibold leading-[150%] tracking-normal opacity-70 hover:opacity-100 transition-opacity shrink-0 whitespace-nowrap"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleViewProfile(moderator.id);
+                    }}
+                    className="h-[25px] px-[10px] xl:px-[14px] bg-[#D9D9D9] rounded-[10px] text-[#000000] text-[11px] xl:text-[12px] font-semibold leading-[150%] tracking-normal opacity-70 hover:opacity-100 transition-opacity shrink-0 whitespace-nowrap cursor-pointer"
                   >
                     View Profile
                   </button>
@@ -376,7 +386,10 @@ export default function ModeratorsContent() {
               </div>
 
               {/* ── Mobile Card (< md) ── */}
-              <div className="md:hidden flex items-center gap-[12px] py-[12px]">
+              <div 
+                className="md:hidden flex items-center gap-[12px] py-[12px] cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => setSelectedModerator(moderator)}
+              >
                 <div className="w-[44px] h-[44px] rounded-full overflow-hidden shrink-0 bg-[#D9D9D9]">
                   <Image
                     src={moderator.avatar}
@@ -393,7 +406,10 @@ export default function ModeratorsContent() {
                 </div>
                 <div className="flex items-center gap-[8px] shrink-0">
                   <button
-                    onClick={() => handleToggleStatus(moderator.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleStatus(moderator.id);
+                    }}
                     className={`relative w-[26px] h-[15px] rounded-full transition-colors shrink-0 ${moderator.active ? "bg-[#0F792F]" : "bg-[#CCCCCC]"}`}
                   >
                     <span
@@ -401,8 +417,11 @@ export default function ModeratorsContent() {
                     />
                   </button>
                   <button
-                    onClick={() => handleViewProfile(moderator.id)}
-                    className="h-[26px] px-[10px] bg-[#D9D9D9] rounded-[10px] text-[#000000] text-[11px] font-semibold opacity-70 hover:opacity-100 transition-opacity whitespace-nowrap"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleViewProfile(moderator.id);
+                    }}
+                    className="h-[26px] px-[10px] bg-[#D9D9D9] rounded-[10px] text-[#000000] text-[11px] font-semibold opacity-70 hover:opacity-100 transition-opacity whitespace-nowrap cursor-pointer"
                   >
                     Profile
                   </button>
@@ -415,6 +434,69 @@ export default function ModeratorsContent() {
           ))}
         </div>
       </div>
+
+      {/* Moderator Details Modal */}
+      {selectedModerator && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4">
+          <div 
+            className="bg-white w-full max-w-[600px] min-h-[360px] rounded-[16px] p-[32px] md:p-[40px] flex flex-col items-center justify-center shadow-2xl relative"
+          >
+            {/* Close Icon */}
+            <button
+              onClick={() => setSelectedModerator(null)}
+              className="absolute top-[24px] right-[24px] w-[28px] h-[28px] flex items-center justify-center rounded-full bg-[#6B6B6B] hover:bg-[#555555] transition-colors cursor-pointer"
+            >
+              <svg width="10" height="10" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1L13 13M1 13L13 1" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+
+            {/* Avatar */}
+            <div className="w-[120px] h-[120px] rounded-full overflow-hidden bg-[#D9D9D9] mb-[20px]">
+              <Image
+                src={selectedModerator.avatar}
+                alt={selectedModerator.name}
+                width={120}
+                height={120}
+                className="object-cover w-full h-full"
+              />
+            </div>
+
+            {/* Name */}
+            <h2 
+              className="text-[#000000] text-[26px] md:text-[30px] font-normal leading-[100%] mb-[12px]"
+              style={{ fontFamily: "Eurostile, sans-serif" }}
+            >
+              {selectedModerator.name}
+            </h2>
+
+            {/* Verified Seller Badge (Using exact wording as screenshot) */}
+            <div className="flex items-center gap-[8px] mb-[32px]">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 1L14.59 3.59L18.25 3.5L18.75 7.15L22 9L20.5 12L22 15L18.75 16.85L18.25 20.5L14.59 20.41L12 23L9.41 20.41L5.75 20.5L5.25 16.85L2 15L3.5 12L2 9L5.25 7.15L5.75 3.5L9.41 3.59L12 1Z" fill="#0F792F"/>
+                <path d="M10 16.5L6 12.5L7.41 11.09L10 13.67L16.59 7.09L18 8.5L10 16.5Z" fill="white"/>
+              </svg>
+              <span 
+                className="text-[#000000] text-[15px] md:text-[16px] font-medium leading-[100%]"
+                style={{ fontFamily: "Poppins, sans-serif" }}
+              >
+                Verified Seller
+              </span>
+            </div>
+
+            {/* Contact Moderator Button */}
+            <button
+              onClick={() => {
+                // Placeholder - do nothing
+              }}
+              className="w-[200px] h-[48px] md:h-[52px] bg-[#1174BB] rounded-[8px] text-white font-medium text-[15px] md:text-[16px] transition-colors hover:bg-[#0E63A0] cursor-pointer shadow-sm"
+              style={{ fontFamily: "Poppins, sans-serif" }}
+            >
+              Contact Moderator
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
