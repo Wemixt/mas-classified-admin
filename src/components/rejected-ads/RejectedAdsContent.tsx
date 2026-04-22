@@ -105,17 +105,20 @@ const rejectedAdDetails: Record<string, RejectedAdDetail> = {
 
 export default function RejectedAdsContent() {
   const [viewingAdId, setViewingAdId] = useState<string | null>(null);
+  const [messageModalState, setMessageModalState] = useState<{ adId: string; step: "compose" | "done" } | null>(null);
+  const [messageText, setMessageText] = useState("");
+  const [deleteModalState, setDeleteModalState] = useState<{ adId: string; step: "confirm" | "done" } | null>(null);
 
   const handleReconsider = (adId: string) => {
     console.log(`Reconsider ad ${adId}`);
   };
 
   const handleDeletePermanently = (adId: string) => {
-    console.log(`Delete permanently ad ${adId}`);
+    setDeleteModalState({ adId, step: "confirm" });
   };
 
   const handleSendMessage = (adId: string) => {
-    console.log(`Send message for ad ${adId}`);
+    setMessageModalState({ adId, step: "compose" });
   };
 
   const handleViewAd = (adId: string) => {
@@ -286,6 +289,157 @@ export default function RejectedAdsContent() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Message Modal */}
+      {messageModalState && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4">
+          <div 
+            className="bg-white w-full max-w-[600px] min-h-[360px] rounded-[16px] p-[24px] md:p-[32px] flex flex-col shadow-2xl relative"
+          >
+            {messageModalState.step === "done" ? (
+              <div className="flex flex-col items-center justify-center flex-1 h-full py-[20px]">
+                {/* Close Icon */}
+                <button
+                  onClick={() => {
+                    setMessageModalState(null);
+                    setMessageText("");
+                  }}
+                  className="absolute top-[24px] right-[24px] w-[28px] h-[28px] flex items-center justify-center rounded-full bg-[#6B6B6B] hover:bg-[#555555] transition-colors cursor-pointer"
+                >
+                  <svg width="10" height="10" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 1L13 13M1 13L13 1" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+
+                {/* Checkmark Icon */}
+                <div className="w-[130px] h-[130px] rounded-full bg-[#1174BB] flex items-center justify-center mb-[20px]">
+                  <svg width="55" height="40" viewBox="0 0 64 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 25L22 43L60 4" stroke="white" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+
+                {/* Text */}
+                <h2 
+                  className="text-[#000000] text-[32px] font-normal leading-[100%]"
+                  style={{ fontFamily: "Poppins, sans-serif" }}
+                >
+                  Done!
+                </h2>
+              </div>
+            ) : (
+              <>
+                <textarea
+                  className="flex-1 w-full bg-white border border-[#E0E0E0] rounded-[12px] p-[20px] text-[#000] text-[14px] md:text-[15px] outline-none resize-none focus:border-[#0F467F] transition-colors placeholder:text-[#9E9E9E]"
+                  placeholder="Type here..."
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  style={{ fontFamily: "Poppins, sans-serif" }}
+                />
+                
+                <div className="flex items-center gap-[16px] md:gap-[20px] mt-[24px]">
+                  <button
+                    onClick={() => {
+                      setMessageModalState(null);
+                      setMessageText("");
+                    }}
+                    className="flex-1 h-[52px] bg-white border border-[#E0E0E0] rounded-[8px] text-[#000] font-medium text-[15px] md:text-[16px] transition-colors hover:bg-gray-50 cursor-pointer shadow-sm"
+                    style={{ fontFamily: "Poppins, sans-serif" }}
+                  >
+                    Go Back
+                  </button>
+                  <button
+                    onClick={() => {
+                      // Transition to Done modal
+                      setMessageModalState({ ...messageModalState, step: "done" });
+                    }}
+                    className="flex-1 h-[52px] bg-[#0F467F] rounded-[8px] text-white font-medium text-[15px] md:text-[16px] transition-colors hover:bg-[#0c3966] cursor-pointer shadow-sm"
+                    style={{ fontFamily: "Poppins, sans-serif" }}
+                  >
+                    Send
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+      {/* Delete Confirmation Modal */}
+      {deleteModalState && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4">
+          <div 
+            className="bg-white w-full max-w-[600px] min-h-[300px] rounded-[16px] p-[32px] md:p-[40px] flex flex-col shadow-2xl relative"
+          >
+            {deleteModalState.step === "done" ? (
+              <div className="flex flex-col items-center justify-center flex-1 h-full py-[20px]">
+                {/* Close Icon */}
+                <button
+                  onClick={() => {
+                    setDeleteModalState(null);
+                  }}
+                  className="absolute top-[24px] right-[24px] w-[28px] h-[28px] flex items-center justify-center rounded-full bg-[#6B6B6B] hover:bg-[#555555] transition-colors cursor-pointer"
+                >
+                  <svg width="10" height="10" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 1L13 13M1 13L13 1" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+
+                {/* Checkmark Icon */}
+                <div className="w-[130px] h-[130px] rounded-full bg-[#1174BB] flex items-center justify-center mb-[20px]">
+                  <svg width="55" height="40" viewBox="0 0 64 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 25L22 43L60 4" stroke="white" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+
+                {/* Text */}
+                <h2 
+                  className="text-[#000000] text-[32px] font-normal leading-[100%]"
+                  style={{ fontFamily: "Poppins, sans-serif" }}
+                >
+                  Done!
+                </h2>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center text-center flex-1 justify-center">
+                <h2 
+                  className="text-[#000000] text-[24px] md:text-[28px] font-normal mb-[16px]"
+                  style={{ fontFamily: "Eurostile, sans-serif" }}
+                >
+                  Confirm Deletion
+                </h2>
+                <div className="w-[80%] max-w-[400px] border-t border-[#E0E0E0] mb-[24px]" />
+                <p 
+                  className="text-[#000000] text-[15px] md:text-[16px] font-medium leading-[150%] mb-[32px]"
+                  style={{ fontFamily: "Poppins, sans-serif" }}
+                >
+                  Are you sure you want to delete this item?
+                  <br />
+                  This action cannot be undone.
+                </p>
+                <div className="flex items-center justify-center gap-[16px] md:gap-[24px] w-full max-w-[360px]">
+                  <button
+                    onClick={() => {
+                      setDeleteModalState({ ...deleteModalState, step: "done" });
+                    }}
+                    className="flex-1 h-[48px] md:h-[52px] bg-[#EEEEEE] rounded-[8px] text-[#0F467F] font-semibold text-[15px] md:text-[16px] transition-colors hover:bg-[#E0E0E0] cursor-pointer shadow-sm"
+                    style={{ fontFamily: "Poppins, sans-serif" }}
+                  >
+                    Delete
+                  </button>
+                  <button
+                    onClick={() => {
+                      setDeleteModalState(null);
+                    }}
+                    className="flex-1 h-[48px] md:h-[52px] bg-[#0F467F] rounded-[8px] text-white font-medium text-[15px] md:text-[16px] transition-colors hover:bg-[#0c3966] cursor-pointer shadow-sm"
+                    style={{ fontFamily: "Poppins, sans-serif" }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

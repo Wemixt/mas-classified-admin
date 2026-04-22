@@ -29,6 +29,7 @@ interface AdDetailViewProps {
   onBack: () => void;
   onAccept: (adId: string) => void;
   onReject: (adId: string) => void;
+  onRequestChanges?: (adId: string) => void;
 }
 
 export default function AdDetailView({
@@ -36,8 +37,11 @@ export default function AdDetailView({
   onBack,
   onAccept,
   onReject,
+  onRequestChanges,
 }: AdDetailViewProps) {
   const [selectedImage, setSelectedImage] = useState(0);
+  const [modalAction, setModalAction] = useState<"reject" | "requestChanges" | "done" | null>(null);
+  const [reason, setReason] = useState("");
 
   const formattedPrice = new Intl.NumberFormat("en-LK").format(ad.price);
 
@@ -68,15 +72,30 @@ export default function AdDetailView({
 
       {/* Scrollable content area */}
       <div className="flex-1 overflow-y-auto pr-[4px] md:pr-[12px] pb-[24px]">
-        {/* Title row */}
-        <div className="flex items-start justify-between gap-[8px]">
+        {/* Title row — title left, Accept button + date/time stacked right */}
+        <div className="flex items-start justify-between gap-[12px]">
           <h2
             className="text-[#000000] text-[18px] md:text-[22px] font-normal leading-[150%] flex-1 min-w-0"
             style={{ fontFamily: "Poppins, sans-serif" }}
           >
             {ad.title}
           </h2>
-          <div className="text-right shrink-0">
+
+          {/* Right column: Accept button on top, date & time below */}
+          <div className="flex flex-col items-end gap-[6px] shrink-0">
+            <button
+              onClick={() => onAccept(ad.id)}
+              className="h-[34px] px-[24px] rounded-full text-white text-[13px] md:text-[14px] font-semibold leading-[100%] tracking-wide cursor-pointer transition-all duration-200"
+              style={{
+                fontFamily: "Poppins, sans-serif",
+                background: "#148729",
+                boxShadow: "0 2px 8px rgba(20,135,41,0.30)",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#117523")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "#148729")}
+            >
+              Accept
+            </button>
             <p
               className="text-[#000000] text-[11px] md:text-[12px] font-normal leading-[150%]"
               style={{ fontFamily: "Poppins, sans-serif" }}
@@ -182,9 +201,13 @@ export default function AdDetailView({
         )}
       </div>
 
-      {/* Bottom action bar */}
-      <div className="bg-[#E9E9E9] mt-auto ml-[-16px] mr-[-16px] md:ml-[-28px] md:mr-[-16px] xl:mr-[-50px]">
-        <div className="flex items-center justify-between px-[16px] md:px-[28px] py-[12px] md:py-0 md:h-[105px] flex-wrap gap-[12px]">
+      {/* Bottom action bar — #E9E9E9, full-width flush to right edge */}
+      <div
+        className="bg-[#E9E9E9] mt-auto -mx-4 md:ml-[-28px] md:mr-[-40px] xl:mr-[-66px]"
+      >
+        <div
+          className="flex items-center justify-between flex-wrap gap-[12px] py-[16px] md:py-0 md:h-[90px] px-4 md:pl-[28px] md:pr-6 xl:pr-[50px]"
+        >
           {/* Seller info */}
           <div className="flex items-center gap-[10px] md:gap-[12px]">
             {/* Avatar */}
@@ -200,7 +223,7 @@ export default function AdDetailView({
                   {ad.seller.name}
                 </span>
                 {ad.seller.badge && (
-                  <span className="bg-[#E6CA56] text-[#000000] text-[9px] font-bold px-[6px] py-[1px] rounded-[5px]">
+                  <span className="bg-[#E6CA56] text-[#000000] text-[9px] font-bold px-[6px] py-[2px] rounded-[5px]">
                     {ad.seller.badge}
                   </span>
                 )}
@@ -214,25 +237,115 @@ export default function AdDetailView({
             </div>
           </div>
 
-          {/* Action buttons */}
-          <div className="flex items-center gap-[12px] md:gap-[20px]">
+          {/* Action buttons — Figma: Reject (dark red pill) + Request Changes (orange pill) */}
+          <div className="flex items-center gap-[12px] md:gap-[16px]">
+            {/* Reject button */}
             <button
-              onClick={() => onAccept(ad.id)}
-              className="w-[110px] md:w-[146px] h-[32px] md:h-[35px] bg-[#0A7211] rounded-full text-white text-[13px] md:text-[16px] font-normal leading-[150%] hover:bg-[#096310] transition-colors cursor-pointer"
-              style={{ fontFamily: "Poppins, sans-serif" }}
-            >
-              Accept
-            </button>
-            <button
-              onClick={() => onReject(ad.id)}
-              className="w-[110px] md:w-[146px] h-[32px] md:h-[35px] bg-[#ED1C24] rounded-full text-white text-[13px] md:text-[16px] font-normal leading-[150%] hover:bg-[#D41920] transition-colors cursor-pointer"
-              style={{ fontFamily: "Poppins, sans-serif" }}
+              onClick={() => setModalAction("reject")}
+              className="h-[40px] md:h-[44px] px-[28px] md:px-[36px] rounded-full text-white text-[13px] md:text-[15px] font-bold leading-[100%] tracking-wide transition-all duration-200 cursor-pointer"
+              style={{
+                fontFamily: "Poppins, sans-serif",
+                background: "#8B1A1A",
+                boxShadow: "0 2px 8px rgba(139,26,26,0.35)",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#7A1515")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "#8B1A1A")}
             >
               Reject
+            </button>
+
+            {/* Request Changes button */}
+            <button
+              onClick={() => setModalAction("requestChanges")}
+              className="h-[40px] md:h-[44px] px-[20px] md:px-[28px] rounded-full text-white text-[13px] md:text-[15px] font-bold leading-[100%] tracking-wide transition-all duration-200 cursor-pointer"
+              style={{
+                fontFamily: "Poppins, sans-serif",
+                background: "#C85A00",
+                boxShadow: "0 2px 8px rgba(200,90,0,0.35)",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#B55000")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "#C85A00")}
+            >
+              Request Changes
             </button>
           </div>
         </div>
       </div>
+
+      {/* Modal Overlay */}
+      {modalAction && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4">
+          <div 
+            className="bg-white w-full max-w-[600px] min-h-[360px] rounded-[16px] p-[24px] md:p-[32px] flex flex-col shadow-2xl relative"
+          >
+            {modalAction === "done" ? (
+              <div className="flex flex-col items-center justify-center flex-1 h-full py-[20px]">
+                {/* Close Icon */}
+                <button
+                  onClick={() => {
+                    setModalAction(null);
+                    setReason("");
+                    // In final implementation, call the actual API / parent handlers here
+                  }}
+                  className="absolute top-[24px] right-[24px] w-[28px] h-[28px] flex items-center justify-center rounded-full bg-[#6B6B6B] hover:bg-[#555555] transition-colors cursor-pointer"
+                >
+                  <svg width="10" height="10" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 1L13 13M1 13L13 1" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+
+                {/* Checkmark Icon */}
+                <div className="w-[130px] h-[130px] rounded-full bg-[#1174BB] flex items-center justify-center mb-[20px]">
+                  <svg width="55" height="40" viewBox="0 0 64 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 25L22 43L60 4" stroke="white" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+
+                {/* Text */}
+                <h2 
+                  className="text-[#000000] text-[32px] font-normal leading-[100%]"
+                  style={{ fontFamily: "Poppins, sans-serif" }}
+                >
+                  Done!
+                </h2>
+              </div>
+            ) : (
+              <>
+                <textarea
+                  className="flex-1 w-full bg-white border border-[#E0E0E0] rounded-[12px] p-[20px] text-[#000] text-[14px] md:text-[15px] outline-none resize-none focus:border-[#0F467F] transition-colors placeholder:text-[#9E9E9E]"
+                  placeholder="Type the reason here..."
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  style={{ fontFamily: "Poppins, sans-serif" }}
+                />
+                
+                <div className="flex items-center gap-[16px] md:gap-[20px] mt-[24px]">
+                  <button
+                    onClick={() => {
+                      setModalAction(null);
+                      setReason("");
+                    }}
+                    className="flex-1 h-[52px] bg-white border border-[#E0E0E0] rounded-[8px] text-[#000] font-medium text-[15px] md:text-[16px] transition-colors hover:bg-gray-50 cursor-pointer shadow-sm"
+                    style={{ fontFamily: "Poppins, sans-serif" }}
+                  >
+                    Go Back
+                  </button>
+                  <button
+                    onClick={() => {
+                      // Transition to Done modal
+                      setModalAction("done");
+                    }}
+                    className="flex-1 h-[52px] bg-[#0F467F] rounded-[8px] text-white font-medium text-[15px] md:text-[16px] transition-colors hover:bg-[#0c3966] cursor-pointer shadow-sm"
+                    style={{ fontFamily: "Poppins, sans-serif" }}
+                  >
+                    Submit
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
