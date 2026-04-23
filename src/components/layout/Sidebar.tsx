@@ -2,14 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks";
 import { getMenuForRole } from "@/config/menuConfig";
 import { useSidebar } from "@/context/SidebarContext";
 
 export default function Sidebar() {
-  const { user, role } = useAuth();
+  const { user, role, logout } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   const menuItems = role ? getMenuForRole(role) : [];
   const { isOpen, close } = useSidebar();
 
@@ -115,6 +116,24 @@ export default function Sidebar() {
               <path d="M1 1L7 7L1 13" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </Link>
+
+          {/* ── Logout button ── */}
+          <button
+            onClick={async () => {
+              await logout();
+              close();
+              router.push('/login');
+            }}
+            className="shrink-0 w-[44px] h-[44px] flex items-center justify-center rounded-[6px] transition-colors hover:bg-[#0E63A0]/50 group"
+            aria-label="Logout"
+            title="Logout"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white group-hover:text-red-400 transition-colors">
+              <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M16 17L21 12L16 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
 
         </div>
       </nav>
