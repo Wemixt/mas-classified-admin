@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 interface User {
   id: string;
@@ -10,15 +11,16 @@ interface User {
   registeredDate: string;
   role: "Seller" | "Moderator" | "Visitor";
   status: "Active" | "Blocked";
+  avatar: string;
 }
 
 const mockUsers: User[] = [
-  { id: "1", name: "Kasun Sampath", username: "kasuns", employeeId: "MAS 0236", registeredDate: "Today", role: "Seller", status: "Active" },
-  { id: "2", name: "Visal Lakshitha", username: "lakshithavisal", employeeId: "MAS 0356", registeredDate: "Yesterday", role: "Seller", status: "Active" },
-  { id: "3", name: "Dulaj samaraweera", username: "dulajj98", employeeId: "MAS 0120", registeredDate: "Feb 04, 2026", role: "Moderator", status: "Active" },
-  { id: "4", name: "Avishka Sandeepa", username: "avishka49", employeeId: "-", registeredDate: "Feb 04, 2026", role: "Visitor", status: "Active" },
-  { id: "5", name: "Sameera Viraj", username: "sameera", employeeId: "-", registeredDate: "Feb 04, 2026", role: "Visitor", status: "Active" },
-  { id: "6", name: "Anura Dissanayaka", username: "anuraj", employeeId: "MAS 0120", registeredDate: "Feb 04, 2026", role: "Seller", status: "Active" },
+  { id: "1", name: "Kasun Sampath", username: "kasuns", employeeId: "MAS 0236", registeredDate: "Today", role: "Seller", status: "Active", avatar: "/logos/mass logo.png" },
+  { id: "2", name: "Visal Lakshitha", username: "lakshithavisal", employeeId: "MAS 0356", registeredDate: "Yesterday", role: "Seller", status: "Active", avatar: "/logos/mass logo.png" },
+  { id: "3", name: "Dulaj samaraweera", username: "dulajj98", employeeId: "MAS 0120", registeredDate: "Feb 04, 2026", role: "Moderator", status: "Active", avatar: "/logos/mass logo.png" },
+  { id: "4", name: "Avishka Sandeepa", username: "avishka49", employeeId: "-", registeredDate: "Feb 04, 2026", role: "Visitor", status: "Active", avatar: "/logos/mass logo.png" },
+  { id: "5", name: "Sameera Viraj", username: "sameera", employeeId: "-", registeredDate: "Feb 04, 2026", role: "Visitor", status: "Active", avatar: "/logos/mass logo.png" },
+  { id: "6", name: "Anura Dissanayaka", username: "anuraj", employeeId: "MAS 0120", registeredDate: "Feb 04, 2026", role: "Seller", status: "Active", avatar: "/logos/mass logo.png" },
 ];
 
 type TabType = "All Users" | "Moderators" | "Sellers" | "Visitors";
@@ -28,6 +30,8 @@ export default function AllUsersContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [users] = useState<User[]>(mockUsers);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   const tabs: TabType[] = ["All Users", "Moderators", "Sellers", "Visitors"];
 
@@ -128,10 +132,21 @@ export default function AllUsersContent() {
               {filteredUsers.map((user) => (
                 <div
                   key={user.id}
-                  className="bg-[#F4F4F4] rounded-[8px] grid grid-cols-[2fr_1.2fr_1.2fr_1.2fr_1fr] items-center h-[52px] md:h-[57px]"
+                  onClick={() => setSelectedUser(user)}
+                  className="bg-[#F4F4F4] rounded-[8px] grid grid-cols-[2fr_1.2fr_1.2fr_1.2fr_1fr] items-center h-[52px] md:h-[57px] cursor-pointer hover:bg-[#EBEBEB] transition-colors"
                 >
                   <div className="px-[12px] md:px-[24px] flex items-center gap-[8px] md:gap-[14px]">
-                    <div className="w-[34px] h-[34px] md:w-[42px] md:h-[42px] rounded-full overflow-hidden shrink-0 bg-[#D9D9D9]" />
+                    <div className="w-[34px] h-[34px] md:w-[42px] md:h-[42px] rounded-full overflow-hidden shrink-0 bg-[#D9D9D9]">
+                      {user.avatar && (
+                        <Image
+                          src={user.avatar}
+                          alt={user.name}
+                          width={42}
+                          height={42}
+                          className="object-cover w-full h-full"
+                        />
+                      )}
+                    </div>
                     <div className="flex flex-col gap-[3px] md:gap-[4px] min-w-0">
                       <span className="text-[#000000] text-[12px] md:text-[15px] font-medium leading-[100%] truncate">{user.name}</span>
                       <span className="text-[#5E5E5E] text-[10px] md:text-[13px] font-normal leading-[100%] truncate">@{user.username}</span>
@@ -161,7 +176,7 @@ export default function AllUsersContent() {
 
                     {/* Dropdown Menu */}
                     {openDropdown === user.id && (
-                      <div className="absolute right-auto left-[12px] md:left-[16px] top-[100%] mt-[6px] w-[120px] md:w-[130px] bg-white border border-[#E0E0E0] rounded-[8px] shadow-sm z-50 flex flex-col p-[4px]">
+                      <div className="absolute right-auto left-[12px] md:left-[16px] top-[100%] mt-[6px] w-[120px] md:w-[130px] bg-white border border-[#E0E0E0] rounded-[8px] shadow-sm z-50 flex flex-col p-[4px]" onClick={(e) => e.stopPropagation()}>
                         <button className="flex items-center gap-[10px] w-full px-[12px] h-[34px] bg-[#1174BB] text-white rounded-[4px]">
                           <div className="w-[14px] h-[14px] bg-white rounded-full flex items-center justify-center shrink-0">
                             <svg width="10" height="10" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -217,6 +232,106 @@ export default function AllUsersContent() {
           </div>
         </div>
       </div>
+
+      {/* User Details Modal */}
+      {selectedUser && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4" onClick={(e) => e.stopPropagation()}>
+          <div 
+            className="bg-white w-full max-w-[600px] min-h-[360px] rounded-[16px] p-[32px] md:p-[40px] flex flex-col items-center justify-center shadow-2xl relative"
+          >
+            {/* Close Icon */}
+            <button
+              onClick={() => setSelectedUser(null)}
+              className="absolute top-[24px] right-[24px] w-[28px] h-[28px] flex items-center justify-center rounded-full bg-[#6B6B6B] hover:bg-[#555555] transition-colors cursor-pointer"
+            >
+              <svg width="10" height="10" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1L13 13M1 13L13 1" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+
+            {/* Avatar */}
+            <div className="w-[120px] h-[120px] rounded-full overflow-hidden bg-[#D9D9D9] mb-[20px]">
+              {selectedUser.avatar && (
+                <Image
+                  src={selectedUser.avatar}
+                  alt={selectedUser.name}
+                  width={120}
+                  height={120}
+                  className="object-cover w-full h-full"
+                />
+              )}
+            </div>
+
+            {/* Name */}
+            <h2 
+              className="text-[#000000] text-[26px] md:text-[30px] font-normal leading-[100%] mb-[12px]"
+              style={{ fontFamily: "Eurostile, sans-serif" }}
+            >
+              {selectedUser.name}
+            </h2>
+
+            {/* Verified Badge */}
+            <div className="flex items-center gap-[8px] mb-[32px]">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 1L14.59 3.59L18.25 3.5L18.75 7.15L22 9L20.5 12L22 15L18.75 16.85L18.25 20.5L14.59 20.41L12 23L9.41 20.41L5.75 20.5L5.25 16.85L2 15L3.5 12L2 9L5.25 7.15L5.75 3.5L9.41 3.59L12 1Z" fill="#0F792F"/>
+                <path d="M10 16.5L6 12.5L7.41 11.09L10 13.67L16.59 7.09L18 8.5L10 16.5Z" fill="white"/>
+              </svg>
+              <span 
+                className="text-[#000000] text-[15px] md:text-[16px] font-medium leading-[100%]"
+                style={{ fontFamily: "Poppins, sans-serif" }}
+              >
+                Verified {selectedUser.role}
+              </span>
+            </div>
+
+            {/* Contact User Button */}
+            <button
+              onClick={() => {
+                setIsContactModalOpen(true);
+                setSelectedUser(null);
+              }}
+              className="w-[200px] h-[48px] md:h-[52px] bg-[#1174BB] rounded-[8px] text-white font-medium text-[15px] md:text-[16px] transition-colors hover:bg-[#0E63A0] cursor-pointer shadow-sm"
+              style={{ fontFamily: "Poppins, sans-serif" }}
+            >
+              Contact {selectedUser.role}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Contact Modal */}
+      {isContactModalOpen && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 p-4" onClick={() => setIsContactModalOpen(false)}>
+          <div 
+            className="bg-[#F5F5F5] w-full max-w-[500px] rounded-[16px] p-[24px] md:p-[32px] flex flex-col shadow-2xl relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Text Area */}
+            <textarea
+              className="w-full h-[150px] md:h-[180px] rounded-[12px] bg-white border border-[#E0E0E0] p-[16px] text-[#000000] text-[14px] md:text-[15px] outline-none resize-none shadow-sm placeholder:text-[#8E8E8E]"
+              placeholder="Type here..."
+            />
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-[12px] md:gap-[16px] mt-[24px]">
+              <button
+                onClick={() => setIsContactModalOpen(false)}
+                className="flex-1 h-[48px] md:h-[52px] bg-white rounded-[8px] text-[#000000] font-medium text-[15px] md:text-[16px] border border-[#E0E0E0] transition-colors hover:bg-[#F9F9F9] shadow-sm"
+                style={{ fontFamily: "Poppins, sans-serif" }}
+              >
+                Go Back
+              </button>
+              <button
+                onClick={() => setIsContactModalOpen(false)}
+                className="flex-1 h-[48px] md:h-[52px] bg-[#1174BB] rounded-[8px] text-white font-medium text-[15px] md:text-[16px] transition-colors hover:bg-[#0E63A0] shadow-sm"
+                style={{ fontFamily: "Poppins, sans-serif" }}
+              >
+                Send
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

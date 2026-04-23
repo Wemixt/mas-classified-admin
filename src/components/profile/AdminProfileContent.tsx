@@ -27,6 +27,26 @@ export default function AdminProfileContent() {
   const { user, isLoading } = useAuth();
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [showDoneModal, setShowDoneModal] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [showPasswordDoneModal, setShowPasswordDoneModal] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const handleChangePassword = () => {
+    if (!currentPassword || !newPassword || !confirmPassword) return;
+    setShowChangePasswordModal(false);
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setShowCurrent(false);
+    setShowNew(false);
+    setShowConfirm(false);
+    setShowPasswordDoneModal(true);
+  };
 
   if (isLoading) {
     return <div className="p-8">Loading profile...</div>;
@@ -108,8 +128,11 @@ export default function AdminProfileContent() {
                 </svg>
                 Edit
               </button>
-              <button className="h-[40px] px-[20px] bg-white border border-[#333333] rounded-[8px] text-[14px] font-medium hover:bg-gray-50 transition-colors">
-                 Change Password
+              <button
+                onClick={() => setShowChangePasswordModal(true)}
+                className="h-[40px] px-[20px] bg-white border border-[#333333] rounded-[8px] text-[14px] font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                Change Password
               </button>
             </div>
           </div>
@@ -294,6 +317,206 @@ export default function AdminProfileContent() {
             </div>
 
             <h2 
+              className="text-[#000000] text-[28px] md:text-[32px] font-normal leading-[100%]"
+              style={{ fontFamily: "Eurostile, sans-serif" }}
+            >
+              Done!
+            </h2>
+          </div>
+        </div>
+      )}
+
+      {/* ── Change Password Modal ── */}
+      {showChangePasswordModal && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setShowChangePasswordModal(false)}
+        >
+          <div
+            className="bg-white w-full max-w-[495px] rounded-[16px] p-[32px] md:p-[40px] shadow-2xl relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setShowChangePasswordModal(false)}
+              className="absolute top-[20px] right-[20px] w-[28px] h-[28px] flex items-center justify-center rounded-full bg-[#6B6B6B] hover:bg-[#555555] transition-colors cursor-pointer"
+              aria-label="Close"
+            >
+              <svg width="10" height="10" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1L13 13M1 13L13 1" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+
+            {/* Title */}
+            <h2
+              className="text-[#000000] text-[22px] md:text-[24px] font-medium leading-[100%] mb-[16px]"
+              style={{ fontFamily: "Eurostile, sans-serif" }}
+            >
+              Change your password
+            </h2>
+
+            {/* Divider */}
+            <div className="border-t border-[#E0E0E0] mb-[24px]" />
+
+            {/* Fields */}
+            <div className="flex flex-col gap-[18px]">
+
+              {/* Current Password */}
+              <div className="flex flex-col gap-[8px]">
+                <label
+                  className="text-[#000000] text-[13px] md:text-[14px] font-bold leading-[100%]"
+                  style={{ fontFamily: "Eurostile, sans-serif" }}
+                >
+                  Current Password
+                </label>
+                <div className="flex items-center h-[48px] rounded-[8px] border border-[#D0D0D0] bg-white px-[14px] gap-[10px] focus-within:border-[#114A82] transition-colors">
+                  <input
+                    type={showCurrent ? "text" : "password"}
+                    placeholder="Enter your current password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="flex-1 bg-transparent text-[#1A1A1A] text-[13px] md:text-[14px] font-normal outline-none placeholder:text-[#C0C0C0]"
+                    style={{ fontFamily: "Eurostile, sans-serif" }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrent((v) => !v)}
+                    className="shrink-0 text-[#9A9A9A] hover:text-[#555] transition-colors cursor-pointer"
+                    aria-label="Toggle current password visibility"
+                  >
+                    {showCurrent ? (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                        <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                        <path d="M1 1l22 22" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                      </svg>
+                    ) : (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8"/>
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* New Password */}
+              <div className="flex flex-col gap-[8px]">
+                <label
+                  className="text-[#000000] text-[13px] md:text-[14px] font-bold leading-[100%]"
+                  style={{ fontFamily: "Eurostile, sans-serif" }}
+                >
+                  New Password
+                </label>
+                <div className="flex items-center h-[48px] rounded-[8px] border border-[#D0D0D0] bg-white px-[14px] gap-[10px] focus-within:border-[#114A82] transition-colors">
+                  <input
+                    type={showNew ? "text" : "password"}
+                    placeholder="Enter your new password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="flex-1 bg-transparent text-[#1A1A1A] text-[13px] md:text-[14px] font-normal outline-none placeholder:text-[#C0C0C0]"
+                    style={{ fontFamily: "Eurostile, sans-serif" }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNew((v) => !v)}
+                    className="shrink-0 text-[#9A9A9A] hover:text-[#555] transition-colors cursor-pointer"
+                    aria-label="Toggle new password visibility"
+                  >
+                    {showNew ? (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                        <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                        <path d="M1 1l22 22" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                      </svg>
+                    ) : (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8"/>
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Confirm New Password */}
+              <div className="flex flex-col gap-[8px]">
+                <label
+                  className="text-[#000000] text-[13px] md:text-[14px] font-bold leading-[100%]"
+                  style={{ fontFamily: "Eurostile, sans-serif" }}
+                >
+                  Confirm New Password
+                </label>
+                <div className="flex items-center h-[48px] rounded-[8px] border border-[#D0D0D0] bg-white px-[14px] gap-[10px] focus-within:border-[#114A82] transition-colors">
+                  <input
+                    type={showConfirm ? "text" : "password"}
+                    placeholder="Confirm your new password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="flex-1 bg-transparent text-[#1A1A1A] text-[13px] md:text-[14px] font-normal outline-none placeholder:text-[#C0C0C0]"
+                    style={{ fontFamily: "Eurostile, sans-serif" }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm((v) => !v)}
+                    className="shrink-0 text-[#9A9A9A] hover:text-[#555] transition-colors cursor-pointer"
+                    aria-label="Toggle confirm password visibility"
+                  >
+                    {showConfirm ? (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                        <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                        <path d="M1 1l22 22" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                      </svg>
+                    ) : (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8"/>
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Submit button */}
+            <button
+              onClick={handleChangePassword}
+              disabled={!currentPassword || !newPassword || !confirmPassword}
+              className="mt-[28px] w-full h-[52px] bg-[#114A82] hover:bg-[#0E3A66] disabled:opacity-50 disabled:cursor-not-allowed rounded-[10px] text-white text-[15px] md:text-[16px] font-bold leading-[100%] transition-colors cursor-pointer"
+              style={{ fontFamily: "Eurostile, sans-serif" }}
+            >
+              Change Password
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Change Password Done Modal ── */}
+      {showPasswordDoneModal && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setShowPasswordDoneModal(false)}
+        >
+          <div
+            className="bg-[#F4F5F7] w-full max-w-[400px] rounded-[16px] p-[40px] flex flex-col items-center justify-center shadow-2xl relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowPasswordDoneModal(false)}
+              className="absolute top-[16px] right-[16px] w-[28px] h-[28px] flex items-center justify-center rounded-full bg-[#6B6B6B] hover:bg-[#555555] transition-colors cursor-pointer"
+            >
+              <svg width="10" height="10" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1L13 13M1 13L13 1" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            <div className="mb-[24px]">
+              <svg width="100" height="100" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="60" cy="60" r="56" fill="#1174BB" />
+                <path d="M34 62L52 80L86 42" stroke="white" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <h2
               className="text-[#000000] text-[28px] md:text-[32px] font-normal leading-[100%]"
               style={{ fontFamily: "Eurostile, sans-serif" }}
             >

@@ -46,6 +46,7 @@ const sellers: Seller[] = [
 export default function SellersContent() {
   const [sellerList, setSellerList] = useState<Seller[]>(sellers);
   const [selectedSeller, setSelectedSeller] = useState<Seller | null>(null);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   const handleToggleStatus = (sellerId: string) => {
     setSellerList((prev) =>
@@ -76,31 +77,31 @@ export default function SellersContent() {
           {/* Table Header */}
           <div className="grid grid-cols-[1.4fr_1.6fr_1fr_0.8fr_0.8fr] bg-[#1174BB] h-[47px] items-center rounded-t-lg">
             <div
-              className="px-[16px] text-white text-[14px] md:text-[17px] font-normal leading-[100%] tracking-normal"
+              className="px-[16px] text-white text-[15px] xl:text-[17px] font-normal leading-[100%] tracking-normal"
               style={{ fontFamily: "Eurostile, sans-serif" }}
             >
               Name
             </div>
             <div
-              className="px-[16px] text-white text-[14px] md:text-[17px] font-normal leading-[100%] tracking-normal"
+              className="px-[16px] text-white text-[15px] xl:text-[17px] font-normal leading-[100%] tracking-normal"
               style={{ fontFamily: "Eurostile, sans-serif" }}
             >
               Email
             </div>
             <div
-              className="px-[20px] text-white text-[14px] md:text-[17px] font-normal leading-[100%] tracking-normal"
+              className="px-[20px] text-white text-[15px] xl:text-[17px] font-normal leading-[100%] tracking-normal"
               style={{ fontFamily: "Eurostile, sans-serif" }}
             >
               Phone
             </div>
             <div
-              className="px-[16px] md:px-[-2px] text-white text-[14px] md:text-[17px] font-normal leading-[100%] tracking-normal"
+              className="px-[16px] md:px-[-2px] text-white text-[15px] xl:text-[17px] font-normal leading-[100%] tracking-normal"
               style={{ fontFamily: "Eurostile, sans-serif" }}
             >
               Total Ads
             </div>
             <div
-              className="px-[16px] text-white text-[14px] md:text-[17px] font-normal leading-[100%] tracking-normal"
+              className="px-[16px] text-white text-[15px] xl:text-[17px] font-normal leading-[100%] tracking-normal"
               style={{ fontFamily: "Eurostile, sans-serif" }}
             >
               Status
@@ -112,48 +113,48 @@ export default function SellersContent() {
             {sellerList.map((seller, index) => (
               <div key={seller.id}>
                 <div 
-                  className="grid grid-cols-[1.4fr_1.6fr_1fr_0.8fr_0.8fr] items-center h-[58px] cursor-pointer hover:bg-gray-50 transition-colors"
+                  className="grid grid-cols-[1.4fr_1.6fr_1fr_0.8fr_0.8fr] items-center h-[72px] cursor-pointer hover:bg-gray-50 transition-colors"
                   onClick={() => setSelectedSeller(seller)}
                 >
                   {/* Name with Avatar */}
-                  <div className="px-[16px] flex items-center gap-[12px]">
-                    <div className="w-[30px] h-[30px] md:w-[38px] md:h-[38px] rounded-full overflow-hidden shrink-0 bg-[#D9D9D9]">
+                  <div className="px-[16px] flex items-center gap-[10px] xl:gap-[12px]">
+                    <div className="w-[44px] h-[44px] xl:w-[54px] xl:h-[54px] rounded-full overflow-hidden shrink-0 bg-[#D9D9D9]">
                       <Image
                         src={seller.avatar}
                         alt={seller.name}
-                        width={38}
-                        height={38}
+                        width={54}
+                        height={54}
                         className="object-cover w-full h-full"
                       />
                     </div>
-                    <span className="text-[#5E5E5E] text-[11px] md:text-[12px] font-normal leading-[100%] tracking-normal">
+                    <span className="text-[#000000] text-[13px] xl:text-[14px] font-semibold leading-[100%] tracking-normal truncate">
                       {seller.name}
                     </span>
                   </div>
 
                   {/* Email */}
-                  <div className="px-[16px] text-[#5E5E5E] text-[11px] md:text-[12px] font-normal leading-[100%] tracking-normal truncate">
+                  <div className="px-[16px] text-[#000000] text-[13px] xl:text-[16px] font-normal leading-[100%] tracking-normal opacity-80 truncate">
                     {seller.email}
                   </div>
 
                   {/* Phone */}
-                  <div className="px-[16px] text-[#5E5E5E] text-[11px] md:text-[12px] font-normal leading-[100%] tracking-normal">
+                  <div className="px-[16px] text-[#000000] text-[13px] xl:text-[16px] font-normal leading-[100%] tracking-normal opacity-80">
                     {seller.phone}
                   </div>
 
                   {/* Total Ads */}
-                  <div className="px-[16px] text-[#5E5E5E] text-[11px] md:text-[12px] font-normal leading-[100%] tracking-normal">
+                  <div className="px-[16px] text-[#000000] text-[13px] xl:text-[16px] font-normal leading-[100%] tracking-normal opacity-80">
                     {String(seller.totalAds).padStart(2, "0")}
                   </div>
 
                   {/* Status Toggle */}
-                  <div className="px-[16px] flex items-center gap-[8px]">
+                  <div className="px-[16px] flex items-center gap-[10px] xl:gap-[16px]">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleToggleStatus(seller.id);
                       }}
-                      className={`relative w-[28px] h-[16px] rounded-full transition-colors ${
+                      className={`relative w-[28px] h-[16px] rounded-full transition-colors shrink-0 ${
                         seller.active ? "bg-[#0F792F]" : "bg-[#CCCCCC]"
                       }`}
                     >
@@ -163,7 +164,7 @@ export default function SellersContent() {
                         }`}
                       />
                     </button>
-                    <span className="text-[#5E5E5E] text-[11px] md:text-[12px] font-normal leading-[100%] tracking-normal">
+                    <span className="text-[#000000] text-[13px] xl:text-[14px] font-normal leading-[100%] tracking-normal min-w-[36px]">
                       {seller.active ? "Active" : "Inactive"}
                     </span>
                   </div>
@@ -231,13 +232,48 @@ export default function SellersContent() {
             {/* Contact Seller Button */}
             <button
               onClick={() => {
-                // Placeholder - do nothing per user instructions
+                setIsContactModalOpen(true);
+                setSelectedSeller(null);
               }}
               className="w-[200px] h-[48px] md:h-[52px] bg-[#1174BB] rounded-[8px] text-white font-medium text-[15px] md:text-[16px] transition-colors hover:bg-[#0E63A0] cursor-pointer shadow-sm"
               style={{ fontFamily: "Poppins, sans-serif" }}
             >
               Contact Seller
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Contact Modal */}
+      {isContactModalOpen && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 p-4" onClick={() => setIsContactModalOpen(false)}>
+          <div 
+            className="bg-[#F5F5F5] w-full max-w-[500px] rounded-[16px] p-[24px] md:p-[32px] flex flex-col shadow-2xl relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Text Area */}
+            <textarea
+              className="w-full h-[150px] md:h-[180px] rounded-[12px] bg-white border border-[#E0E0E0] p-[16px] text-[#000000] text-[14px] md:text-[15px] outline-none resize-none shadow-sm placeholder:text-[#8E8E8E]"
+              placeholder="Type here..."
+            />
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-[12px] md:gap-[16px] mt-[24px]">
+              <button
+                onClick={() => setIsContactModalOpen(false)}
+                className="flex-1 h-[48px] md:h-[52px] bg-white rounded-[8px] text-[#000000] font-medium text-[15px] md:text-[16px] border border-[#E0E0E0] transition-colors hover:bg-[#F9F9F9] shadow-sm"
+                style={{ fontFamily: "Poppins, sans-serif" }}
+              >
+                Go Back
+              </button>
+              <button
+                onClick={() => setIsContactModalOpen(false)}
+                className="flex-1 h-[48px] md:h-[52px] bg-[#1174BB] rounded-[8px] text-white font-medium text-[15px] md:text-[16px] transition-colors hover:bg-[#0E63A0] shadow-sm"
+                style={{ fontFamily: "Poppins, sans-serif" }}
+              >
+                Send
+              </button>
+            </div>
           </div>
         </div>
       )}

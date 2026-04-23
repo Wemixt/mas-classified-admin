@@ -79,6 +79,7 @@ export default function ModeratorsContent() {
 
   const [moderatorList, setModeratorList] = useState<Moderator[]>(moderators);
   const [selectedModerator, setSelectedModerator] = useState<Moderator | null>(null);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [createdData, setCreatedData] = useState({ name: "", role: "" });
@@ -487,13 +488,48 @@ export default function ModeratorsContent() {
             {/* Contact Moderator Button */}
             <button
               onClick={() => {
-                // Placeholder - do nothing
+                setIsContactModalOpen(true);
+                setSelectedModerator(null);
               }}
               className="w-[200px] h-[48px] md:h-[52px] bg-[#1174BB] rounded-[8px] text-white font-medium text-[15px] md:text-[16px] transition-colors hover:bg-[#0E63A0] cursor-pointer shadow-sm"
               style={{ fontFamily: "Poppins, sans-serif" }}
             >
               Contact Moderator
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Contact Modal */}
+      {isContactModalOpen && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 p-4" onClick={() => setIsContactModalOpen(false)}>
+          <div 
+            className="bg-[#F5F5F5] w-full max-w-[500px] rounded-[16px] p-[24px] md:p-[32px] flex flex-col shadow-2xl relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Text Area */}
+            <textarea
+              className="w-full h-[150px] md:h-[180px] rounded-[12px] bg-white border border-[#E0E0E0] p-[16px] text-[#000000] text-[14px] md:text-[15px] outline-none resize-none shadow-sm placeholder:text-[#8E8E8E]"
+              placeholder="Type here..."
+            />
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-[12px] md:gap-[16px] mt-[24px]">
+              <button
+                onClick={() => setIsContactModalOpen(false)}
+                className="flex-1 h-[48px] md:h-[52px] bg-white rounded-[8px] text-[#000000] font-medium text-[15px] md:text-[16px] border border-[#E0E0E0] transition-colors hover:bg-[#F9F9F9] shadow-sm"
+                style={{ fontFamily: "Poppins, sans-serif" }}
+              >
+                Go Back
+              </button>
+              <button
+                onClick={() => setIsContactModalOpen(false)}
+                className="flex-1 h-[48px] md:h-[52px] bg-[#1174BB] rounded-[8px] text-white font-medium text-[15px] md:text-[16px] transition-colors hover:bg-[#0E63A0] shadow-sm"
+                style={{ fontFamily: "Poppins, sans-serif" }}
+              >
+                Send
+              </button>
+            </div>
           </div>
         </div>
       )}
