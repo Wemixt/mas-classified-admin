@@ -6,12 +6,11 @@ export const menuItems: MenuItem[] = [
   { label: "Published Ads", path: "/published-ads", roles: ["admin", "moderator", "super_admin"] },
   { label: "Rejected Ads",  path: "/rejected-ads", roles: ["admin", "moderator", "super_admin"] },
   { label: "Sellers",       path: "/sellers",      roles: ["admin", "moderator", "super_admin"] },
-  { label: "Reports",       path: "/reports",      roles: ["moderator"] },
   { label: "Moderators",    path: "/moderators",   roles: ["admin", "super_admin"] },
   { label: "Categories",    path: "/categories",   roles: ["admin", "moderator", "super_admin"] },
   { label: "All Users",     path: "/all-users",    roles: ["admin", "super_admin"] },
   { label: "Messages",      path: "/messages",     roles: ["admin", "moderator", "super_admin"] },
-  { label: "All Ads",       path: "/all-ads",      roles: ["admin", "super_admin"] },
+  { label: "All Ads",       path: "/all-ads",      roles: ["admin", "moderator", "super_admin"] },
 ];
 
 export function getMenuForRole(role: UserRole): MenuItem[] {

@@ -1,11 +1,6 @@
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import AdminProfileContent from "@/components/profile/AdminProfileContent";
+import { redirect } from "next/navigation";
 
 export default function ProfilePage() {
-  return (
-    <DashboardLayout>
-      <AdminProfileContent />
-    </DashboardLayout>
-  );
+  redirect("/settings");
 }
 
