@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 
 /**
  * MasLoginButton Component
@@ -36,15 +37,17 @@ const MasLoginButton: React.FC = () => {
   return (
     <button
       onClick={handleMasLogin}
-      className="flex w-full items-center justify-center gap-3 rounded-md bg-white px-3 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:ring-transparent transition-all"
+      className="group flex w-full cursor-pointer items-center justify-center gap-4 rounded-xl bg-white px-6 py-4 text-lg font-bold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 hover:shadow-md transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#164b85]"
       type="button"
     >
-      <img 
-        src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Amazon_Lambda_logo.svg" 
+      <Image 
+        src="/logos/mass logo.png" 
         alt="MAS Logo" 
-        className="h-5 w-5"
+        width={55} 
+        height={24} 
+        className="object-contain"
       />
-      Login with MAS
+      <span>Continue with MAS</span>
     </button>
   );
 };
