@@ -1,37 +1,70 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
+import { userService as adminUserService } from "@/services/admin/user.service";
 
 interface User {
   id: string;
+  uuid: string;
   name: string;
   username: string;
   employeeId: string;
   registeredDate: string;
-  role: "Seller" | "Moderator" | "Visitor";
+  role: string;
   status: "Active" | "Blocked";
   avatar: string;
 }
 
-const mockUsers: User[] = [
-  { id: "1", name: "Kasun Sampath", username: "kasuns", employeeId: "MAS 0236", registeredDate: "Today", role: "Seller", status: "Active", avatar: "/logos/mass logo.png" },
-  { id: "2", name: "Visal Lakshitha", username: "lakshithavisal", employeeId: "MAS 0356", registeredDate: "Yesterday", role: "Seller", status: "Active", avatar: "/logos/mass logo.png" },
-  { id: "3", name: "Dulaj samaraweera", username: "dulajj98", employeeId: "MAS 0120", registeredDate: "Feb 04, 2026", role: "Moderator", status: "Active", avatar: "/logos/mass logo.png" },
-  { id: "4", name: "Avishka Sandeepa", username: "avishka49", employeeId: "-", registeredDate: "Feb 04, 2026", role: "Visitor", status: "Active", avatar: "/logos/mass logo.png" },
-  { id: "5", name: "Sameera Viraj", username: "sameera", employeeId: "-", registeredDate: "Feb 04, 2026", role: "Visitor", status: "Active", avatar: "/logos/mass logo.png" },
-  { id: "6", name: "Anura Dissanayaka", username: "anuraj", employeeId: "MAS 0120", registeredDate: "Feb 04, 2026", role: "Seller", status: "Active", avatar: "/logos/mass logo.png" },
-];
 
 type TabType = "All Users" | "Moderators" | "Sellers" | "Visitors";
 
 export default function AllUsersContent() {
   const [activeTab, setActiveTab] = useState<TabType>("All Users");
   const [searchQuery, setSearchQuery] = useState("");
-  const [users] = useState<User[]>(mockUsers);
+  const [userList, setUserList] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      let roleParam: any = undefined;
+      if (activeTab === "Moderators") roleParam = "MODERATOR";
+      else if (activeTab === "Sellers") roleParam = "USER";
+      else if (activeTab === "Visitors") roleParam = "GUEST";
+
+      const response = await adminUserService.getAdminUsers(roleParam);
+      if (response.success && response.data) {
+        const mappedUsers: User[] = response.data.data.map((u: any) => ({
+          id: u.id,
+          uuid: u.uuid,
+          name: u.fullName || "Unknown",
+          username: u.email?.split("@")[0] || "unknown",
+          employeeId: u.employeeId || "N/A",
+          registeredDate: new Date(u.createdAt).toLocaleDateString(),
+          role: u.role === "MODERATOR" ? "Moderator" : u.role === "USER" ? "Seller" : "Visitor",
+          status: u.status === "ACTIVE" ? "Active" : "Blocked",
+          avatar: u.profileImage || "/logos/mass logo.png",
+        }));
+        setUserList(mappedUsers);
+      }
+    } catch (err) {
+      console.error("Failed to fetch users", err);
+      setError("Failed to fetch users");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, [activeTab]);
 
   const tabs: TabType[] = ["All Users", "Moderators", "Sellers", "Visitors"];
 
@@ -44,19 +77,31 @@ export default function AllUsersContent() {
     if (openDropdown) setOpenDropdown(null);
   };
 
-  const filteredUsers = users.filter((user) => {
-    const matchesTab =
-      activeTab === "All Users" ||
-      (activeTab === "Moderators" && user.role === "Moderator") ||
-      (activeTab === "Sellers" && user.role === "Seller") ||
-      (activeTab === "Visitors" && user.role === "Visitor");
+  const handleUpdateStatus = async (userId: string, newStatus: "ACTIVE" | "SUSPENDED") => {
+    try {
+      await adminUserService.updateUserStatus(userId, newStatus);
+      // Update local state
+      setUserList((prev) =>
+        prev.map((user) =>
+          user.id === userId
+            ? { ...user, status: newStatus === "ACTIVE" ? "Active" : "Blocked" }
+            : user
+        )
+      );
+      setOpenDropdown(null);
+    } catch (err) {
+      console.error("Failed to update user status", err);
+      alert("Failed to update user status");
+    }
+  };
 
+  const filteredUsers = userList.filter((user) => {
     const matchesSearch =
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.employeeId.toLowerCase().includes(searchQuery.toLowerCase());
 
-    return matchesTab && matchesSearch;
+    return matchesSearch;
   });
 
   return (
@@ -129,7 +174,14 @@ export default function AllUsersContent() {
 
             {/* Table Body */}
             <div className="flex flex-col gap-[8px] md:gap-[12px] mt-[8px] md:mt-[12px]">
-              {filteredUsers.map((user) => (
+              {loading ? (
+                <div className="py-[32px] text-center text-[#5E5E5E]">Loading users...</div>
+              ) : error ? (
+                <div className="py-[32px] text-center text-red-500">{error}</div>
+              ) : filteredUsers.length === 0 ? (
+                <div className="py-[32px] text-center text-[#5E5E5E]">No users found.</div>
+              ) : (
+                filteredUsers.map((user) => (
                 <div
                   key={user.id}
                   onClick={() => setSelectedUser(user)}
@@ -177,18 +229,24 @@ export default function AllUsersContent() {
                     {/* Dropdown Menu */}
                     {openDropdown === user.id && (
                       <div className="absolute right-auto left-[12px] md:left-[16px] top-[100%] mt-[6px] w-[120px] md:w-[130px] bg-white border border-[#E0E0E0] rounded-[8px] shadow-sm z-50 flex flex-col p-[4px]" onClick={(e) => e.stopPropagation()}>
-                        <button className="flex items-center gap-[10px] w-full px-[12px] h-[34px] bg-[#1174BB] text-white rounded-[4px]">
-                          <div className="w-[14px] h-[14px] bg-white rounded-full flex items-center justify-center shrink-0">
+                        <button 
+                          onClick={() => handleUpdateStatus(user.id, "ACTIVE")}
+                          className={`flex items-center gap-[10px] w-full px-[12px] h-[34px] rounded-[4px] transition-colors ${user.status === "Active" ? "bg-[#1174BB] text-white" : "hover:bg-[#F5F5F5] text-[#222222]"}`}
+                        >
+                          <div className={`w-[14px] h-[14px] rounded-full flex items-center justify-center shrink-0 ${user.status === "Active" ? "bg-white" : "bg-[#0F792F]"}`}>
                             <svg width="10" height="10" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M2.5 6.5L4.5 8.5L9.5 3.5" stroke="#1174BB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                              <path d="M2.5 6.5L4.5 8.5L9.5 3.5" stroke={user.status === "Active" ? "#1174BB" : "white"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           </div>
                           <span className="text-[13px] font-medium">Active</span>
                         </button>
-                        <button className="flex items-center gap-[10px] w-full px-[12px] h-[34px] hover:bg-[#F5F5F5] text-[#222222] rounded-[4px] transition-colors mt-[2px]">
-                          <div className="w-[14px] h-[14px] bg-[#D32F2F] rounded-full flex items-center justify-center shrink-0">
+                        <button 
+                          onClick={() => handleUpdateStatus(user.id, "SUSPENDED")}
+                          className={`flex items-center gap-[10px] w-full px-[12px] h-[34px] rounded-[4px] transition-colors mt-[2px] ${user.status === "Blocked" ? "bg-[#D32F2F] text-white" : "hover:bg-[#F5F5F5] text-[#222222]"}`}
+                        >
+                          <div className={`w-[14px] h-[14px] rounded-full flex items-center justify-center shrink-0 ${user.status === "Blocked" ? "bg-white" : "bg-[#D32F2F]"}`}>
                             <svg width="6" height="6" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M1 1L9 9M9 1L1 9" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                              <path d="M1 1L9 9M9 1L1 9" stroke={user.status === "Blocked" ? "#D32F2F" : "white"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           </div>
                           <span className="text-[13px] font-medium">Block</span>
@@ -197,11 +255,7 @@ export default function AllUsersContent() {
                     )}
                   </div>
                 </div>
-              ))}
-              {filteredUsers.length === 0 && (
-                <div className="py-[32px] text-center text-[#5E5E5E] text-[14px] md:text-[15px]">
-                  No users found.
-                </div>
+                ))
               )}
             </div>
           </div>
