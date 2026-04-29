@@ -72,10 +72,15 @@ export default function ModeratorsContent() {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
+    password: "",
+    confirmPassword: "",
     employeeId: "",
-    role: "Content Moderator",
-    tempPassword: "",
+    address: "",
+    nic: "",
+    phoneNo: "",
+    role: "MODERATOR",
   });
+  const [formErrors, setFormErrors] = useState<string[]>([]);
 
   const handleToggleStatus = async (moderatorId: string, currentStatus: boolean) => {
     try {
@@ -99,7 +104,18 @@ export default function ModeratorsContent() {
 
   const handleCloseForm = () => {
     setShowForm(false);
-    setFormData({ fullName: "", email: "", employeeId: "", role: "Content Moderator", tempPassword: "" });
+    setFormData({
+      fullName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      employeeId: "",
+      address: "",
+      nic: "",
+      phoneNo: "",
+      role: "MODERATOR",
+    });
+    setFormErrors([]);
   };
 
   const handleCloseSuccess = () => {
@@ -107,12 +123,48 @@ export default function ModeratorsContent() {
     setCreatedData({ name: "", role: "" });
   };
 
-  const handleCreateAccount = () => {
-    console.log("Create moderator:", formData);
-    setCreatedData({ name: formData.fullName, role: formData.role });
-    setShowForm(false);
-    setShowSuccess(true);
-    setFormData({ fullName: "", email: "", employeeId: "", role: "Content Moderator", tempPassword: "" });
+  const handleCreateAccount = async () => {
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    try {
+      setFormErrors([]);
+      const response = await userService.registerStaff(formData);
+      if (response.success) {
+        setCreatedData({ name: formData.fullName, role: formData.role });
+        setShowForm(false);
+        setShowSuccess(true);
+        setFormData({
+          fullName: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+          employeeId: "",
+          address: "",
+          nic: "",
+          phoneNo: "",
+          role: "MODERATOR",
+        });
+        setFormErrors([]);
+        // Refresh list
+        fetchModerators();
+      }
+    } catch (err: any) {
+      console.error("Failed to register staff", err);
+      const errorData = err.response?.data;
+      
+      if (errorData?.error?.details && Array.isArray(errorData.error.details)) {
+        setFormErrors(errorData.error.details);
+      } else if (Array.isArray(errorData?.message)) {
+        setFormErrors(errorData.message);
+      } else if (errorData?.message) {
+        setFormErrors([errorData.message]);
+      } else {
+        setFormErrors(["An unexpected error occurred. Please try again."]);
+      }
+    }
   };
 
   const handleViewProfile = (moderatorId: string) => {
@@ -129,81 +181,73 @@ export default function ModeratorsContent() {
           onClick={handleCloseForm}
         >
           <div
-            className="bg-white rounded-[16px] w-full max-w-[460px] p-[24px] md:p-[32px] shadow-xl relative"
+            className="bg-white rounded-[16px] w-full max-w-[500px] shadow-xl relative flex flex-col max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={handleCloseForm}
-              className="absolute top-[16px] right-[16px] w-[28px] h-[28px] rounded-full bg-[#E0E0E0] flex items-center justify-center hover:bg-[#D0D0D0] transition-colors"
+              className="absolute top-[16px] right-[16px] z-10 w-[28px] h-[28px] rounded-full bg-[#E0E0E0] flex items-center justify-center hover:bg-[#D0D0D0] transition-colors"
             >
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M1 1L11 11M11 1L1 11" stroke="#555555" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </button>
 
-            <h2
-              className="text-[#2D2D2D] text-[18px] md:text-[22px] font-normal leading-[100%] tracking-normal mb-[24px] md:mb-[28px] pr-[32px]"
-              style={{ fontFamily: "Eurostile, sans-serif" }}
-            >
-              Create Moderator Form
-            </h2>
+            <div className="p-[24px] md:p-[32px] overflow-y-auto custom-scrollbar">
+              <h2
+                className="text-[#2D2D2D] text-[18px] md:text-[22px] font-normal leading-[100%] tracking-normal mb-[24px] md:mb-[28px] pr-[32px]"
+                style={{ fontFamily: "Eurostile, sans-serif" }}
+              >
+                Create Moderator Form
+              </h2>
 
-            <div className="flex flex-col gap-[16px] md:gap-[20px]">
-              {[
-                { label: "Full Name", key: "fullName", type: "text", placeholder: "Enter your full name" },
-                { label: "Email Address", key: "email", type: "email", placeholder: "Enter your email address" },
-                { label: "Employee ID", key: "employeeId", type: "text", placeholder: "Enter employee ID" },
-              ].map(({ label, key, type, placeholder }) => (
-                <div key={key} className="flex flex-col gap-[6px] md:gap-[8px]">
-                  <label className="text-[#000000] text-[13px] md:text-[14px] font-semibold leading-[100%] tracking-normal">
-                    {label}
-                  </label>
-                  <input
-                    type={type}
-                    placeholder={placeholder}
-                    value={formData[key as keyof typeof formData]}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, [key]: e.target.value }))}
-                    className="h-[42px] md:h-[44px] px-[14px] md:px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal placeholder:text-[#A0A0A0] outline-none focus:border-[#1174BB] transition-colors"
-                  />
+              {formErrors.length > 0 && (
+                <div className="mb-[20px] p-[12px] bg-red-50 border border-red-200 rounded-[8px]">
+                  <ul className="list-disc list-inside">
+                    {formErrors.map((error, idx) => (
+                      <li key={idx} className="text-red-600 text-[13px] font-medium">
+                        {error}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              ))}
+              )}
 
-              {/* Role */}
-              <div className="flex flex-col gap-[6px] md:gap-[8px]">
-                <label className="text-[#000000] text-[13px] md:text-[14px] font-semibold leading-[100%] tracking-normal">
-                  Role
-                </label>
-                <select
-                  value={formData.role}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, role: e.target.value }))}
-                  className="h-[42px] md:h-[44px] px-[14px] md:px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal outline-none focus:border-[#1174BB] transition-colors bg-white appearance-none"
-                >
-                  <option value="Content Moderator">Content Moderator</option>
-                  <option value="Senior Moderator">Senior Moderator</option>
-                </select>
+              <div className="flex flex-col gap-[16px] md:gap-[20px]">
+                {[
+                  { label: "Full Name", key: "fullName", type: "text", placeholder: "Enter your full name" },
+                  { label: "Email Address", key: "email", type: "email", placeholder: "Enter your email address" },
+                  { label: "Employee ID", key: "employeeId", type: "text", placeholder: "Enter employee ID" },
+                  { label: "Address", key: "address", type: "text", placeholder: "Enter address" },
+                  { label: "NIC", key: "nic", type: "text", placeholder: "Enter NIC number" },
+                  { label: "Phone Number", key: "phoneNo", type: "text", placeholder: "Enter phone number" },
+                  { label: "Password", key: "password", type: "password", placeholder: "Enter password" },
+                  { label: "Confirm Password", key: "confirmPassword", type: "password", placeholder: "Confirm password" },
+                ].map(({ label, key, type, placeholder }) => (
+                  <div key={key} className="flex flex-col gap-[6px] md:gap-[8px]">
+                    <label className="text-[#000000] text-[13px] md:text-[14px] font-semibold leading-[100%] tracking-normal">
+                      {label}
+                    </label>
+                    <input
+                      type={type}
+                      placeholder={placeholder}
+                      value={formData[key as keyof typeof formData]}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, [key]: e.target.value }))}
+                      className="h-[42px] md:h-[44px] px-[14px] md:px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal placeholder:text-[#A0A0A0] outline-none focus:border-[#1174BB] transition-colors"
+                    />
+                  </div>
+                ))}
+
+                {/* Role hidden - always MODERATOR */}
               </div>
 
-              {/* Temp Password */}
-              <div className="flex flex-col gap-[6px] md:gap-[8px]">
-                <label className="text-[#000000] text-[13px] md:text-[14px] font-semibold leading-[100%] tracking-normal">
-                  Temp Password
-                </label>
-                <input
-                  type="text"
-                  placeholder="TempPass@2026"
-                  value={formData.tempPassword}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, tempPassword: e.target.value }))}
-                  className="h-[42px] md:h-[44px] px-[14px] md:px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal placeholder:text-[#A0A0A0] outline-none focus:border-[#1174BB] transition-colors"
-                />
-              </div>
+              <button
+                onClick={handleCreateAccount}
+                className="w-full h-[44px] md:h-[48px] mt-[24px] md:mt-[28px] bg-[#1174BB] rounded-[8px] text-white text-[15px] md:text-[16px] font-semibold leading-[100%] tracking-normal hover:bg-[#0E63A0] transition-colors"
+              >
+                Create Account
+              </button>
             </div>
-
-            <button
-              onClick={handleCreateAccount}
-              className="w-full h-[44px] md:h-[48px] mt-[24px] md:mt-[28px] bg-[#1174BB] rounded-[8px] text-white text-[15px] md:text-[16px] font-semibold leading-[100%] tracking-normal hover:bg-[#0E63A0] transition-colors"
-            >
-              Create Account
-            </button>
           </div>
         </div>
       )}

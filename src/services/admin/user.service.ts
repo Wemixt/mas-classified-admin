@@ -9,4 +9,8 @@ export const userService = {
     const response = await userApi.updateUserStatus(id, status);
     return response.data;
   },
+  registerStaff: async (data: any) => {
+    const response = await userApi.registerStaff(data);
+    return response.data;
+  },
 };

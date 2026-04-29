@@ -7,4 +7,6 @@ export const userApi = {
     }),
   updateUserStatus: (id: string, status: string) => 
     apiClient.put(`/api/v1/users/admin/status/update/${id}`, { status }),
+  registerStaff: (data: any) => 
+    apiClient.post(`/api/v1/auth/register/staff`, data),
 };
