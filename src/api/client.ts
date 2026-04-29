@@ -56,7 +56,12 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config;
     
     // Handle specific status codes (e.g., 401 Unauthorized)
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Don't retry for login/logout/refresh endpoints to avoid infinite loops
+    const isAuthEndpoint = originalRequest.url?.includes('/auth/login') || 
+                          originalRequest.url?.includes('/auth/logout') || 
+                          originalRequest.url?.includes('/auth/refresh');
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       if (isRefreshing) {
         return new Promise(function(resolve, reject) {
           failedQueue.push({ resolve, reject });

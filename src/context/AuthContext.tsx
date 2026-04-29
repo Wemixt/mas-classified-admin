@@ -125,16 +125,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
+    // Clear local state immediately to prevent UI flickering or recursion issues
+    document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    document.cookie = "refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    setUser(null);
+    setRole(null);
+    setIsAuthenticated(false);
+
     try {
+      // Attempt to notify backend, but don't block on it if it fails
       await authService.logout();
     } catch (error) {
-      console.error("Logout API failed", error);
-    } finally {
-      document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-      document.cookie = "refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-      setUser(null);
-      setRole(null);
-      setIsAuthenticated(false);
+      // If logout fails (e.g. 401 already), we don't care much since local state is cleared
+      console.warn("Logout API notification failed (likely already unauthorized)", error);
     }
   };
 
