@@ -23,12 +23,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const normalizeRole = (role: string): UserRole => {
+  const normalizeRole = (role: string): UserRole | null => {
     const lowerRole = role.toLowerCase();
     if (lowerRole === "admin" || lowerRole === "moderator" || lowerRole === "super_admin" || lowerRole === "superadmin") {
       return (lowerRole === "superadmin" ? "super_admin" : lowerRole) as UserRole;
     }
-    return "moderator"; // Default fallback
+    return null;
   };
 
   const fetchUserDetails = async () => {
@@ -36,9 +36,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await authService.getDetails();
       if (response && response.success && response.data?.user) {
         const userData = response.data.user;
-        setUser(userData);
-        setRole(normalizeRole(userData.role));
-        setIsAuthenticated(true);
+        const normalized = normalizeRole(userData.role);
+        
+        if (normalized) {
+          setUser(userData);
+          setRole(normalized);
+          setIsAuthenticated(true);
+        } else {
+          // If role is not allowed in admin panel, logout
+          console.warn("Unauthorized role attempted to access admin panel:", userData.role);
+          logout();
+        }
       } else {
         setIsAuthenticated(false);
         setUser(null);
@@ -90,10 +98,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const detailsResponse = await authService.getDetails(accessToken);
         if (detailsResponse && detailsResponse.success && detailsResponse.data?.user) {
           const userData = detailsResponse.data.user;
-          setUser(userData);
-          setRole(normalizeRole(userData.role));
-          setIsAuthenticated(true);
-          return { success: true, user: userData };
+          const normalized = normalizeRole(userData.role);
+          
+          if (normalized) {
+            setUser(userData);
+            setRole(normalized);
+            setIsAuthenticated(true);
+            return { success: true, user: userData };
+          } else {
+            // Unauthorized role
+            await logout(); // Clear cookies
+            return { success: false, message: "You do not have permission to access the admin portal." };
+          }
         }
         
         return { success: false, message: "Failed to retrieve profile details" };
