@@ -6,4 +6,12 @@ export const adService = {
     const response = await adApi.adminList(status, page, limit);
     return response.data;
   },
+  updateAdStatus: async (id: string, status: AdStatus, rejectionReason?: string) => {
+    const response = await adApi.updateAdStatus(id, status, rejectionReason);
+    return response.data;
+  },
+  getAdById: async (id: string) => {
+    const response = await adApi.getAd(id);
+    return response.data;
+  },
 };

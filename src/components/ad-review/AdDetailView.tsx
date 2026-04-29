@@ -28,8 +28,8 @@ interface AdDetailViewProps {
   ad: AdDetail;
   onBack: () => void;
   onAccept: (adId: string) => void;
-  onReject: (adId: string) => void;
-  onRequestChanges?: (adId: string) => void;
+  onReject: (adId: string, reason: string) => void;
+  onRequestChanges?: (adId: string, reason: string) => void;
 }
 
 export default function AdDetailView({
@@ -212,7 +212,7 @@ export default function AdDetailView({
           <div className="flex items-center gap-[10px] md:gap-[12px]">
             {/* Avatar */}
             <div className="w-[40px] h-[40px] md:w-[52px] md:h-[52px] rounded-full bg-[#D2D2D2] shrink-0 flex items-center justify-center text-[#5E5E5E] text-[15px] md:text-[18px] font-bold">
-              {ad.seller.name.charAt(0)}
+              {ad.seller.name?.charAt(0) || "U"}
             </div>
             <div>
               <div className="flex items-center gap-[6px]">
@@ -332,10 +332,15 @@ export default function AdDetailView({
                   </button>
                   <button
                     onClick={() => {
-                      // Transition to Done modal
+                      if (modalAction === "reject") {
+                        onReject(ad.id, reason);
+                      } else if (modalAction === "requestChanges" && onRequestChanges) {
+                        onRequestChanges(ad.id, reason);
+                      }
                       setModalAction("done");
                     }}
-                    className="flex-1 h-[52px] bg-[#0F467F] rounded-[8px] text-white font-medium text-[15px] md:text-[16px] transition-colors hover:bg-[#0c3966] cursor-pointer shadow-sm"
+                    disabled={!reason.trim()}
+                    className="flex-1 h-[52px] bg-[#0F467F] rounded-[8px] text-white font-medium text-[15px] md:text-[16px] transition-colors hover:bg-[#0c3966] cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{ fontFamily: "Poppins, sans-serif" }}
                   >
                     Submit

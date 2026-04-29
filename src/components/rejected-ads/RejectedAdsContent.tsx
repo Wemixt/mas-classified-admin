@@ -13,6 +13,8 @@ export default function RejectedAdsContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewingAdId, setViewingAdId] = useState<string | null>(null);
+  const [selectedAd, setSelectedAd] = useState<RejectedAdDetail | null>(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
   const [messageModalState, setMessageModalState] = useState<{ adId: string; step: "compose" | "done" } | null>(null);
   const [messageText, setMessageText] = useState("");
   const [deleteModalState, setDeleteModalState] = useState<{ adId: string; step: "confirm" | "done" } | null>(null);
@@ -35,8 +37,21 @@ export default function RejectedAdsContent() {
     fetchAds();
   }, []);
 
-  const handleReconsider = (adId: string) => {
-    console.log(`Reconsider ad ${adId}`);
+  const handleReconsider = async (adId: string) => {
+    const ad = ads.find(a => a.id === adId);
+    if (!ad) return;
+
+    try {
+      setLoading(true);
+      await adService.updateAdStatus(ad.uuid, "PENDING_REVIEW");
+      setViewingAdId(null);
+      await fetchAds();
+    } catch (err) {
+      setError("Failed to reconsider ad");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDeletePermanently = (adId: string) => {
@@ -47,30 +62,50 @@ export default function RejectedAdsContent() {
     setMessageModalState({ adId, step: "compose" });
   };
 
-  const handleViewAd = (adId: string) => {
-    setViewingAdId(adId);
+  const handleViewAd = async (adId: string) => {
+    const ad = ads.find(a => a.id === adId);
+    if (!ad) return;
+
+    try {
+      setLoadingDetail(true);
+      setViewingAdId(adId);
+      const response = await adService.getAdById(ad.uuid);
+      if (response.success && response.data) {
+        const fullAd = response.data;
+        setSelectedAd({
+          id: fullAd.id,
+          title: fullAd.title,
+          seller: { 
+            name: fullAd.userName || fullAd.user?.fullName || fullAd.seller?.name || "Unknown Seller",
+            username: fullAd.userEmail?.split('@')[0] || fullAd.user?.email?.split('@')[0] || "unknown" 
+          },
+          category: fullAd.categoryName,
+          status: fullAd.status,
+          reviewedBy: "System",
+          reviewedOnDate: new Date(fullAd.createdAt).toLocaleDateString(),
+          reviewedOnTime: new Date(fullAd.createdAt).toLocaleTimeString(),
+          rejection: {
+            heading: fullAd.rejectionReason || "Ad was rejected",
+            details: "No further details provided.",
+            issuesFound: [],
+          },
+        });
+      }
+    } catch (err) {
+      console.error("Failed to fetch ad details", err);
+      setError("Failed to fetch ad details");
+    } finally {
+      setLoadingDetail(false);
+    }
   };
 
   const handleBackToList = () => {
     setViewingAdId(null);
+    setSelectedAd(null);
   };
 
   const viewingAdData = ads.find(a => a.id === viewingAdId);
-  const viewingAd: RejectedAdDetail | null = viewingAdData ? {
-    id: viewingAdData.id,
-    title: viewingAdData.title,
-    seller: { name: viewingAdData.userName, username: viewingAdData.userEmail.split('@')[0] },
-    category: viewingAdData.categoryName,
-    status: viewingAdData.status,
-    reviewedBy: "System",
-    reviewedOnDate: new Date(viewingAdData.createdAt).toLocaleDateString(),
-    reviewedOnTime: new Date(viewingAdData.createdAt).toLocaleTimeString(),
-    rejection: {
-      heading: "Ad was rejected",
-      details: "Details not available in list view.",
-      issuesFound: [],
-    },
-  } : null;
+  const viewingAd = selectedAd;
 
   const viewingListAd = viewingAdData;
 

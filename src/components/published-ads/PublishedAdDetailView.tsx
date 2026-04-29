@@ -164,7 +164,7 @@ export default function PublishedAdDetailView({
               </span>
               <div className="flex items-center gap-[8px]">
                 <div className="w-[26px] h-[26px] rounded-full bg-[#D2D2D2] flex items-center justify-center text-[9px] font-bold text-[#5E5E5E] shrink-0">
-                  {ad.seller.name.charAt(0)}
+                  {ad.seller.name?.charAt(0) || "U"}
                 </div>
                 <span
                   className="text-[#000000] text-[13px] md:text-[14px] font-semibold"

@@ -17,6 +17,8 @@ export default function ReviewAdsContent() {
   >({});
   const [feedback, setFeedback] = useState<Record<string, string>>({});
   const [viewingAdId, setViewingAdId] = useState<string | null>(null);
+  const [selectedAd, setSelectedAd] = useState<AdDetail | null>(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
 
   const fetchAds = async () => {
     try {
@@ -43,57 +45,138 @@ export default function ReviewAdsContent() {
     }));
   };
 
-  const handleSubmit = (adId: string) => {
+  const handleSubmit = async (adId: string) => {
     const action = selectedActions[adId];
     if (!action) return;
-    console.log(`Ad ${adId}: ${action}`);
+    const ad = ads.find(a => a.id === adId);
+    if (!ad) return;
+
+    try {
+      setLoading(true);
+      const status = action === "approve" ? "ACTIVE" : "REJECTED";
+      const reason = (action === "reject" || action === "requestChanges") ? feedback[adId] : undefined;
+      
+      await adService.updateAdStatus(ad.uuid, status, reason);
+      
+      // Clear actions and refresh list
+      setSelectedActions(prev => {
+        const next = { ...prev };
+        delete next[adId];
+        return next;
+      });
+      setFeedback(prev => {
+        const next = { ...prev };
+        delete next[adId];
+        return next;
+      });
+      
+      await fetchAds();
+    } catch (err) {
+      setError("Failed to update ad status");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleViewAd = (adId: string) => {
-    setViewingAdId(adId);
+  const handleViewAd = async (adId: string) => {
+    const ad = ads.find(a => a.id === adId);
+    if (!ad) return;
+    
+    try {
+      setLoadingDetail(true);
+      setViewingAdId(adId);
+      const response = await adService.getAdById(ad.uuid);
+      if (response.success && response.data) {
+        const fullAd = response.data;
+        setSelectedAd({
+          id: fullAd.id,
+          title: fullAd.title,
+          price: Number(fullAd.price),
+          negotiable: fullAd.isNegotiable,
+          category: fullAd.categoryName,
+          condition: fullAd.condition,
+          deviceType: fullAd.model,
+          brand: fullAd.brand,
+          model: fullAd.model,
+          description: fullAd.description || "No description provided.",
+          images: fullAd.images || [],
+          dateSubmitted: new Date(fullAd.createdAt).toLocaleDateString(),
+          timeSubmitted: new Date(fullAd.createdAt).toLocaleTimeString(),
+          seller: {
+            name: fullAd.userName || fullAd.user?.fullName || fullAd.seller?.name || "Unknown Seller",
+            username: fullAd.userEmail?.split('@')[0] || fullAd.user?.email?.split('@')[0] || "unknown",
+            avatar: "",
+            badge: "Seller",
+          },
+        });
+      }
+    } catch (err) {
+      console.error("Failed to fetch ad details", err);
+      setError("Failed to fetch ad details");
+    } finally {
+      setLoadingDetail(false);
+    }
   };
 
   const handleBackToList = () => {
     setViewingAdId(null);
+    setSelectedAd(null);
   };
 
-  const handleAccept = (adId: string) => {
-    console.log(`Ad ${adId}: accepted`);
-    setViewingAdId(null);
+  const handleAccept = async (adId: string) => {
+    const ad = ads.find(a => a.id === adId);
+    if (!ad) return;
+    try {
+      setLoading(true);
+      await adService.updateAdStatus(ad.uuid, "ACTIVE");
+      setViewingAdId(null);
+      await fetchAds();
+    } catch (err) {
+      setError("Failed to approve ad");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleReject = (adId: string) => {
-    console.log(`Ad ${adId}: rejected`);
-    setViewingAdId(null);
+  const handleReject = async (adId: string, reason: string) => {
+    const ad = ads.find(a => a.id === adId);
+    if (!ad) return;
+    try {
+      setLoading(true);
+      await adService.updateAdStatus(ad.uuid, "REJECTED", reason);
+      setViewingAdId(null);
+      setSelectedAd(null);
+      await fetchAds();
+    } catch (err) {
+      setError("Failed to reject ad");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRequestChanges = (adId: string) => {
-    console.log(`Ad ${adId}: request changes`);
-    setViewingAdId(null);
+  const handleRequestChanges = async (adId: string, reason: string) => {
+    const ad = ads.find(a => a.id === adId);
+    if (!ad) return;
+    try {
+      setLoading(true);
+      // Following user instruction: "both same" (REJECTED)
+      await adService.updateAdStatus(ad.uuid, "REJECTED", reason);
+      setViewingAdId(null);
+      setSelectedAd(null);
+      await fetchAds();
+    } catch (err) {
+      setError("Failed to request changes");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const viewingAdData = ads.find(a => a.id === viewingAdId);
-  const viewingAd: AdDetail | null = viewingAdData ? {
-    id: viewingAdData.id,
-    title: viewingAdData.title,
-    price: Number(viewingAdData.price),
-    negotiable: viewingAdData.isNegotiable,
-    category: viewingAdData.categoryName,
-    condition: viewingAdData.condition,
-    deviceType: viewingAdData.model, // Fallback
-    brand: viewingAdData.brand,
-    model: viewingAdData.model,
-    description: "Details not fully available in list view. Use API for full details if needed.",
-    images: [], // List API might not return all images
-    dateSubmitted: new Date(viewingAdData.createdAt).toLocaleDateString(),
-    timeSubmitted: new Date(viewingAdData.createdAt).toLocaleTimeString(),
-    seller: {
-      name: viewingAdData.userName,
-      username: viewingAdData.userEmail.split('@')[0],
-      avatar: "",
-      badge: "Seller",
-    },
-  } : null;
+  const viewingAd = selectedAd;
 
   return (
     <div className={`py-4 md:pt-[28px] px-4 md:pl-[28px] md:pr-4 ${viewingAd ? "pb-0" : "md:pb-[28px]"}`}>
@@ -109,7 +192,9 @@ export default function ReviewAdsContent() {
       <div className="border-t border-[#5E5E5E] opacity-70 mt-[16px]" />
 
       {/* Content switches between list and detail */}
-      {viewingAd ? (
+      {loadingDetail ? (
+        <div className="py-20 text-center text-[#5E5E5E]">Loading ad details...</div>
+      ) : viewingAd ? (
         <div className="mt-[20px]">
           <AdDetailView
             ad={viewingAd}
@@ -302,7 +387,8 @@ export default function ReviewAdsContent() {
                     />
                     <button
                       onClick={() => handleSubmit(ad.id)}
-                      className="shrink-0 w-[88px] md:w-[103px] h-[40px] md:h-[44px] bg-[#1174BB] rounded-[8px] text-white text-[12px] font-semibold leading-[100%] tracking-normal hover:bg-[#0E63A0] transition-colors cursor-pointer"
+                      disabled={!feedback[ad.id]?.trim()}
+                      className="shrink-0 w-[88px] md:w-[103px] h-[40px] md:h-[44px] bg-[#1174BB] rounded-[8px] text-white text-[12px] font-semibold leading-[100%] tracking-normal hover:bg-[#0E63A0] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Submit
                     </button>

@@ -13,6 +13,8 @@ export default function PublishedAdsContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewingAdId, setViewingAdId] = useState<string | null>(null);
+  const [selectedAd, setSelectedAd] = useState<PublishedAdDetail | null>(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
   const [messageModalState, setMessageModalState] = useState<{ adId: string; step: "compose" | "done" } | null>(null);
   const [messageText, setMessageText] = useState("");
 
@@ -38,38 +40,58 @@ export default function PublishedAdsContent() {
     setMessageModalState({ adId, step: "compose" });
   };
 
-  const handleViewAd = (adId: string) => {
-    setViewingAdId(adId);
+  const handleViewAd = async (adId: string) => {
+    const ad = ads.find(a => a.id === adId);
+    if (!ad) return;
+
+    try {
+      setLoadingDetail(true);
+      setViewingAdId(adId);
+      const response = await adService.getAdById(ad.uuid);
+      if (response.success && response.data) {
+        const fullAd = response.data;
+        setSelectedAd({
+          id: fullAd.id,
+          title: fullAd.title,
+          condition: fullAd.condition,
+          deviceType: fullAd.model,
+          brand: fullAd.brand,
+          model: fullAd.model,
+          description: fullAd.description || "No description provided.",
+          images: fullAd.images || [],
+          category: fullAd.categoryName,
+          status: fullAd.status,
+          isLive: fullAd.status === "ACTIVE",
+          viewedCount: fullAd.viewCount || 0,
+          seller: { 
+            name: fullAd.userName || fullAd.user?.fullName || fullAd.seller?.name || "Unknown Seller",
+            badge: "Gold" 
+          },
+          approvedBy: "System",
+          publishedDate: new Date(fullAd.createdAt).toLocaleDateString(),
+          publishedTime: new Date(fullAd.createdAt).toLocaleTimeString(),
+          approvedDate: new Date(fullAd.createdAt).toLocaleDateString(),
+          approvedTime: new Date(fullAd.createdAt).toLocaleTimeString(),
+          sellerMobile: fullAd.contactDetails || "+94 7 xxx xxx",
+          revisions: [],
+          reviews: { totalCount: 0, items: [] },
+        });
+      }
+    } catch (err) {
+      console.error("Failed to fetch ad details", err);
+      setError("Failed to fetch ad details");
+    } finally {
+      setLoadingDetail(false);
+    }
   };
 
   const handleBackToList = () => {
     setViewingAdId(null);
+    setSelectedAd(null);
   };
 
   const viewingAdData = ads.find(a => a.id === viewingAdId);
-  const viewingAd: PublishedAdDetail | null = viewingAdData ? {
-    id: viewingAdData.id,
-    title: viewingAdData.title,
-    condition: viewingAdData.condition,
-    deviceType: viewingAdData.model,
-    brand: viewingAdData.brand,
-    model: viewingAdData.model,
-    description: "Details not fully available in list view.",
-    images: [],
-    category: viewingAdData.categoryName,
-    status: viewingAdData.status,
-    isLive: viewingAdData.status === "ACTIVE",
-    viewedCount: viewingAdData.viewCount,
-    seller: { name: viewingAdData.userName, badge: "Gold" },
-    approvedBy: "System", // Or fetch from revisions if available
-    publishedDate: new Date(viewingAdData.createdAt).toLocaleDateString(),
-    publishedTime: new Date(viewingAdData.createdAt).toLocaleTimeString(),
-    approvedDate: new Date(viewingAdData.createdAt).toLocaleDateString(),
-    approvedTime: new Date(viewingAdData.createdAt).toLocaleTimeString(),
-    sellerMobile: "+94 7 xxx xxx",
-    revisions: [],
-    reviews: { totalCount: 0, items: [] },
-  } : null;
+  const viewingAd = selectedAd;
 
   const viewingListAd = viewingAdData;
 
@@ -97,7 +119,9 @@ export default function PublishedAdsContent() {
       <div className="border-t border-[#5E5E5E] opacity-70 mt-[16px]" />
 
       {/* Content switches between list and detail */}
-      {viewingAd ? (
+      {loadingDetail ? (
+        <div className="py-20 text-center text-[#5E5E5E]">Loading ad details...</div>
+      ) : viewingAd ? (
         <div className="mt-[20px]">
           <PublishedAdDetailView ad={viewingAd} onBack={handleBackToList} />
         </div>
