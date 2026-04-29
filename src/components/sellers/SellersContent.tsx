@@ -63,14 +63,33 @@ export default function SellersContent() {
     }
   }, [role]);
 
-  const handleToggleStatus = (sellerId: string) => {
-    setSellerList((prev) =>
-      prev.map((seller) =>
-        seller.id === sellerId
-          ? { ...seller, active: !seller.active }
-          : seller
-      )
-    );
+  const handleToggleStatus = async (sellerId: string, currentStatus: boolean) => {
+    try {
+      const newActive = !currentStatus;
+      const backendStatus = newActive ? "ACTIVE" : "SUSPENDED";
+
+      if (role === "admin" || role === "super_admin") {
+        // We'll skip admin for now or implement if we have the API
+        console.log("Admin status update not implemented yet");
+        // For now just local update to keep UI responsive
+        setSellerList((prev) =>
+          prev.map((seller) =>
+            seller.id === sellerId ? { ...seller, active: newActive } : seller
+          )
+        );
+      } else {
+        // Moderator status update
+        await moderatorUserService.updateUserStatus(sellerId, backendStatus);
+        setSellerList((prev) =>
+          prev.map((seller) =>
+            seller.id === sellerId ? { ...seller, active: newActive } : seller
+          )
+        );
+      }
+    } catch (err) {
+      console.error("Failed to update user status", err);
+      // Optional: show a toast or error message
+    }
   };
 
   return (
@@ -174,7 +193,7 @@ export default function SellersContent() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleToggleStatus(seller.id);
+                        handleToggleStatus(seller.id, seller.active);
                       }}
                       className={`relative w-[28px] h-[16px] rounded-full transition-colors shrink-0 ${
                         seller.active ? "bg-[#0F792F]" : "bg-[#CCCCCC]"

@@ -5,4 +5,8 @@ export const userService = {
     const response = await userApi.getModeratorUsers(page, limit);
     return response.data;
   },
+  updateUserStatus: async (id: string, status: string) => {
+    const response = await userApi.updateUserStatus(id, status);
+    return response.data;
+  },
 };

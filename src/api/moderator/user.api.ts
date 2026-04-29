@@ -6,5 +6,5 @@ export const userApi = {
       params: { page, limit }
     }),
   updateUserStatus: (id: string, status: string) => 
-    apiClient.patch(`/api/v1/users/moderator/status/update/${id}`, { status }),
+    apiClient.put(`/api/v1/users/moderator/status/update/${id}`, { status }),
 };
