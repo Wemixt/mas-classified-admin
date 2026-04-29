@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { userService } from "@/services/admin/user.service";
+import { userService as adminUserService } from "@/services/admin/user.service";
+import { userService as moderatorUserService } from "@/services/moderator/user.service";
+import { useAuth } from "@/hooks";
 
 interface Seller {
   id: string;
@@ -16,6 +18,7 @@ interface Seller {
 
 
 export default function SellersContent() {
+  const { role } = useAuth();
   const [sellerList, setSellerList] = useState<Seller[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +28,15 @@ export default function SellersContent() {
   const fetchSellers = async () => {
     try {
       setLoading(true);
-      const response = await userService.getAdminUsers("USER");
+      
+      let response;
+      if (role === "admin" || role === "super_admin") {
+        response = await adminUserService.getAdminUsers("USER");
+      } else {
+        // Moderator's sellers page
+        response = await moderatorUserService.getModeratorUsers();
+      }
+
       if (response.success && response.data) {
         const mappedSellers: Seller[] = response.data.data.map((u: any) => ({
           id: u.id,
@@ -47,8 +58,10 @@ export default function SellersContent() {
   };
 
   useEffect(() => {
-    fetchSellers();
-  }, []);
+    if (role) {
+      fetchSellers();
+    }
+  }, [role]);
 
   const handleToggleStatus = (sellerId: string) => {
     setSellerList((prev) =>
