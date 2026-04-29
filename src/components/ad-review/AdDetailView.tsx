@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 export interface AdDetail {
   id: string;
@@ -16,6 +17,8 @@ export interface AdDetail {
   images: string[];
   dateSubmitted: string;
   timeSubmitted: string;
+  location: string;
+  contactNo: string;
   seller: {
     name: string;
     username: string;
@@ -143,7 +146,8 @@ export default function AdDetailView({
         <div className="mt-[16px] md:mt-[18px] flex flex-col gap-[4px] md:gap-[6px]">
           {[
             { label: "Condition", value: ad.condition },
-            { label: "Device type", value: ad.deviceType },
+            { label: "Location", value: ad.location },
+            { label: "Contact No", value: ad.contactNo },
             { label: "Brand", value: ad.brand },
             { label: "Model", value: ad.model },
           ].map((spec) => (
@@ -182,23 +186,42 @@ export default function AdDetailView({
         </div>
 
         {/* Image gallery */}
-        {ad.images.length > 0 && (
-          <div className="mt-[20px] md:mt-[24px]">
-            <div className="flex gap-[10px] md:gap-[16px] flex-wrap">
-              {ad.images.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setSelectedImage(idx)}
-                  className={`w-[80px] h-[80px] sm:w-[110px] sm:h-[110px] md:w-[140px] md:h-[140px] xl:w-[160px] xl:h-[160px] bg-[#D9D9D9] border-2 transition-all cursor-pointer ${
-                    selectedImage === idx
-                      ? "border-[#1174BB] shadow-md"
-                      : "border-transparent hover:border-[#D2D2D2]"
-                  }`}
+        <div className="mt-[20px] md:mt-[24px]">
+          <div className="flex gap-[10px] md:gap-[16px] flex-wrap">
+            {/* Real Images */}
+            {ad.images.map((img, idx) => (
+              <button
+                key={idx}
+                onClick={() => setSelectedImage(idx)}
+                className={`w-[80px] h-[80px] sm:w-[110px] sm:h-[110px] md:w-[140px] md:h-[140px] xl:w-[160px] xl:h-[160px] bg-[#D9D9D9] border-2 transition-all cursor-pointer relative overflow-hidden ${
+                  selectedImage === idx
+                    ? "border-[#1174BB] shadow-md"
+                    : "border-transparent hover:border-[#D2D2D2]"
+                }`}
+              >
+                <Image
+                  src={img}
+                  alt={`Ad image ${idx + 1}`}
+                  fill
+                  className="object-cover"
                 />
-              ))}
-            </div>
+              </button>
+            ))}
+            
+            {/* Media Placeholders (if less than 4 images) */}
+            {Array.from({ length: Math.max(0, 4 - ad.images.length) }).map((_, idx) => (
+              <div
+                key={`placeholder-${idx}`}
+                className="w-[80px] h-[80px] sm:w-[110px] sm:h-[110px] md:w-[140px] md:h-[140px] xl:w-[160px] xl:h-[160px] bg-[#D9D9D9] border-2 border-dashed border-[#BDBDBD] flex flex-col items-center justify-center gap-2"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21 19V5C21 3.9 20.1 3 19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19ZM8.5 13.5L11 16.51L14.5 12L19 18H5L8.5 13.5Z" fill="#757575"/>
+                </svg>
+                <span className="text-[10px] text-[#757575] font-medium">No Image</span>
+              </div>
+            ))}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Bottom action bar — #E9E9E9, full-width flush to right edge */}

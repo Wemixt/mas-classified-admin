@@ -96,16 +96,18 @@ export default function ReviewAdsContent() {
           negotiable: fullAd.isNegotiable,
           category: fullAd.categoryName,
           condition: fullAd.condition,
-          deviceType: fullAd.model,
+          location: `${fullAd.cityName}, ${fullAd.districtName}`,
+          contactNo: fullAd.contactDetails || "N/A",
           brand: fullAd.brand,
           model: fullAd.model,
+          deviceType: fullAd.categoryName, // Usually category for tech
           description: fullAd.description || "No description provided.",
           images: fullAd.images || [],
           dateSubmitted: new Date(fullAd.createdAt).toLocaleDateString(),
           timeSubmitted: new Date(fullAd.createdAt).toLocaleTimeString(),
           seller: {
-            name: fullAd.userName || fullAd.user?.fullName || fullAd.seller?.name || "Unknown Seller",
-            username: fullAd.userEmail?.split('@')[0] || fullAd.user?.email?.split('@')[0] || "unknown",
+            name: fullAd.userName || fullAd.user?.fullName || "Unknown Seller",
+            username: fullAd.userEmail?.split('@')[0] || "unknown",
             avatar: "",
             badge: "Seller",
           },
@@ -131,6 +133,7 @@ export default function ReviewAdsContent() {
       setLoading(true);
       await adService.updateAdStatus(ad.uuid, "ACTIVE");
       setViewingAdId(null);
+      setSelectedAd(null);
       await fetchAds();
     } catch (err) {
       setError("Failed to approve ad");

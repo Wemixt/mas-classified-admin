@@ -45,6 +45,7 @@ export default function RejectedAdsContent() {
       setLoading(true);
       await adService.updateAdStatus(ad.uuid, "PENDING_REVIEW");
       setViewingAdId(null);
+      setSelectedAd(null);
       await fetchAds();
     } catch (err) {
       setError("Failed to reconsider ad");
