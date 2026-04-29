@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useAuth } from "@/hooks";
+import { userService } from "@/services/admin/user.service";
 
 interface Moderator {
   id: string;
@@ -14,53 +15,6 @@ interface Moderator {
   active: boolean;
 }
 
-const moderators: Moderator[] = [
-  {
-    id: "1",
-    name: "Kasun Sampath",
-    username: "@kasuns",
-    employeeId: "MAS 0236",
-    registeredDate: "Today",
-    avatar: "/logos/mass logo.png",
-    active: true,
-  },
-  {
-    id: "2",
-    name: "Visal Lakshitha",
-    username: "@lakshithavisal",
-    employeeId: "MAS 0356",
-    registeredDate: "Yesterday",
-    avatar: "/logos/mass logo.png",
-    active: true,
-  },
-  {
-    id: "3",
-    name: "Dulaj samaraweera",
-    username: "@dulajj98",
-    employeeId: "MAS 0120",
-    registeredDate: "Feb 04, 2026",
-    avatar: "/logos/mass logo.png",
-    active: true,
-  },
-  {
-    id: "4",
-    name: "Avishka Sandeepa",
-    username: "@avishka49",
-    employeeId: "MAS 0120",
-    registeredDate: "Feb 04, 2026",
-    avatar: "/logos/mass logo.png",
-    active: true,
-  },
-  {
-    id: "5",
-    name: "Sameera Viraj",
-    username: "@sameera",
-    employeeId: "MAS 0120",
-    registeredDate: "Feb 04, 2026",
-    avatar: "/logos/mass logo.png",
-    active: false,
-  },
-];
 
 export default function ModeratorsContent() {
   const { role, isLoading } = useAuth();
@@ -77,9 +31,41 @@ export default function ModeratorsContent() {
     );
   }
 
-  const [moderatorList, setModeratorList] = useState<Moderator[]>(moderators);
+  const [moderatorList, setModeratorList] = useState<Moderator[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedModerator, setSelectedModerator] = useState<Moderator | null>(null);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+
+  const fetchModerators = async () => {
+    try {
+      setLoading(true);
+      const response = await userService.getAdminUsers("MODERATOR");
+      if (response.success && response.data) {
+        const mappedModerators: Moderator[] = response.data.data.map((u: any) => ({
+          id: u.id,
+          name: u.fullName || "Unknown",
+          username: u.email?.split('@')[0] ? `@${u.email.split('@')[0]}` : "@unknown",
+          employeeId: u.employeeId || "N/A",
+          registeredDate: new Date(u.createdAt).toLocaleDateString(),
+          avatar: u.profileImage || "/logos/mass logo.png",
+          active: u.status === "ACTIVE",
+        }));
+        setModeratorList(mappedModerators);
+      }
+    } catch (err) {
+      console.error("Failed to fetch moderators", err);
+      setError("Failed to fetch moderators");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (role === "admin" || role === "super_admin") {
+      fetchModerators();
+    }
+  }, [role]);
   const [showForm, setShowForm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [createdData, setCreatedData] = useState({ name: "", role: "" });
@@ -122,7 +108,8 @@ export default function ModeratorsContent() {
   };
 
   const handleViewProfile = (moderatorId: string) => {
-    console.log(`View profile for moderator ${moderatorId}`);
+    const mod = moderatorList.find(m => m.id === moderatorId);
+    if (mod) setSelectedModerator(mod);
   };
 
   return (
@@ -320,7 +307,14 @@ export default function ModeratorsContent() {
 
         {/* Table Body */}
         <div className="flex flex-col">
-          {moderatorList.map((moderator) => (
+          {loading ? (
+            <div className="py-20 text-center text-[#5E5E5E]">Loading moderators...</div>
+          ) : error ? (
+            <div className="py-20 text-center text-red-500">{error}</div>
+          ) : moderatorList.length === 0 ? (
+            <div className="py-20 text-center text-[#5E5E5E]">No moderators found.</div>
+          ) : (
+            moderatorList.map((moderator) => (
             <div key={moderator.id}>
               {/* ── Desktop Row (md+) ── */}
               <div 
@@ -432,7 +426,8 @@ export default function ModeratorsContent() {
               {/* Row Divider */}
               <div className="border-t border-[#E0E0E0]" />
             </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 
@@ -471,19 +466,8 @@ export default function ModeratorsContent() {
               {selectedModerator.name}
             </h2>
 
-            {/* Verified Seller Badge (Using exact wording as screenshot) */}
-            <div className="flex items-center gap-[8px] mb-[32px]">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 1L14.59 3.59L18.25 3.5L18.75 7.15L22 9L20.5 12L22 15L18.75 16.85L18.25 20.5L14.59 20.41L12 23L9.41 20.41L5.75 20.5L5.25 16.85L2 15L3.5 12L2 9L5.25 7.15L5.75 3.5L9.41 3.59L12 1Z" fill="#0F792F"/>
-                <path d="M10 16.5L6 12.5L7.41 11.09L10 13.67L16.59 7.09L18 8.5L10 16.5Z" fill="white"/>
-              </svg>
-              <span 
-                className="text-[#000000] text-[15px] md:text-[16px] font-medium leading-[100%]"
-                style={{ fontFamily: "Poppins, sans-serif" }}
-              >
-                Verified Seller
-              </span>
-            </div>
+            {/* Space before button */}
+            <div className="mb-[24px]" />
 
             {/* Contact Moderator Button */}
             <button

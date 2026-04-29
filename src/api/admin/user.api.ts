@@ -1,6 +1,8 @@
 import apiClient from "../client";
 
 export const userApi = {
-  // getUsers: () => apiClient.get("/users"),
-  // getUserById: (id: string) => apiClient.get(`/users/${id}`),
+  getAdminUsers: (role: string, page = 1, limit = 10) => 
+    apiClient.get(`/api/v1/users/admin/list`, {
+      params: { role, page, limit }
+    }),
 };

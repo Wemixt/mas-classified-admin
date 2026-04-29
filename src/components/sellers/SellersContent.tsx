@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
+import { userService } from "@/services/admin/user.service";
 
 interface Seller {
   id: string;
@@ -13,40 +14,41 @@ interface Seller {
   active: boolean;
 }
 
-const sellers: Seller[] = [
-  {
-    id: "1",
-    name: "Ishan Nayanajith",
-    email: "kwinayanajith@gmail.com",
-    phone: "0712414095",
-    totalAds: 12,
-    avatar: "/logos/mass logo.png",
-    active: true,
-  },
-  {
-    id: "2",
-    name: "Sugath Kalhara",
-    email: "sugathk@gmail.com",
-    phone: "0712425695",
-    totalAds: 8,
-    avatar: "/logos/mass logo.png",
-    active: true,
-  },
-  {
-    id: "3",
-    name: "Sarith Umayanga",
-    email: "sugathk@gmail.com",
-    phone: "0712425695",
-    totalAds: 8,
-    avatar: "/logos/mass logo.png",
-    active: true,
-  },
-];
 
 export default function SellersContent() {
-  const [sellerList, setSellerList] = useState<Seller[]>(sellers);
+  const [sellerList, setSellerList] = useState<Seller[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedSeller, setSelectedSeller] = useState<Seller | null>(null);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+
+  const fetchSellers = async () => {
+    try {
+      setLoading(true);
+      const response = await userService.getAdminUsers("USER");
+      if (response.success && response.data) {
+        const mappedSellers: Seller[] = response.data.data.map((u: any) => ({
+          id: u.id,
+          name: u.fullName || "Unknown",
+          email: u.email,
+          phone: u.phoneNo || "N/A",
+          totalAds: 0, // Not provided in user list API
+          avatar: u.profileImage || "/logos/mass logo.png",
+          active: u.status === "ACTIVE",
+        }));
+        setSellerList(mappedSellers);
+      }
+    } catch (err) {
+      console.error("Failed to fetch sellers", err);
+      setError("Failed to fetch sellers");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSellers();
+  }, []);
 
   const handleToggleStatus = (sellerId: string) => {
     setSellerList((prev) =>
@@ -110,7 +112,14 @@ export default function SellersContent() {
 
           {/* Table Body */}
           <div className="flex flex-col border-b border-l border-r border-[#E0E0E0] rounded-b-lg">
-            {sellerList.map((seller, index) => (
+            {loading ? (
+              <div className="py-20 text-center text-[#5E5E5E]">Loading sellers...</div>
+            ) : error ? (
+              <div className="py-20 text-center text-red-500">{error}</div>
+            ) : sellerList.length === 0 ? (
+              <div className="py-20 text-center text-[#5E5E5E]">No sellers found.</div>
+            ) : (
+              sellerList.map((seller, index) => (
               <div key={seller.id}>
                 <div 
                   className="grid grid-cols-[1.4fr_1.6fr_1fr_0.8fr_0.8fr] items-center h-[72px] cursor-pointer hover:bg-gray-50 transition-colors"
@@ -175,7 +184,8 @@ export default function SellersContent() {
                   <div className="border-t border-[#E0E0E0]" />
                 )}
               </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
