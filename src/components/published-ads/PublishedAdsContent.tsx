@@ -1,167 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PublishedAdDetailView, {
   type PublishedAdDetail,
 } from "./PublishedAdDetailView";
+import { adService } from "@/services/moderator/ad.service";
+import type { Ad } from "@/types";
 
-interface PublishedAd {
-  id: string;
-  title: string;
-  sellerName: string;
-  category: string;
-  clicks: number;
-  datePublished: string;
-  timePublished: string;
-  approvedBy: string;
-}
-
-const publishedAds: PublishedAd[] = [
-  {
-    id: "1",
-    title: "Dell inspire i7 11th Gen Laptop...",
-    sellerName: "Ishan Nayanajith",
-    category: "Laptop",
-    clicks: 153,
-    datePublished: "2026/01/28",
-    timePublished: "02.32 PM",
-    approvedBy: "Kasun Prasanna",
-  },
-  {
-    id: "2",
-    title: "Cotten M T shirt - Hi quality..",
-    sellerName: "Kasun Suraj",
-    category: "T shirt",
-    clicks: 123,
-    datePublished: "2026/01/14",
-    timePublished: "10.30 AM",
-    approvedBy: "Kasun Prasanna",
-  },
-  {
-    id: "3",
-    title: "JBL T50 Bluetooth Wireless...",
-    sellerName: "Supun Thathsara",
-    category: "Headset",
-    clicks: 76,
-    datePublished: "2026/02/03",
-    timePublished: "09.15 AM",
-    approvedBy: "Sugath Kalhara",
-  },
-];
-
-const adDetails: Record<string, PublishedAdDetail> = {
-  "1": {
-    id: "1",
-    title: "Dell inspire i7 11th Gen Laptop | 16GB RAM | 1 TB ssd",
-    condition: "Used",
-    deviceType: "Laptop",
-    brand: "Dell",
-    model: "Inspire 5200",
-    description:
-      "The Dell Inspiron 5500 is a dependable and stylish laptop, ideal for students, professionals, and everyday users. This used device is in good working condition and offers Dell's trusted build quality with smooth performance for daily tasks such as office work, online classes, browsing, and entertainment. Its comfortable keyboard, clear display, and portable design make it suitable for both work and home use. A reliable and cost-effective choice, with negotiable price for interested buyers.",
-    images: ["", "", "", "", ""],
-    category: "Laptop",
-    status: "Published",
-    isLive: true,
-    viewedCount: 152,
-    seller: { name: "Kasun Anuradha", badge: "Gold" },
-    approvedBy: "Vimal Sangeeth",
-    publishedDate: "2026/01/28",
-    publishedTime: "2:45 pm",
-    approvedDate: "2026/01/28",
-    approvedTime: "3:53 pm",
-    sellerMobile: "+94 7 xxx xxx",
-    revisions: [
-      {
-        id: "1",
-        date: "2026/01/28",
-        time: "2:50 pm",
-        by: "Kasun Perera",
-        description: "Updated product description",
-      },
-      {
-        id: "2",
-        date: "2026/01/27",
-        time: "8:20 pm",
-        by: "Kasun Perera",
-        description: "Updated sub category",
-      },
-      {
-        id: "3",
-        date: "2026/01/25",
-        time: "1:50 pm",
-        by: "Kasun Perera",
-        description: "Added real product images",
-      },
-    ],
-    reviews: {
-      totalCount: 4,
-      items: [
-        {
-          id: "1",
-          author: "P Kasun",
-          verified: true,
-          date: "03 Aug 2024",
-          text: "Arrived soon. Plug and play. Stable connection. Can recommend.",
-          likes: 6,
-        },
-      ],
-    },
-  },
-  "2": {
-    id: "2",
-    title: "Cotten M T shirt - Hi quality",
-    condition: "New",
-    deviceType: "Clothing",
-    brand: "N/A",
-    model: "N/A",
-    description:
-      "High quality cotton T-shirt in medium size. Comfortable and breathable fabric suitable for everyday wear. Available in multiple colors.",
-    images: ["", "", ""],
-    category: "T shirt",
-    status: "Published",
-    isLive: true,
-    viewedCount: 123,
-    seller: { name: "Kasun Suraj", badge: "Silver" },
-    approvedBy: "Kasun Prasanna",
-    publishedDate: "2026/01/14",
-    publishedTime: "10:30 am",
-    approvedDate: "2026/01/14",
-    approvedTime: "11:00 am",
-    sellerMobile: "+94 7 xxx xxx",
-    revisions: [],
-    reviews: { totalCount: 0, items: [] },
-  },
-  "3": {
-    id: "3",
-    title: "JBL T50 Bluetooth Wireless Headset",
-    condition: "New",
-    deviceType: "Headset",
-    brand: "JBL",
-    model: "T50",
-    description:
-      "JBL T50 Bluetooth wireless headset with premium sound quality. Features noise cancellation and long battery life. Perfect for music lovers and professionals.",
-    images: ["", "", "", ""],
-    category: "Headset",
-    status: "Published",
-    isLive: true,
-    viewedCount: 76,
-    seller: { name: "Supun Thathsara" },
-    approvedBy: "Sugath Kalhara",
-    publishedDate: "2026/02/03",
-    publishedTime: "9:15 am",
-    approvedDate: "2026/02/03",
-    approvedTime: "9:45 am",
-    sellerMobile: "+94 7 xxx xxx",
-    revisions: [],
-    reviews: { totalCount: 0, items: [] },
-  },
-};
 
 export default function PublishedAdsContent() {
+  const [ads, setAds] = useState<Ad[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [viewingAdId, setViewingAdId] = useState<string | null>(null);
   const [messageModalState, setMessageModalState] = useState<{ adId: string; step: "compose" | "done" } | null>(null);
   const [messageText, setMessageText] = useState("");
+
+  const fetchAds = async () => {
+    try {
+      setLoading(true);
+      const response = await adService.getAdminAds("ACTIVE");
+      setAds(response.data.data);
+      setError(null);
+    } catch (err) {
+      setError("Failed to load published ads");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAds();
+  }, []);
 
   const handleSendMessage = (adId: string) => {
     setMessageModalState({ adId, step: "compose" });
@@ -175,10 +46,32 @@ export default function PublishedAdsContent() {
     setViewingAdId(null);
   };
 
-  const viewingAd = viewingAdId ? adDetails[viewingAdId] : null;
-  const viewingListAd = viewingAdId
-    ? publishedAds.find((a) => a.id === viewingAdId)
-    : null;
+  const viewingAdData = ads.find(a => a.id === viewingAdId);
+  const viewingAd: PublishedAdDetail | null = viewingAdData ? {
+    id: viewingAdData.id,
+    title: viewingAdData.title,
+    condition: viewingAdData.condition,
+    deviceType: viewingAdData.model,
+    brand: viewingAdData.brand,
+    model: viewingAdData.model,
+    description: "Details not fully available in list view.",
+    images: [],
+    category: viewingAdData.categoryName,
+    status: viewingAdData.status,
+    isLive: viewingAdData.status === "ACTIVE",
+    viewedCount: viewingAdData.viewCount,
+    seller: { name: viewingAdData.userName, badge: "Gold" },
+    approvedBy: "System", // Or fetch from revisions if available
+    publishedDate: new Date(viewingAdData.createdAt).toLocaleDateString(),
+    publishedTime: new Date(viewingAdData.createdAt).toLocaleTimeString(),
+    approvedDate: new Date(viewingAdData.createdAt).toLocaleDateString(),
+    approvedTime: new Date(viewingAdData.createdAt).toLocaleTimeString(),
+    sellerMobile: "+94 7 xxx xxx",
+    revisions: [],
+    reviews: { totalCount: 0, items: [] },
+  } : null;
+
+  const viewingListAd = viewingAdData;
 
   return (
     <div className="py-4 md:pt-[28px] md:pb-[28px] px-4 md:pl-[28px] md:pr-4">
@@ -253,7 +146,13 @@ export default function PublishedAdsContent() {
 
           {/* Table Body */}
           <div className="flex flex-col gap-[10px] md:gap-[12px] mt-[10px] md:mt-[12px]">
-            {publishedAds.map((ad) => (
+            {loading ? (
+              <div className="py-20 text-center text-[#5E5E5E]">Loading ads...</div>
+            ) : error ? (
+              <div className="py-20 text-center text-red-500">{error}</div>
+            ) : ads.length === 0 ? (
+              <div className="py-20 text-center text-[#5E5E5E]">No published ads found.</div>
+            ) : ads.map((ad) => (
               <div
                 key={ad.id}
                 className="bg-[#F4F4F4] rounded-[8px] overflow-hidden"
@@ -268,13 +167,13 @@ export default function PublishedAdsContent() {
                       </span>
                     </div>
                     <div className="px-[16px] text-[#000000] text-[13px] xl:text-[14px] font-normal leading-[150%] tracking-normal truncate">
-                      {ad.sellerName}
+                      {ad.userName}
                     </div>
                     <div className="px-[16px] text-[#000000] text-[13px] xl:text-[14px] font-normal leading-[150%] tracking-normal">
-                      {ad.category}
+                      {ad.categoryName}
                     </div>
                     <div className="px-[16px] text-[#000000] text-[13px] xl:text-[14px] font-normal leading-[150%] tracking-normal">
-                      {ad.clicks}
+                      {ad.viewCount}
                     </div>
                   </div>
                   <div className="w-[100px] xl:w-[120px] shrink-0 flex items-center justify-center">
@@ -295,7 +194,7 @@ export default function PublishedAdsContent() {
                       {ad.title}
                     </p>
                     <p className="text-[#5E5E5E] text-[11px] mt-[2px]">
-                      {ad.sellerName} · {ad.category} · {ad.clicks} clicks
+                      {ad.userName} · {ad.categoryName} · {ad.viewCount} clicks
                     </p>
                   </div>
                   <button
@@ -320,7 +219,7 @@ export default function PublishedAdsContent() {
                         Published Date
                       </span>
                       <span className="text-[#000000] text-[12px] md:text-[14px] font-semibold leading-[150%] tracking-normal ml-[8px]">
-                        {ad.datePublished}
+                        {new Date(ad.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                     <div className="flex items-center">
@@ -331,7 +230,7 @@ export default function PublishedAdsContent() {
                         Published Time
                       </span>
                       <span className="text-[#000000] text-[12px] md:text-[14px] font-semibold leading-[150%] tracking-normal ml-[8px]">
-                        {ad.timePublished}
+                        {new Date(ad.createdAt).toLocaleTimeString()}
                       </span>
                     </div>
                   </div>
@@ -339,7 +238,7 @@ export default function PublishedAdsContent() {
                     <span className="text-[#242424] text-[11px] md:text-[12px] font-normal leading-[150%] tracking-normal whitespace-nowrap">
                       Approved by{" "}
                       <strong className="font-semibold">
-                        {ad.approvedBy}
+                        System
                       </strong>
                     </span>
                     <button

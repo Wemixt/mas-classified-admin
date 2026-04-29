@@ -1,100 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdDetailView, { type AdDetail } from "./AdDetailView";
+import { adService } from "@/services/moderator/ad.service";
+import type { Ad } from "@/types";
 
-interface Ad {
-  id: string;
-  title: string;
-  sellerName: string;
-  category: string;
-  dateSubmitted: string;
-}
 
 type ReviewAction = "approve" | "reject" | "requestChanges" | null;
 
-const pendingAds: Ad[] = [
-  {
-    id: "1",
-    title: "Dell inspire i7 11th Gen Laptop...",
-    sellerName: "Ishan Nayanajith",
-    category: "Laptop",
-    dateSubmitted: "2026/01/28",
-  },
-  {
-    id: "2",
-    title: "Samsung s21 Ultra 250GB 12...",
-    sellerName: "Kasun Anuradha",
-    category: "Mobile Phone",
-    dateSubmitted: "2026/01/18",
-  },
-];
-
-const adDetails: Record<string, AdDetail> = {
-  "1": {
-    id: "1",
-    title: "Dell Inspiron i7 11th Gen Laptop 16GB RAM 512GB SSD",
-    price: 185000,
-    negotiable: true,
-    category: "Laptop",
-    condition: "Used",
-    deviceType: "Laptop",
-    brand: "Dell",
-    model: "Inspiron 5500",
-    description:
-      "The Dell Inspiron 5500 is a dependable and stylish laptop, ideal for students, professionals, and everyday users. This used device is in good working condition and offers Dell's trusted build quality with smooth performance for daily tasks such as office work, online classes, browsing, and entertainment. Its comfortable keyboard, clear display, and portable design make it suitable for both work and home use. A reliable and cost-effective choice, with negotiable price for interested buyers.",
-    images: [
-      "https://picsum.photos/seed/dell1/400/400",
-      "https://picsum.photos/seed/dell2/400/400",
-      "https://picsum.photos/seed/dell3/400/400",
-      "https://picsum.photos/seed/dell4/400/400",
-      "https://picsum.photos/seed/dell5/400/400",
-    ],
-    dateSubmitted: "2026/01/28",
-    timeSubmitted: "02:15 PM",
-    seller: {
-      name: "Ishan Nayanajith",
-      username: "ishann",
-      avatar: "",
-      badge: "Seller",
-    },
-  },
-  "2": {
-    id: "2",
-    title: "Samsung s21 Ultra 250GB ROM 12GB RAM",
-    price: 130000,
-    negotiable: true,
-    category: "Mobile Phone",
-    condition: "Used",
-    deviceType: "Mobile Phone",
-    brand: "Samsung",
-    model: "s21 Ultra",
-    description:
-      "The Dell Inspiron 5500 is a dependable and stylish laptop, ideal for students, professionals, and everyday users. This used device is in good working condition and offers Dell's trusted build quality with smooth performance for daily tasks such as office work, online classes, browsing, and entertainment. Its comfortable keyboard, clear display, and portable design make it suitable for both work and home use. A reliable and cost-effective choice, with negotiable price for interested buyers.",
-    images: [
-      "https://picsum.photos/seed/sam1/400/400",
-      "https://picsum.photos/seed/sam2/400/400",
-      "https://picsum.photos/seed/sam3/400/400",
-      "https://picsum.photos/seed/sam4/400/400",
-      "https://picsum.photos/seed/sam5/400/400",
-    ],
-    dateSubmitted: "2026/01/18",
-    timeSubmitted: "09:30 PM",
-    seller: {
-      name: "Kasun Anuradha",
-      username: "kasuna",
-      avatar: "",
-      badge: "Seller",
-    },
-  },
-};
-
 export default function ReviewAdsContent() {
+  const [ads, setAds] = useState<Ad[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedActions, setSelectedActions] = useState<
     Record<string, ReviewAction>
   >({});
   const [feedback, setFeedback] = useState<Record<string, string>>({});
   const [viewingAdId, setViewingAdId] = useState<string | null>(null);
+
+  const fetchAds = async () => {
+    try {
+      setLoading(true);
+      const response = await adService.getAdminAds("PENDING_REVIEW");
+      setAds(response.data.data);
+      setError(null);
+    } catch (err) {
+      setError("Failed to load pending ads");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAds();
+  }, []);
 
   const handleActionChange = (adId: string, action: ReviewAction) => {
     setSelectedActions((prev) => ({
@@ -132,7 +72,28 @@ export default function ReviewAdsContent() {
     setViewingAdId(null);
   };
 
-  const viewingAd = viewingAdId ? adDetails[viewingAdId] : null;
+  const viewingAdData = ads.find(a => a.id === viewingAdId);
+  const viewingAd: AdDetail | null = viewingAdData ? {
+    id: viewingAdData.id,
+    title: viewingAdData.title,
+    price: Number(viewingAdData.price),
+    negotiable: viewingAdData.isNegotiable,
+    category: viewingAdData.categoryName,
+    condition: viewingAdData.condition,
+    deviceType: viewingAdData.model, // Fallback
+    brand: viewingAdData.brand,
+    model: viewingAdData.model,
+    description: "Details not fully available in list view. Use API for full details if needed.",
+    images: [], // List API might not return all images
+    dateSubmitted: new Date(viewingAdData.createdAt).toLocaleDateString(),
+    timeSubmitted: new Date(viewingAdData.createdAt).toLocaleTimeString(),
+    seller: {
+      name: viewingAdData.userName,
+      username: viewingAdData.userEmail.split('@')[0],
+      avatar: "",
+      badge: "Seller",
+    },
+  } : null;
 
   return (
     <div className={`py-4 md:pt-[28px] px-4 md:pl-[28px] md:pr-4 ${viewingAd ? "pb-0" : "md:pb-[28px]"}`}>
@@ -203,7 +164,13 @@ export default function ReviewAdsContent() {
 
           {/* Table Body */}
           <div className="flex flex-col gap-[10px] md:gap-[12px] mt-[10px] md:mt-[12px]">
-            {pendingAds.map((ad) => (
+            {loading ? (
+              <div className="py-20 text-center text-[#5E5E5E]">Loading ads...</div>
+            ) : error ? (
+              <div className="py-20 text-center text-red-500">{error}</div>
+            ) : ads.length === 0 ? (
+              <div className="py-20 text-center text-[#5E5E5E]">No ads pending review.</div>
+            ) : ads.map((ad) => (
               <div
                 key={ad.id}
                 className="bg-[#F4F4F4] rounded-[8px]"
@@ -215,13 +182,13 @@ export default function ReviewAdsContent() {
                       {ad.title}
                     </div>
                     <div className="px-[16px] text-[#000000] text-[13px] xl:text-[14px] font-normal leading-[150%] tracking-normal truncate">
-                      {ad.sellerName}
+                      {ad.userName}
                     </div>
                     <div className="px-[16px] text-[#000000] text-[13px] xl:text-[14px] font-normal leading-[150%] tracking-normal">
-                      {ad.category}
+                      {ad.categoryName}
                     </div>
                     <div className="px-[16px] text-[#000000] text-[13px] xl:text-[14px] font-normal leading-[150%] tracking-normal">
-                      {ad.dateSubmitted}
+                      {new Date(ad.createdAt).toLocaleDateString()}
                     </div>
                   </div>
                   <div className="w-[100px] xl:w-[120px] shrink-0 flex items-center justify-center">
@@ -241,7 +208,7 @@ export default function ReviewAdsContent() {
                       {ad.title}
                     </p>
                     <p className="text-[#5E5E5E] text-[11px] mt-[2px]">
-                      {ad.sellerName} · {ad.category} · {ad.dateSubmitted}
+                      {ad.userName} · {ad.categoryName} · {new Date(ad.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                   <button

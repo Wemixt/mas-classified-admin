@@ -1,113 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import RejectedAdDetailView, {
   type RejectedAdDetail,
 } from "./RejectedAdDetailView";
+import { adService } from "@/services/moderator/ad.service";
+import type { Ad } from "@/types";
 
-interface RejectedAd {
-  id: string;
-  title: string;
-  sellerName: string;
-  category: string;
-  rejectedBy: string;
-}
-
-const rejectedAds: RejectedAd[] = [
-  {
-    id: "1",
-    title: "Dell inspire i7 11th Gen Laptop...",
-    sellerName: "Ishan Nayanajith",
-    category: "Laptop",
-    rejectedBy: "Kasun Prasanna",
-  },
-  {
-    id: "2",
-    title: "Samsung s21 Ultra 250GB 12...",
-    sellerName: "Kasun Anuradha",
-    category: "Mobile Phone",
-    rejectedBy: "Kasun Prasanna",
-  },
-  {
-    id: "3",
-    title: "JBL T50 Bluetooth Wireless...",
-    sellerName: "Supun Thathsara",
-    category: "Headset",
-    rejectedBy: "Sugath Kalhara",
-  },
-];
-
-const rejectedAdDetails: Record<string, RejectedAdDetail> = {
-  "1": {
-    id: "1",
-    title: "Dell inspire i7 11th Gen Laptop",
-    seller: { name: "Ishan Nayanajith", username: "ishann" },
-    category: "Laptop",
-    status: "Rejected",
-    reviewedBy: "Kasun Prasanna",
-    reviewedOnDate: "2026-02-11",
-    reviewedOnTime: "09.32 PM",
-    rejection: {
-      heading: "Insufficient or misleading product information",
-      details:
-        "The ad description does not clearly explain the product condition and specifications. Important details such as warranty status, original images, and accurate product features are missing or unclear.",
-      issuesFound: [
-        "Product images are low quality or not clear",
-        "Description is too short and missing key details",
-        "Product condition (New / Used) is not mentioned",
-        "Possible mismatch between title and description",
-      ],
-    },
-  },
-  "2": {
-    id: "2",
-    title: "Samsung s21 Ultra 250GB 12GB RAM",
-    seller: { name: "Kasun Anuradha", username: "kasuna" },
-    category: "Mobile Phone",
-    status: "Rejected",
-    reviewedBy: "Kasun Prasanna",
-    reviewedOnDate: "2026-02-11",
-    reviewedOnTime: "09.32 PM",
-    rejection: {
-      heading: "Insufficient or misleading product information",
-      details:
-        "The ad description does not clearly explain the product condition and specifications. Important details such as warranty status, original images, and accurate product features are missing or unclear.",
-      issuesFound: [
-        "Product images are low quality or not clear",
-        "Description is too short and missing key details",
-        "Product condition (New / Used) is not mentioned",
-        "Possible mismatch between title and description",
-      ],
-    },
-  },
-  "3": {
-    id: "3",
-    title: "JBL T50 Bluetooth Wireless Headset",
-    seller: { name: "Anura Dissanayaka", username: "anuraj" },
-    category: "Headset",
-    status: "Rejected",
-    reviewedBy: "Sugath Kallara",
-    reviewedOnDate: "2026-02-11",
-    reviewedOnTime: "09.32 PM",
-    rejection: {
-      heading: "Insufficient or misleading product information",
-      details:
-        "The ad description does not clearly explain the product condition and specifications. Important details such as warranty status, original images, and accurate product features are missing or unclear.",
-      issuesFound: [
-        "Product images are low quality or not clear",
-        "Description is too short and missing key details",
-        "Product condition (New / Used) is not mentioned",
-        "Possible mismatch between title and description",
-      ],
-    },
-  },
-};
 
 export default function RejectedAdsContent() {
+  const [ads, setAds] = useState<Ad[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [viewingAdId, setViewingAdId] = useState<string | null>(null);
   const [messageModalState, setMessageModalState] = useState<{ adId: string; step: "compose" | "done" } | null>(null);
   const [messageText, setMessageText] = useState("");
   const [deleteModalState, setDeleteModalState] = useState<{ adId: string; step: "confirm" | "done" } | null>(null);
+
+  const fetchAds = async () => {
+    try {
+      setLoading(true);
+      const response = await adService.getAdminAds("REJECTED");
+      setAds(response.data.data);
+      setError(null);
+    } catch (err) {
+      setError("Failed to load rejected ads");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAds();
+  }, []);
 
   const handleReconsider = (adId: string) => {
     console.log(`Reconsider ad ${adId}`);
@@ -129,10 +55,24 @@ export default function RejectedAdsContent() {
     setViewingAdId(null);
   };
 
-  const viewingAd = viewingAdId ? rejectedAdDetails[viewingAdId] : null;
-  const viewingListAd = viewingAdId
-    ? rejectedAds.find((a) => a.id === viewingAdId)
-    : null;
+  const viewingAdData = ads.find(a => a.id === viewingAdId);
+  const viewingAd: RejectedAdDetail | null = viewingAdData ? {
+    id: viewingAdData.id,
+    title: viewingAdData.title,
+    seller: { name: viewingAdData.userName, username: viewingAdData.userEmail.split('@')[0] },
+    category: viewingAdData.categoryName,
+    status: viewingAdData.status,
+    reviewedBy: "System",
+    reviewedOnDate: new Date(viewingAdData.createdAt).toLocaleDateString(),
+    reviewedOnTime: new Date(viewingAdData.createdAt).toLocaleTimeString(),
+    rejection: {
+      heading: "Ad was rejected",
+      details: "Details not available in list view.",
+      issuesFound: [],
+    },
+  } : null;
+
+  const viewingListAd = viewingAdData;
 
   return (
     <div className="py-4 md:pt-[28px] md:pb-[28px] px-4 md:pl-[28px] md:pr-4">
@@ -205,7 +145,13 @@ export default function RejectedAdsContent() {
 
           {/* Table Body */}
           <div className="flex flex-col gap-[10px] md:gap-[12px] mt-[10px] md:mt-[12px]">
-            {rejectedAds.map((ad) => (
+            {loading ? (
+              <div className="py-20 text-center text-[#5E5E5E]">Loading ads...</div>
+            ) : error ? (
+              <div className="py-20 text-center text-red-500">{error}</div>
+            ) : ads.length === 0 ? (
+              <div className="py-20 text-center text-[#5E5E5E]">No rejected ads found.</div>
+            ) : ads.map((ad) => (
               <div
                 key={ad.id}
                 className="bg-[#F4F4F4] rounded-[8px] overflow-hidden"
@@ -219,11 +165,11 @@ export default function RejectedAdsContent() {
                         {ad.title}
                       </span>
                     </div>
-                    <div className="px-[16px] text-[#000000] text-[13px] xl:text-[14px] font-normal leading-[150%] tracking-normal truncate">
-                      {ad.sellerName}
+                     <div className="px-[16px] text-[#000000] text-[13px] xl:text-[14px] font-normal leading-[150%] tracking-normal truncate">
+                      {ad.userName}
                     </div>
                     <div className="px-[16px] text-[#000000] text-[13px] xl:text-[14px] font-normal leading-[150%] tracking-normal">
-                      {ad.category}
+                      {ad.categoryName}
                     </div>
                   </div>
                   <div className="w-[100px] xl:w-[120px] shrink-0 flex items-center justify-center">
@@ -244,7 +190,7 @@ export default function RejectedAdsContent() {
                       {ad.title}
                     </p>
                     <p className="text-[#5E5E5E] text-[11px] mt-[2px]">
-                      {ad.sellerName} · {ad.category}
+                      {ad.userName} · {ad.categoryName}
                     </p>
                   </div>
                   <button
@@ -277,7 +223,7 @@ export default function RejectedAdsContent() {
                   <div className="flex flex-wrap items-center gap-[8px] md:gap-[12px]">
                     <span className="text-[#242424] text-[11px] md:text-[12px] font-normal leading-[150%] tracking-normal whitespace-nowrap">
                       Rejected by{" "}
-                      <strong className="font-semibold">{ad.rejectedBy}</strong>
+                      <strong className="font-semibold">System</strong>
                     </span>
                     <button
                       onClick={() => handleSendMessage(ad.id)}

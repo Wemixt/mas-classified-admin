@@ -64,3 +64,51 @@ export interface UserDetailsResponse {
     path: string;
   };
 }
+
+export type AdStatus = "ACTIVE" | "PENDING_REVIEW" | "REJECTED" | "DELETED" | "EXPIRED" | "DRAFT";
+
+export interface Ad {
+  id: string;
+  uuid: string;
+  title: string;
+  slug: string;
+  brand: string;
+  model: string;
+  contactDetails: string;
+  price: string;
+  currency: string;
+  isNegotiable: boolean;
+  condition: string;
+  status: AdStatus;
+  viewCount: number;
+  createdAt: string;
+  countryName: string;
+  districtName: string;
+  cityName: string;
+  categoryName: string;
+  userName: string;
+  userEmail: string;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+}
+
+export interface AdListResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: PaginatedResponse<Ad>;
+  meta: {
+    timestamp: string;
+    path: string;
+  };
+}
