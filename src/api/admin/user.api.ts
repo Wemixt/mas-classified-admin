@@ -5,4 +5,6 @@ export const userApi = {
     apiClient.get(`/api/v1/users/admin/list`, {
       params: { role, page, limit }
     }),
+  updateUserStatus: (id: string, status: string) => 
+    apiClient.put(`/api/v1/users/admin/status/update/${id}`, { status }),
 };

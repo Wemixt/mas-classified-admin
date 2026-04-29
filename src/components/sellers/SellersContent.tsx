@@ -69,9 +69,7 @@ export default function SellersContent() {
       const backendStatus = newActive ? "ACTIVE" : "SUSPENDED";
 
       if (role === "admin" || role === "super_admin") {
-        // We'll skip admin for now or implement if we have the API
-        console.log("Admin status update not implemented yet");
-        // For now just local update to keep UI responsive
+        await adminUserService.updateUserStatus(sellerId, backendStatus);
         setSellerList((prev) =>
           prev.map((seller) =>
             seller.id === sellerId ? { ...seller, active: newActive } : seller

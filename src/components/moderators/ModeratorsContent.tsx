@@ -77,14 +77,22 @@ export default function ModeratorsContent() {
     tempPassword: "",
   });
 
-  const handleToggleStatus = (moderatorId: string) => {
-    setModeratorList((prev) =>
-      prev.map((moderator) =>
-        moderator.id === moderatorId
-          ? { ...moderator, active: !moderator.active }
-          : moderator
-      )
-    );
+  const handleToggleStatus = async (moderatorId: string, currentStatus: boolean) => {
+    try {
+      const newActive = !currentStatus;
+      const backendStatus = newActive ? "ACTIVE" : "SUSPENDED";
+
+      await userService.updateUserStatus(moderatorId, backendStatus);
+      setModeratorList((prev) =>
+        prev.map((moderator) =>
+          moderator.id === moderatorId
+            ? { ...moderator, active: newActive }
+            : moderator
+        )
+      );
+    } catch (err) {
+      console.error("Failed to update moderator status", err);
+    }
   };
 
   const handleAddModerator = () => setShowForm(true);
@@ -357,7 +365,7 @@ export default function ModeratorsContent() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleToggleStatus(moderator.id);
+                      handleToggleStatus(moderator.id, moderator.active);
                     }}
                     className={`relative w-[28px] h-[16px] rounded-full transition-colors shrink-0 ${moderator.active ? "bg-[#0F792F]" : "bg-[#CCCCCC]"}`}
                   >
@@ -403,7 +411,7 @@ export default function ModeratorsContent() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleToggleStatus(moderator.id);
+                      handleToggleStatus(moderator.id, moderator.active);
                     }}
                     className={`relative w-[26px] h-[15px] rounded-full transition-colors shrink-0 ${moderator.active ? "bg-[#0F792F]" : "bg-[#CCCCCC]"}`}
                   >
