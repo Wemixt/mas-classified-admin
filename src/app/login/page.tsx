@@ -78,34 +78,6 @@ export default function LoginPage() {
           )}
 
           <div className="mt-8 w-full">
-            <button
-              type="button"
-              className="flex w-full items-center justify-center gap-3 rounded-md bg-white px-3 py-3 text-sm font-bold text-[#164b85] shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-all focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#164b85]"
-              onClick={() => {
-                // TODO: Update with actual SSO route or method
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-                window.location.href = `${apiUrl}/api/v1/auth/cognito/login`;
-              }}
-            >
-              <Image 
-                src="/logos/mass logo.png" 
-                alt="MAS Logo" 
-                width={50} 
-                height={20} 
-                className="object-contain" 
-              />
-              Login with MAS
-            </button>
-            
-            <div className="relative mt-6 mb-6">
-              <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                <div className="w-full border-t border-gray-200" />
-              </div>
-              <div className="relative flex justify-center text-sm font-medium leading-6">
-                <span className="bg-white px-6 text-gray-400">Or continue with email</span>
-              </div>
-            </div>
-
             <form className="space-y-5" onSubmit={handleLogin}>
               <div>
                 <label htmlFor="email" className="block text-xs font-bold text-gray-900 mb-2">

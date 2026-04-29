@@ -14,4 +14,8 @@ export const authService = {
     const response = await authApi.getDetails(token);
     return response.data;
   },
+  refresh: async (refreshToken: string) => {
+    const response = await authApi.refresh(refreshToken);
+    return response.data;
+  },
 };

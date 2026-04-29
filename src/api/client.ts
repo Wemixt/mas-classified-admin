@@ -32,15 +32,84 @@ apiClient.interceptors.request.use(
   }
 );
 
+// To prevent infinite loop if refresh fails
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 // Response Interceptor: Global Error Handling
 apiClient.interceptors.response.use(
   (response) => {
     return response;
   },
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
+    
     // Handle specific status codes (e.g., 401 Unauthorized)
-    if (error.response?.status === 401) {
-      console.warn("Unauthorized! Redirecting to login or refreshing token...");
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise(function(resolve, reject) {
+          failedQueue.push({ resolve, reject });
+        }).then(token => {
+          originalRequest.headers['Authorization'] = 'Bearer ' + token;
+          return apiClient(originalRequest);
+        }).catch(err => {
+          return Promise.reject(err);
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        if (typeof document !== "undefined") {
+          const refreshToken = document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("refresh_token="))
+            ?.split("=")[1];
+
+          if (!refreshToken) {
+            throw new Error("No refresh token available");
+          }
+
+          const response = await axios.post(
+            `${getApiBaseUrl()}/api/v1/auth/refresh`,
+            {},
+            { headers: { Authorization: `Bearer ${refreshToken}` } }
+          );
+
+          if (response.data?.success && response.data?.data) {
+            const { accessToken, refreshToken: newRefreshToken } = response.data.data;
+            document.cookie = `auth_token=${accessToken}; path=/; max-age=86400; SameSite=Lax`;
+            document.cookie = `refresh_token=${newRefreshToken}; path=/; max-age=604800; SameSite=Lax`;
+            
+            apiClient.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+            originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
+            
+            processQueue(null, accessToken);
+            return apiClient(originalRequest);
+          }
+        }
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        // Dispatch custom event to trigger logout in UI
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event('auth_error'));
+        }
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
     }
     return Promise.reject(error);
   }

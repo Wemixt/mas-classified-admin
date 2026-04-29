@@ -65,6 +65,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } else {
       setIsLoading(false);
     }
+
+    const handleAuthError = () => {
+      logout();
+    };
+
+    window.addEventListener('auth_error', handleAuthError);
+    return () => window.removeEventListener('auth_error', handleAuthError);
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -72,9 +79,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await authService.login({ email, password });
       
       if (response && response.success && response.data) {
-        const { accessToken } = response.data;
+        const { accessToken, refreshToken } = response.data;
         // Set the token securely so the Next.js middleware allows navigation
         document.cookie = `auth_token=${accessToken}; path=/; max-age=86400; SameSite=Lax`;
+        if (refreshToken) {
+          document.cookie = `refresh_token=${refreshToken}; path=/; max-age=604800; SameSite=Lax`;
+        }
         
         // Fetch real user details with the token immediately
         const detailsResponse = await authService.getDetails(accessToken);
@@ -105,6 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("Logout API failed", error);
     } finally {
       document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      document.cookie = "refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       setUser(null);
       setRole(null);
       setIsAuthenticated(false);
