@@ -1,6 +1,6 @@
-import apiClient from "./client";
+import apiClient from "../client";
 
-export const listingApi = {
+export const adApi = {
   // getListings: () => apiClient.get("/listings"),
   // getListingById: (id: string) => apiClient.get(`/listings/${id}`),
 };

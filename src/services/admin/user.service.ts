@@ -1,4 +1,4 @@
-import { userApi } from "@/api/user.api";
+import { userApi } from "@/api/admin/user.api";
 
 export const userService = {
   // getAllUsers: async () => {
