@@ -67,7 +67,7 @@ export default function Header() {
 
         {/* ── All Ads button ── */}
         <Link
-          href="/ads"
+          href="/all-ads"
           className="flex-shrink-0 flex items-center justify-center rounded-[8px] xl:rounded-[10px]
             bg-[#0F467F] text-white font-normal leading-[100%] tracking-normal
             hover:bg-[#0F467F]/90 transition-colors
