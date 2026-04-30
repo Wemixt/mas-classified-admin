@@ -5,6 +5,8 @@ import Image from "next/image";
 import { adsService } from "@/services/admin/ads.service";
 import { AdminAd } from "@/types";
 import toast from "react-hot-toast";
+import AdDetailView, { AdDetail } from "../ad-review/AdDetailView";
+import { adService as moderatorAdService } from "@/services/moderator/ad.service";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -121,6 +123,10 @@ export default function ModeratorAllAdsContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
+  const [viewingAdId, setViewingAdId] = useState<string | null>(null);
+  const [selectedAd, setSelectedAd] = useState<AdDetail | null>(null);
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+
   const [meta, setMeta] = useState({
     total: 0,
     page: 1,
@@ -145,6 +151,93 @@ export default function ModeratorAllAdsContent() {
     }
   };
 
+  const handleViewAd = async (ad: AdminAd) => {
+    try {
+      setIsLoadingDetail(true);
+      setViewingAdId(ad.uuid);
+      const response = await adsService.getAdminAdDetails(ad.uuid);
+      
+      if (response.success && response.data) {
+        const fullAd = response.data;
+        setSelectedAd({
+          id: fullAd.id,
+          title: fullAd.title,
+          price: Number(fullAd.price),
+          negotiable: fullAd.isNegotiable,
+          category: fullAd.categoryName,
+          condition: fullAd.condition,
+          location: `${fullAd.cityName}, ${fullAd.districtName}`,
+          contactNo: fullAd.contactDetails || "N/A",
+          brand: fullAd.brand,
+          model: fullAd.model,
+          deviceType: fullAd.categoryName,
+          description: fullAd.description || "No description provided.",
+          images: fullAd.images || [],
+          dateSubmitted: new Date(fullAd.createdAt).toLocaleDateString(),
+          timeSubmitted: new Date(fullAd.createdAt).toLocaleTimeString(),
+          seller: {
+            name: fullAd.userName || fullAd.user?.fullName || "Unknown Seller",
+            username: fullAd.userEmail?.split('@')[0] || "unknown",
+            avatar: "",
+            badge: "Seller",
+          },
+        });
+      }
+    } catch (err) {
+      console.error("Failed to fetch ad details", err);
+      toast.error("Failed to fetch ad details");
+    } finally {
+      setIsLoadingDetail(false);
+    }
+  };
+
+  const handleBackToList = () => {
+    setViewingAdId(null);
+    setSelectedAd(null);
+  };
+
+  const handleAccept = async (adId: string) => {
+    try {
+      setIsLoading(true);
+      await moderatorAdService.updateAdStatus(viewingAdId!, "ACTIVE");
+      toast.success("Ad approved successfully");
+      handleBackToList();
+      fetchAds(meta.page);
+    } catch (err) {
+      toast.error("Failed to approve ad");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleReject = async (adId: string, reason: string) => {
+    try {
+      setIsLoading(true);
+      await moderatorAdService.updateAdStatus(viewingAdId!, "REJECTED", reason);
+      toast.success("Ad rejected successfully");
+      handleBackToList();
+      fetchAds(meta.page);
+    } catch (err) {
+      toast.error("Failed to reject ad");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRequestChanges = async (adId: string, reason: string) => {
+    try {
+      setIsLoading(true);
+      await moderatorAdService.updateAdStatus(viewingAdId!, "REJECTED", reason);
+      toast.success("Change request sent");
+      handleBackToList();
+      fetchAds(meta.page);
+    } catch (err) {
+      toast.error("Failed to request changes");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const filteredAds = useMemo(() => {
     if (!searchQuery.trim()) return ads;
     const q = searchQuery.toLowerCase();
@@ -160,96 +253,123 @@ export default function ModeratorAllAdsContent() {
 
   return (
     <div className="py-4 md:pt-[28px] md:pb-[40px] px-4 md:pl-[28px] md:pr-4 w-full max-w-full overflow-hidden">
-      <h1 className="text-[#5E5E5E] text-[18px] md:text-[22px] font-normal leading-[100%] tracking-normal" style={{ fontFamily: "Eurostile, sans-serif" }}>
-        All Ads
-      </h1>
-
-      <div className="border-t border-[#5E5E5E] opacity-70 mt-[16px]" />
-
-      <div className="flex flex-col sm:flex-row sm:items-center gap-[16px] sm:gap-[24px] mt-[24px]">
-        <h2 className="text-[#1A1A1A] text-[20px] md:text-[22px] font-bold leading-[100%] tracking-normal whitespace-nowrap underline decoration-[#1A1A1A] underline-offset-[3px]" style={{ fontFamily: "Eurostile, sans-serif" }}>
-          All Categories
-        </h2>
-
-        <div className="flex-1">
-          <div className={`flex items-center gap-[10px] h-[44px] md:h-[46px] rounded-[8px] border px-[14px] md:px-[16px] bg-white transition-all duration-150 ${
-            searchFocused ? "border-[#1174BB] shadow-[0_0_0_3px_rgba(17,116,187,0.13)]" : "border-[#C5C5C5]"
-          }`}>
-            <SearchIcon focused={searchFocused} />
-            <input
-              type="text"
-              placeholder="Search by title, category, city..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setSearchFocused(true)}
-              onBlur={() => setSearchFocused(false)}
-              className="flex-1 bg-transparent text-[#242424] text-[13px] md:text-[14px] font-normal outline-none placeholder:text-[#B0B0B0]"
-              style={{ fontFamily: "Eurostile, sans-serif" }}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-[8px] mt-[14px] flex-wrap">
-        <span className="text-[#5E5E5E] text-[12px] md:text-[13px] font-normal" style={{ fontFamily: "Eurostile, sans-serif" }}>All Categories</span>
-        <Chevron />
-        <span className="text-[#5E5E5E] text-[12px] md:text-[13px] font-normal" style={{ fontFamily: "Eurostile, sans-serif" }}>All ads in Sri Lanka</span>
-        {searchQuery && (
-          <>
-            <Chevron />
-            <span className="text-[#1174BB] text-[12px] md:text-[13px] font-normal" style={{ fontFamily: "Eurostile, sans-serif" }}>&ldquo;{searchQuery}&rdquo;</span>
-          </>
+      <div className="flex items-baseline gap-[8px] flex-wrap">
+        <h1 className="text-[#5E5E5E] text-[18px] md:text-[22px] font-normal leading-[100%] tracking-normal" style={{ fontFamily: "Eurostile, sans-serif" }}>
+          All Ads
+        </h1>
+        {selectedAd && (
+          <span className="text-[#5E5E5E] text-[14px] md:text-[18px] font-normal leading-[100%] tracking-normal opacity-60 truncate max-w-[200px] sm:max-w-none" style={{ fontFamily: "Eurostile, sans-serif" }}>
+            /&nbsp;{selectedAd.title}
+          </span>
         )}
       </div>
 
-      <p className="text-[#5E5E5E] text-[12px] mt-[6px] opacity-70" style={{ fontFamily: "Eurostile, sans-serif" }}>
-        {isLoading ? "Loading..." : `${filteredAds.length} result${filteredAds.length !== 1 ? "s" : ""} found`}
-      </p>
+      <div className="border-t border-[#5E5E5E] opacity-70 mt-[16px]" />
 
-      {isLoading ? (
+      {isLoadingDetail ? (
         <div className="flex justify-center py-[100px]">
           <div className="w-10 h-10 border-4 border-[#1174BB] border-t-transparent rounded-full animate-spin"></div>
         </div>
-      ) : filteredAds.length > 0 ? (
+      ) : selectedAd ? (
+        <div className="mt-[20px]">
+          <AdDetailView
+            ad={selectedAd}
+            onBack={handleBackToList}
+            onAccept={handleAccept}
+            onReject={handleReject}
+            onRequestChanges={handleRequestChanges}
+          />
+        </div>
+      ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-[12px] md:gap-[16px] mt-[18px] md:mt-[22px]">
-            {filteredAds.map((ad) => (
-              <AdCard key={ad.uuid} ad={ad} />
-            ))}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-[16px] sm:gap-[24px] mt-[24px]">
+            <h2 className="text-[#1A1A1A] text-[20px] md:text-[22px] font-bold leading-[100%] tracking-normal whitespace-nowrap underline decoration-[#1A1A1A] underline-offset-[3px]" style={{ fontFamily: "Eurostile, sans-serif" }}>
+              All Categories
+            </h2>
+
+            <div className="flex-1">
+              <div className={`flex items-center gap-[10px] h-[44px] md:h-[46px] rounded-[8px] border px-[14px] md:px-[16px] bg-white transition-all duration-150 ${
+                searchFocused ? "border-[#1174BB] shadow-[0_0_0_3px_rgba(17,116,187,0.13)]" : "border-[#C5C5C5]"
+              }`}>
+                <SearchIcon focused={searchFocused} />
+                <input
+                  type="text"
+                  placeholder="Search by title, category, city..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => setSearchFocused(false)}
+                  className="flex-1 bg-transparent text-[#242424] text-[13px] md:text-[14px] font-normal outline-none placeholder:text-[#B0B0B0]"
+                  style={{ fontFamily: "Eurostile, sans-serif" }}
+                />
+              </div>
+            </div>
           </div>
 
-          {meta.totalPages > 1 && (
-            <div className="flex justify-center items-center gap-4 mt-8">
-              <button 
-                onClick={() => fetchAds(meta.page - 1)}
-                disabled={meta.page === 1}
-                className="px-4 py-2 border rounded-md disabled:opacity-50 hover:bg-gray-50 transition-colors"
-              >
-                Previous
-              </button>
-              <span className="text-sm text-[#5E5E5E]">
-                Page {meta.page} of {meta.totalPages}
-              </span>
-              <button 
-                onClick={() => fetchAds(meta.page + 1)}
-                disabled={meta.page === meta.totalPages}
-                className="px-4 py-2 border rounded-md disabled:opacity-50 hover:bg-gray-50 transition-colors"
-              >
-                Next
-              </button>
+          <div className="flex items-center gap-[8px] mt-[14px] flex-wrap">
+            <span className="text-[#5E5E5E] text-[12px] md:text-[13px] font-normal" style={{ fontFamily: "Eurostile, sans-serif" }}>All Categories</span>
+            <Chevron />
+            <span className="text-[#5E5E5E] text-[12px] md:text-[13px] font-normal" style={{ fontFamily: "Eurostile, sans-serif" }}>All ads in Sri Lanka</span>
+            {searchQuery && (
+              <>
+                <Chevron />
+                <span className="text-[#1174BB] text-[12px] md:text-[13px] font-normal" style={{ fontFamily: "Eurostile, sans-serif" }}>&ldquo;{searchQuery}&rdquo;</span>
+              </>
+            )}
+          </div>
+
+          <p className="text-[#5E5E5E] text-[12px] mt-[6px] opacity-70" style={{ fontFamily: "Eurostile, sans-serif" }}>
+            {isLoading ? "Loading..." : `${filteredAds.length} result${filteredAds.length !== 1 ? "s" : ""} found`}
+          </p>
+
+          {isLoading ? (
+            <div className="flex justify-center py-[100px]">
+              <div className="w-10 h-10 border-4 border-[#1174BB] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : filteredAds.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-[12px] md:gap-[16px] mt-[18px] md:mt-[22px]">
+                {filteredAds.map((ad) => (
+                  <div key={ad.uuid} onClick={() => handleViewAd(ad)}>
+                    <AdCard ad={ad} />
+                  </div>
+                ))}
+              </div>
+
+              {meta.totalPages > 1 && (
+                <div className="flex justify-center items-center gap-4 mt-8">
+                  <button 
+                    onClick={() => fetchAds(meta.page - 1)}
+                    disabled={meta.page === 1}
+                    className="px-4 py-2 border rounded-md disabled:opacity-50 hover:bg-gray-50 transition-colors"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-sm text-[#5E5E5E]">
+                    Page {meta.page} of {meta.totalPages}
+                  </span>
+                  <button 
+                    onClick={() => fetchAds(meta.page + 1)}
+                    disabled={meta.page === meta.totalPages}
+                    className="px-4 py-2 border rounded-md disabled:opacity-50 hover:bg-gray-50 transition-colors"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-[60px] mt-[20px]">
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mb-[14px] opacity-25">
+                <circle cx="11" cy="11" r="7.5" stroke="#5E5E5E" strokeWidth="1.5" />
+                <path d="M17 17L21 21" stroke="#5E5E5E" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+              <p className="text-[#5E5E5E] text-[14px] font-normal opacity-60 text-center" style={{ fontFamily: "Eurostile, sans-serif" }}>
+                No ads found
+              </p>
             </div>
           )}
         </>
-      ) : (
-        <div className="flex flex-col items-center justify-center py-[60px] mt-[20px]">
-          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mb-[14px] opacity-25">
-            <circle cx="11" cy="11" r="7.5" stroke="#5E5E5E" strokeWidth="1.5" />
-            <path d="M17 17L21 21" stroke="#5E5E5E" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-          <p className="text-[#5E5E5E] text-[14px] font-normal opacity-60 text-center" style={{ fontFamily: "Eurostile, sans-serif" }}>
-            No ads found
-          </p>
-        </div>
       )}
     </div>
   );
