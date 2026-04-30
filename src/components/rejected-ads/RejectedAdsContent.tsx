@@ -6,6 +6,7 @@ import RejectedAdDetailView, {
 } from "./RejectedAdDetailView";
 import { adService } from "@/services/moderator/ad.service";
 import type { Ad } from "@/types";
+import Pagination from "../common/Pagination";
 
 
 export default function RejectedAdsContent() {
@@ -18,12 +19,19 @@ export default function RejectedAdsContent() {
   const [messageModalState, setMessageModalState] = useState<{ adId: string; step: "compose" | "done" } | null>(null);
   const [messageText, setMessageText] = useState("");
   const [deleteModalState, setDeleteModalState] = useState<{ adId: string; step: "confirm" | "done" } | null>(null);
+  const [meta, setMeta] = useState({
+    total: 0,
+    page: 1,
+    limit: 10,
+    totalPages: 1
+  });
 
-  const fetchAds = async () => {
+  const fetchAds = async (page = 1) => {
     try {
       setLoading(true);
-      const response = await adService.getAdminAds("REJECTED");
+      const response = await adService.getAdminAds("REJECTED", page, 10);
       setAds(response.data.data);
+      setMeta(response.data.meta);
       setError(null);
     } catch (err) {
       setError("Failed to load rejected ads");
@@ -46,7 +54,7 @@ export default function RejectedAdsContent() {
       await adService.updateAdStatus(ad.uuid, "PENDING_REVIEW");
       setViewingAdId(null);
       setSelectedAd(null);
-      await fetchAds();
+      await fetchAds(meta.page);
     } catch (err) {
       setError("Failed to reconsider ad");
       console.error(err);
@@ -272,6 +280,13 @@ export default function RejectedAdsContent() {
               </div>
             ))}
           </div>
+
+          <Pagination 
+            currentPage={meta.page}
+            totalPages={meta.totalPages}
+            onPageChange={(page) => fetchAds(page)}
+            isLoading={loading}
+          />
         </div>
       )}
 

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { userService as adminUserService } from "@/services/admin/user.service";
 import { userService as moderatorUserService } from "@/services/moderator/user.service";
 import { useAuth } from "@/hooks";
+import Pagination from "../common/Pagination";
 
 interface Seller {
   id: string;
@@ -24,17 +25,23 @@ export default function SellersContent() {
   const [error, setError] = useState<string | null>(null);
   const [selectedSeller, setSelectedSeller] = useState<Seller | null>(null);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [meta, setMeta] = useState({
+    total: 0,
+    page: 1,
+    limit: 10,
+    totalPages: 1
+  });
 
-  const fetchSellers = async () => {
+  const fetchSellers = async (page = 1) => {
     try {
       setLoading(true);
       
       let response;
       if (role === "admin" || role === "super_admin") {
-        response = await adminUserService.getAdminUsers("USER");
+        response = await adminUserService.getAdminUsers("USER", page, 10);
       } else {
         // Moderator's sellers page
-        response = await moderatorUserService.getModeratorUsers();
+        response = await moderatorUserService.getModeratorUsers(page, 10);
       }
 
       if (response.success && response.data) {
@@ -48,6 +55,7 @@ export default function SellersContent() {
           active: u.status === "ACTIVE",
         }));
         setSellerList(mappedSellers);
+        setMeta(response.data.meta);
       }
     } catch (err) {
       console.error("Failed to fetch sellers", err);
@@ -59,7 +67,7 @@ export default function SellersContent() {
 
   useEffect(() => {
     if (role) {
-      fetchSellers();
+      fetchSellers(1);
     }
   }, [role]);
 
@@ -218,6 +226,13 @@ export default function SellersContent() {
             )}
           </div>
         </div>
+
+        <Pagination 
+          currentPage={meta.page}
+          totalPages={meta.totalPages}
+          onPageChange={(page) => fetchSellers(page)}
+          isLoading={loading}
+        />
       </div>
 
       {/* Seller Details Modal */}

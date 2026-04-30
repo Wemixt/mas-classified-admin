@@ -6,6 +6,7 @@ import PublishedAdDetailView, {
 } from "./PublishedAdDetailView";
 import { adService } from "@/services/moderator/ad.service";
 import type { Ad } from "@/types";
+import Pagination from "../common/Pagination";
 
 
 export default function PublishedAdsContent() {
@@ -17,12 +18,19 @@ export default function PublishedAdsContent() {
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [messageModalState, setMessageModalState] = useState<{ adId: string; step: "compose" | "done" } | null>(null);
   const [messageText, setMessageText] = useState("");
+  const [meta, setMeta] = useState({
+    total: 0,
+    page: 1,
+    limit: 10,
+    totalPages: 1
+  });
 
-  const fetchAds = async () => {
+  const fetchAds = async (page = 1) => {
     try {
       setLoading(true);
-      const response = await adService.getAdminAds("ACTIVE");
+      const response = await adService.getAdminAds("ACTIVE", page, 10);
       setAds(response.data.data);
+      setMeta(response.data.meta);
       setError(null);
     } catch (err) {
       setError("Failed to load published ads");
@@ -276,6 +284,13 @@ export default function PublishedAdsContent() {
               </div>
             ))}
           </div>
+
+          <Pagination 
+            currentPage={meta.page}
+            totalPages={meta.totalPages}
+            onPageChange={(page) => fetchAds(page)}
+            isLoading={loading}
+          />
         </div>
       )}
 

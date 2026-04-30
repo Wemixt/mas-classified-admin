@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { userService as adminUserService } from "@/services/admin/user.service";
+import Pagination from "../common/Pagination";
 
 interface User {
   id: string;
@@ -28,8 +29,14 @@ export default function AllUsersContent() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [meta, setMeta] = useState({
+    total: 0,
+    page: 1,
+    limit: 10,
+    totalPages: 1
+  });
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (page = 1) => {
     try {
       setLoading(true);
       setError(null);
@@ -39,7 +46,7 @@ export default function AllUsersContent() {
       else if (activeTab === "Sellers") roleParam = "USER";
       else if (activeTab === "Visitors") roleParam = "GUEST";
 
-      const response = await adminUserService.getAdminUsers(roleParam);
+      const response = await adminUserService.getAdminUsers(roleParam, page, 10);
       if (response.success && response.data) {
         const mappedUsers: User[] = response.data.data.map((u: any) => ({
           id: u.id,
@@ -53,6 +60,7 @@ export default function AllUsersContent() {
           avatar: u.profileImage || "/logos/mass logo.png",
         }));
         setUserList(mappedUsers);
+        setMeta(response.data.meta);
       }
     } catch (err) {
       console.error("Failed to fetch users", err);
@@ -63,7 +71,7 @@ export default function AllUsersContent() {
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchUsers(1);
   }, [activeTab]);
 
   const tabs: TabType[] = ["All Users", "Moderators", "Sellers", "Visitors"];
@@ -262,29 +270,12 @@ export default function AllUsersContent() {
         </div>
 
         {/* Pagination */}
-        <div className="mt-[20px] md:mt-[24px] flex flex-wrap items-center justify-between gap-[8px] mb-12">
-          <div className="text-[#5E5E5E] text-[12px] md:text-[14.5px] font-normal">
-            Showing 1 to {Math.min(filteredUsers.length, 6)} of {filteredUsers.length} entries
-          </div>
-          <div className="flex items-center gap-[6px] md:gap-[8px]">
-            <button className="h-[30px] md:h-[32px] px-[12px] md:px-[16px] bg-[#EBEBEB] text-[#101010] text-[12px] md:text-[14px] font-normal leading-[100%] rounded-[6px] hover:bg-[#D4D4D4] transition-colors">
-              Previous
-            </button>
-            {[
-              { d: "M7 13L1 7L7 1", dir: "prev" },
-              { d: "M1 1L7 7L1 13", dir: "next" },
-            ].map(({ d, dir }) => (
-              <button key={dir} className="w-[30px] h-[30px] md:w-[32px] md:h-[32px] border border-[#D2D2D2] bg-white flex items-center justify-center rounded-[6px] hover:bg-[#F5F5F5] transition-colors text-[#5E5E5E]">
-                <svg width="7" height="12" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d={d} stroke="#5E5E5E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-            ))}
-            <button className="h-[30px] md:h-[32px] px-[12px] md:px-[16px] bg-[#EBEBEB] text-[#101010] text-[12px] md:text-[14px] font-normal leading-[100%] rounded-[6px] hover:bg-[#D4D4D4] transition-colors">
-              Next
-            </button>
-          </div>
-        </div>
+        <Pagination 
+          currentPage={meta.page}
+          totalPages={meta.totalPages}
+          onPageChange={(page) => fetchUsers(page)}
+          isLoading={loading}
+        />
       </div>
 
       {/* User Details Modal */}

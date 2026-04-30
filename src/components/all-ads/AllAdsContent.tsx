@@ -7,6 +7,7 @@ import { AdminAd } from "@/types";
 import toast from "react-hot-toast";
 import AdDetailView, { AdDetail } from "../ad-review/AdDetailView";
 import { adService as moderatorAdService } from "@/services/moderator/ad.service";
+import Pagination from "../common/Pagination";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -336,27 +337,12 @@ export default function AllAdsContent() {
                 ))}
               </div>
 
-              {meta.totalPages > 1 && (
-                <div className="flex justify-center items-center gap-4 mt-8">
-                  <button 
-                    onClick={() => fetchAds(meta.page - 1)}
-                    disabled={meta.page === 1}
-                    className="px-4 py-2 border rounded-md disabled:opacity-50 hover:bg-gray-50 transition-colors"
-                  >
-                    Previous
-                  </button>
-                  <span className="text-sm text-[#5E5E5E]">
-                    Page {meta.page} of {meta.totalPages}
-                  </span>
-                  <button 
-                    onClick={() => fetchAds(meta.page + 1)}
-                    disabled={meta.page === meta.totalPages}
-                    className="px-4 py-2 border rounded-md disabled:opacity-50 hover:bg-gray-50 transition-colors"
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
+              <Pagination 
+                currentPage={meta.page}
+                totalPages={meta.totalPages}
+                onPageChange={(page) => fetchAds(page)}
+                isLoading={isLoading}
+              />
             </>
           ) : (
             <div className="flex flex-col items-center justify-center py-[60px] mt-[20px]">

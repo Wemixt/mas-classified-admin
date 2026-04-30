@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useAuth } from "@/hooks";
 import { userService } from "@/services/admin/user.service";
+import Pagination from "../common/Pagination";
 
 interface Moderator {
   id: string;
@@ -36,11 +37,17 @@ export default function ModeratorsContent() {
   const [error, setError] = useState<string | null>(null);
   const [selectedModerator, setSelectedModerator] = useState<Moderator | null>(null);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [meta, setMeta] = useState({
+    total: 0,
+    page: 1,
+    limit: 10,
+    totalPages: 1
+  });
 
-  const fetchModerators = async () => {
+  const fetchModerators = async (page = 1) => {
     try {
       setLoading(true);
-      const response = await userService.getAdminUsers("MODERATOR");
+      const response = await userService.getAdminUsers("MODERATOR", page, 10);
       if (response.success && response.data) {
         const mappedModerators: Moderator[] = response.data.data.map((u: any) => ({
           id: u.id,
@@ -52,6 +59,7 @@ export default function ModeratorsContent() {
           active: u.status === "ACTIVE",
         }));
         setModeratorList(mappedModerators);
+        setMeta(response.data.meta);
       }
     } catch (err) {
       console.error("Failed to fetch moderators", err);
@@ -63,7 +71,7 @@ export default function ModeratorsContent() {
 
   useEffect(() => {
     if (role === "admin" || role === "super_admin") {
-      fetchModerators();
+      fetchModerators(1);
     }
   }, [role]);
   const [showForm, setShowForm] = useState(false);
@@ -481,6 +489,13 @@ export default function ModeratorsContent() {
             ))
           )}
         </div>
+
+        <Pagination 
+          currentPage={meta.page}
+          totalPages={meta.totalPages}
+          onPageChange={(page) => fetchModerators(page)}
+          isLoading={loading}
+        />
       </div>
 
       {/* Moderator Details Modal */}
