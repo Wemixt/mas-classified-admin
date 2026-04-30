@@ -1,39 +1,10 @@
 "use client";
 
 import { useAuth } from "@/hooks";
-import { useState } from "react";
-
-interface Subcategory {
-  id: string;
-  name: string;
-  code: string;
-  parent: string;
-  status: "Active" | "Disabled";
-}
-
-interface Category {
-  id: string;
-  name: string;
-  code: string;
-  subcategories: number;
-  publishedAds?: number;
-  status: "Active" | "Disabled";
-  children?: Subcategory[];
-}
-
-const mockCategories: Category[] = [
-  { id: "1", name: "Tech & Gadgets", code: "tech-gadgets", subcategories: 8, publishedAds: 8, status: "Active" },
-  { 
-    id: "2", name: "Food & Treats", code: "food-treats", subcategories: 12, publishedAds: 12, status: "Active", 
-    children: [
-      { id: "s1", name: "Men's clothing", code: "mensclothes", parent: "Food & Treats", status: "Active" },
-      { id: "s2", name: "Women's clothing", code: "Womenclothes", parent: "Food & Treats", status: "Active" },
-      { id: "s3", name: "Kid's Clothing", code: "Kids-clothes", parent: "Food & Treats", status: "Active" }
-    ] 
-  },
-  { id: "3", name: "Home & Garden", code: "home-garden", subcategories: 11, publishedAds: 11, status: "Active" },
-  { id: "4", name: "Crafts & Decor", code: "crafts-decor", subcategories: 11, publishedAds: 11, status: "Active" },
-];
+import { useState, useEffect, useMemo } from "react";
+import { categoryService } from "@/services/admin/category.service";
+import { Category, SubCategory } from "@/types";
+import toast from "react-hot-toast";
 
 const Toggle = ({ active }: { active: boolean }) => (
   <div className={`w-[36px] h-[20px] rounded-[10px] flex items-center p-[2.5px] transition-colors ${active ? 'bg-[#4CAF50] justify-end' : 'bg-[#A0A0A0] justify-start'}`}>
@@ -77,7 +48,9 @@ const ChevronUp = () => (
 export default function CategoriesContent() {
   const { role } = useAuth(); // "admin" | "moderator" | "super_admin"
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedCategoryId, setExpandedCategoryId] = useState<string>("2"); // Pre-expand Food & Treats
+  const [expandedCategoryId, setExpandedCategoryId] = useState<number | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDoneModal, setShowDoneModal] = useState(false);
@@ -85,8 +58,32 @@ export default function CategoriesContent() {
 
   const gridClasses = "grid grid-cols-[1.5fr_1.5fr_1.2fr_1.2fr_1fr] items-center";
 
-  const toggleExpand = (id: string) => {
-    setExpandedCategoryId(prev => prev === id ? "" : id);
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      setIsLoading(true);
+      const data = await categoryService.getMainCategories();
+      setCategories(data);
+    } catch (error) {
+      toast.error("Failed to fetch categories");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const filteredCategories = useMemo(() => {
+    if (!searchQuery) return categories;
+    return categories.filter(cat => 
+      cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      cat.slug.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [categories, searchQuery]);
+
+  const toggleExpand = (id: number) => {
+    setExpandedCategoryId(prev => prev === id ? null : id);
   };
 
   return (
@@ -152,109 +149,117 @@ export default function CategoriesContent() {
 
           {/* Categories List */}
           <div className="flex flex-col gap-[12px]">
-            {mockCategories.map((cat) => {
-              const isExpanded = expandedCategoryId === cat.id;
+            {isLoading ? (
+              <div className="flex justify-center py-10">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1174BB]"></div>
+              </div>
+            ) : filteredCategories.length === 0 ? (
+              <div className="text-center py-10 text-[#5E5E5E]">No categories found</div>
+            ) : (
+              filteredCategories.map((cat) => {
+                const isExpanded = expandedCategoryId === cat.id;
 
-              if (role === "moderator") {
-                return (
-                  <div key={cat.id} className="grid grid-cols-[2fr_1.5fr_1.5fr_1fr] items-center min-h-[58px] px-[24px] bg-[#F5F5F5] rounded-[10px]">
-                    <div className="text-[#000000] text-[13px] md:text-[14px] font-medium leading-[150%]">{cat.name}</div>
-                    <div className="text-[#000000] text-[13px] md:text-[14px] font-bold leading-[150%]">{cat.code}</div>
-                    <div className="text-[#000000] text-[13px] md:text-[14px] font-medium leading-[150%]">{cat.publishedAds}</div>
-                    <div className="flex justify-end">
-                      <button className="h-[30px] px-[16px] bg-[#EBEBEB] text-[#101010] text-[12px] font-medium rounded-[15px] hover:bg-[#D4D4D4] transition-colors whitespace-nowrap">
-                        View All Ad
-                      </button>
+                if (role === "moderator") {
+                  return (
+                    <div key={cat.id} className="grid grid-cols-[2fr_1.5fr_1.5fr_1fr] items-center min-h-[58px] px-[24px] bg-[#F5F5F5] rounded-[10px]">
+                      <div className="text-[#000000] text-[13px] md:text-[14px] font-medium leading-[150%]">{cat.name}</div>
+                      <div className="text-[#000000] text-[13px] md:text-[14px] font-bold leading-[150%]">{cat.slug}</div>
+                      <div className="text-[#000000] text-[13px] md:text-[14px] font-medium leading-[150%]">{cat.subCategories?.length || 0}</div>
+                      <div className="flex justify-end">
+                        <button className="h-[30px] px-[16px] bg-[#EBEBEB] text-[#101010] text-[12px] font-medium rounded-[15px] hover:bg-[#D4D4D4] transition-colors whitespace-nowrap">
+                          View All Ad
+                        </button>
+                      </div>
                     </div>
+                  );
+                }
+
+                // Admin View
+                return (
+                  <div key={cat.id} className="flex flex-col">
+                    {/* Main Row */}
+                    <div 
+                      className={`px-[24px] bg-[#F5F5F5] transition-colors cursor-pointer min-h-[58px] py-[8px] ${gridClasses} ${isExpanded ? 'rounded-t-[10px]' : 'rounded-[10px]'}`}
+                      onClick={() => toggleExpand(cat.id)}
+                    >
+                      <div className="text-[#000000] text-[13px] md:text-[14px] font-medium leading-[150%]">{cat.name}</div>
+                      <div className="text-[#000000] text-[13px] md:text-[14px] font-bold leading-[150%]">{cat.slug}</div>
+                      <div className="text-[#000000] text-[13px] md:text-[14px] font-medium leading-[150%]">{cat.subCategories?.length || 0}</div>
+                      
+                      {/* Actions */}
+                      <div className="flex items-center gap-[12px]">
+                        <button 
+                          onClick={(e) => e.stopPropagation()}
+                          className="h-[30px] px-[16px] bg-[#14487A] text-white text-[12px] font-medium rounded-full flex items-center gap-[6px] hover:bg-[#0E365E] transition-colors"
+                        >
+                          <EditIcon /> Edit
+                        </button>
+                        <button 
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex items-center justify-center transition-opacity hover:opacity-70 p-[6px] hover:bg-[#EAEAEA] rounded-full"
+                        >
+                          <RedTrashIcon />
+                        </button>
+                      </div>
+
+                      {/* Status */}
+                      <div className="flex items-center justify-between gap-[8px]">
+                        <div className="flex items-center gap-[8px]">
+                          <Toggle active={cat.isActive} />
+                          <span className="text-[#000000] text-[13px] md:text-[14px] font-bold">{cat.isActive ? "Active" : "Disabled"}</span>
+                        </div>
+                        <div className="pr-[8px]">
+                          {isExpanded ? <ChevronUp /> : <ChevronDown />}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Expanded Subcategories */}
+                    {isExpanded && (
+                      <div className="bg-[#EBEBEB] rounded-b-[10px] px-[24px] py-[20px]">
+                        <div className="grid grid-cols-[1.5fr_1.5fr_3.4fr] border-b border-[#D4D4D4] pb-[12px] mb-[12px]">
+                          <div className="text-[#333333] text-[13px] font-bold pl-[8px] md:pl-[16px]">Subcategory Name</div>
+                          <div className="text-[#333333] text-[13px] font-bold">Code</div>
+                          <div className="text-[#333333] text-[13px] font-bold">Statue</div>
+                        </div>
+                        
+                        <div className="flex flex-col">
+                          {cat.subCategories?.map((sub) => (
+                            <div key={sub.id} className="grid grid-cols-[1.5fr_1.5fr_3.4fr] items-center border-b border-[#D4D4D4] py-[12px]">
+                              <div className="text-[#555555] text-[13px] font-medium pl-[8px] md:pl-[16px]">{sub.name}</div>
+                              <div className="text-[#555555] text-[13px] font-medium">{sub.slug}</div>
+                              <div className="flex items-center gap-[8px]">
+                                <Toggle active={sub.isActive} />
+                                <span className="text-[#000000] text-[13px] font-bold">{sub.isActive ? "Active" : "Disabled"}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Add subcategory inputs */}
+                        <div className="grid grid-cols-[1.5fr_1.5fr_3.4fr] items-center pt-[16px]">
+                          <div className="pl-[8px] md:pl-[16px]">
+                            <input type="text" placeholder="Type here..." className="h-[38px] w-[90%] max-w-[200px] bg-white rounded-full px-[16px] text-[13px] outline-none border border-transparent focus:border-[#1174BB]" onClick={(e) => e.stopPropagation()} />
+                          </div>
+                          <div>
+                            <input type="text" placeholder="Type here..." className="h-[38px] w-[90%] max-w-[200px] bg-white rounded-full px-[16px] text-[13px] outline-none border border-transparent focus:border-[#1174BB]" onClick={(e) => e.stopPropagation()} />
+                          </div>
+                          <div>
+                            <button 
+                              onClick={(e) => e.stopPropagation()}
+                              className="h-[38px] px-[20px] bg-[#114A82] text-white text-[13px] font-medium rounded-full flex items-center gap-[8px] hover:bg-[#0E3A66] transition-colors whitespace-nowrap w-fit"
+                            >
+                              <PlusCircleIcon color="#114A82" />
+                              <span className="text-white">Add Subcategories</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
-              }
-
-              // Admin View
-              return (
-                <div key={cat.id} className="flex flex-col">
-                  {/* Main Row */}
-                  <div 
-                    className={`px-[24px] bg-[#F5F5F5] transition-colors cursor-pointer min-h-[58px] py-[8px] ${gridClasses} ${isExpanded ? 'rounded-t-[10px]' : 'rounded-[10px]'}`}
-                    onClick={() => toggleExpand(cat.id)}
-                  >
-                    <div className="text-[#000000] text-[13px] md:text-[14px] font-medium leading-[150%]">{cat.name}</div>
-                    <div className="text-[#000000] text-[13px] md:text-[14px] font-bold leading-[150%]">{cat.code}</div>
-                    <div className="text-[#000000] text-[13px] md:text-[14px] font-medium leading-[150%]">{cat.subcategories}</div>
-                    
-                    {/* Actions */}
-                    <div className="flex items-center gap-[12px]">
-                      <button 
-                        onClick={(e) => e.stopPropagation()}
-                        className="h-[30px] px-[16px] bg-[#14487A] text-white text-[12px] font-medium rounded-full flex items-center gap-[6px] hover:bg-[#0E365E] transition-colors"
-                      >
-                        <EditIcon /> Edit
-                      </button>
-                      <button 
-                        onClick={(e) => e.stopPropagation()}
-                        className="flex items-center justify-center transition-opacity hover:opacity-70 p-[6px] hover:bg-[#EAEAEA] rounded-full"
-                      >
-                        <RedTrashIcon />
-                      </button>
-                    </div>
-
-                    {/* Status */}
-                    <div className="flex items-center justify-between gap-[8px]">
-                      <div className="flex items-center gap-[8px]">
-                        <Toggle active={cat.status === "Active"} />
-                        <span className="text-[#000000] text-[13px] md:text-[14px] font-bold">{cat.status}</span>
-                      </div>
-                      <div className="pr-[8px]">
-                        {isExpanded ? <ChevronUp /> : <ChevronDown />}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Expanded Subcategories */}
-                  {isExpanded && (
-                    <div className="bg-[#EBEBEB] rounded-b-[10px] px-[24px] py-[20px]">
-                      <div className="grid grid-cols-[1.5fr_1.5fr_3.4fr] border-b border-[#D4D4D4] pb-[12px] mb-[12px]">
-                        <div className="text-[#333333] text-[13px] font-bold pl-[8px] md:pl-[16px]">Subcategory Name</div>
-                        <div className="text-[#333333] text-[13px] font-bold">Code</div>
-                        <div className="text-[#333333] text-[13px] font-bold">Statue</div>
-                      </div>
-                      
-                      <div className="flex flex-col">
-                        {cat.children?.map((sub) => (
-                          <div key={sub.id} className="grid grid-cols-[1.5fr_1.5fr_3.4fr] items-center border-b border-[#D4D4D4] py-[12px]">
-                            <div className="text-[#555555] text-[13px] font-medium pl-[8px] md:pl-[16px]">{sub.name}</div>
-                            <div className="text-[#555555] text-[13px] font-medium">{sub.code}</div>
-                            <div className="flex items-center gap-[8px]">
-                              <Toggle active={sub.status === "Active"} />
-                              <span className="text-[#000000] text-[13px] font-bold">Active</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Add subcategory inputs */}
-                      <div className="grid grid-cols-[1.5fr_1.5fr_3.4fr] items-center pt-[16px]">
-                        <div className="pl-[8px] md:pl-[16px]">
-                          <input type="text" placeholder="Type here..." className="h-[38px] w-[90%] max-w-[200px] bg-white rounded-full px-[16px] text-[13px] outline-none border border-transparent focus:border-[#1174BB]" onClick={(e) => e.stopPropagation()} />
-                        </div>
-                        <div>
-                          <input type="text" placeholder="Type here..." className="h-[38px] w-[90%] max-w-[200px] bg-white rounded-full px-[16px] text-[13px] outline-none border border-transparent focus:border-[#1174BB]" onClick={(e) => e.stopPropagation()} />
-                        </div>
-                        <div>
-                          <button 
-                            onClick={(e) => e.stopPropagation()}
-                            className="h-[38px] px-[20px] bg-[#114A82] text-white text-[13px] font-medium rounded-full flex items-center gap-[8px] hover:bg-[#0E3A66] transition-colors whitespace-nowrap w-fit"
-                          >
-                            <PlusCircleIcon color="#114A82" />
-                            <span className="text-white">Add Subcategories</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+              })
+            )}
           </div>
         </div>
       </div>

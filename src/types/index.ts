@@ -112,3 +112,57 @@ export interface AdListResponse {
     path: string;
   };
 }
+
+export interface SubCategory {
+  id: number;
+  uuid: string;
+  name: string;
+  slug: string;
+  mainCategoryId: number;
+  description: string | null;
+  icon: string | null;
+  order: number;
+  isActive: boolean;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+export interface Category {
+  id: number;
+  uuid: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  icon: string | null;
+  order: number;
+  isActive: boolean;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  subCategories?: SubCategory[];
+}
+
+export interface CategoryListResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: Category[];
+  meta: {
+    timestamp: string;
+    path: string;
+  };
+}
+
+export interface SubCategoryListResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: SubCategory[];
+  meta: {
+    timestamp: string;
+    path: string;
+  };
+}
