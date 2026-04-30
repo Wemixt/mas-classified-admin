@@ -71,7 +71,7 @@ export default function CategoriesContent() {
 
   // Delete states
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<{ uuid: string, type: "category" | "subcategory", name: string } | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<{ uuid: string, type: "category" | "subcategory", name: string, hasSubcategories?: boolean } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const gridClasses = "grid grid-cols-[0.6fr_1.5fr_1.2fr_1.2fr_1.2fr_0.8fr] items-center";
@@ -217,6 +217,20 @@ export default function CategoriesContent() {
       toast.error(`Failed to delete ${itemToDelete.type}`);
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleToggleStatus = async (uuid: string, type: "category" | "subcategory", currentStatus: boolean) => {
+    try {
+      if (type === "category") {
+        await categoryService.toggleCategoryStatus(uuid, currentStatus);
+      } else {
+        await categoryService.toggleSubCategoryStatus(uuid, currentStatus);
+      }
+      toast.success("Status updated successfully");
+      fetchCategories();
+    } catch (error) {
+      toast.error("Failed to update status");
     }
   };
 
@@ -366,7 +380,12 @@ export default function CategoriesContent() {
                           className="flex items-center justify-center transition-opacity hover:opacity-70 p-[6px] hover:bg-[#EAEAEA] rounded-full"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setItemToDelete({ uuid: cat.uuid, type: "category", name: cat.name });
+                            setItemToDelete({ 
+                              uuid: cat.uuid, 
+                              type: "category", 
+                              name: cat.name,
+                              hasSubcategories: (cat.subCategories?.length || 0) > 0
+                            });
                             setShowDeleteConfirm(true);
                           }}
                         >
@@ -376,7 +395,13 @@ export default function CategoriesContent() {
 
                       {/* Status */}
                       <div className="flex items-center justify-between gap-[8px]">
-                        <div className="flex items-center gap-[8px]">
+                        <div 
+                          className="flex items-center gap-[8px] cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleStatus(cat.uuid, "category", cat.isActive);
+                          }}
+                        >
                           <Toggle active={cat.isActive} />
                           <span className="text-[#000000] text-[13px] md:text-[14px] font-bold">{cat.isActive ? "Active" : "Disabled"}</span>
                         </div>
@@ -407,7 +432,13 @@ export default function CategoriesContent() {
                               <div className="text-[#555555] text-[13px] font-medium truncate pr-4" title={sub.description || ""}>
                                 {sub.description || "-"}
                               </div>
-                              <div className="flex items-center gap-[8px]">
+                              <div 
+                                className="flex items-center gap-[8px] cursor-pointer"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleToggleStatus(sub.uuid, "subcategory", sub.isActive);
+                                }}
+                              >
                                 <Toggle active={sub.isActive} />
                                 <span className="text-[#000000] text-[13px] font-bold">{sub.isActive ? "Active" : "Disabled"}</span>
                               </div>
@@ -635,35 +666,46 @@ export default function CategoriesContent() {
               </svg>
             </div>
             
-            <h3 className="text-[#000] text-[20px] font-bold mb-[8px]">Delete {itemToDelete?.type === "category" ? "Category" : "Subcategory"}?</h3>
+            <h3 className="text-[#000] text-[20px] font-bold mb-[8px]">
+              {itemToDelete?.hasSubcategories ? "Cannot Delete" : `Delete ${itemToDelete?.type === "category" ? "Category" : "Subcategory"}?`}
+            </h3>
             <p className="text-[#5E5E5E] text-[14px] mb-[24px]">
-              Are you sure you want to delete <span className="font-bold">"{itemToDelete?.name}"</span>? 
-              {itemToDelete?.type === "category" && " This will also delete all its subcategories."}
-              This action cannot be undone.
+              {itemToDelete?.hasSubcategories ? (
+                <>
+                  The category <span className="font-bold">"{itemToDelete?.name}"</span> contains subcategories. 
+                  Please delete all subcategories first before deleting this category.
+                </>
+              ) : (
+                <>
+                  Are you sure you want to delete <span className="font-bold">"{itemToDelete?.name}"</span>? 
+                  This action cannot be undone.
+                </>
+              )}
             </p>
 
             <div className="flex w-full gap-[12px]">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                disabled={isDeleting}
-                className="flex-1 h-[44px] bg-white border border-[#D2D2D2] text-[#000] rounded-[8px] text-[14px] font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="flex-1 h-[44px] bg-white border border-[#D2D2D2] text-[#000] rounded-[8px] text-[14px] font-medium hover:bg-gray-50 transition-colors"
               >
-                Cancel
+                {itemToDelete?.hasSubcategories ? "Close" : "Cancel"}
               </button>
-              <button
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="flex-1 h-[44px] bg-[#D32F2F] text-white rounded-[8px] text-[14px] font-medium hover:bg-[#B71C1C] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {isDeleting ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Deleting...
-                  </>
-                ) : (
-                  "Delete"
-                )}
-              </button>
+              {!itemToDelete?.hasSubcategories && (
+                <button
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="flex-1 h-[44px] bg-[#D32F2F] text-white rounded-[8px] text-[14px] font-medium hover:bg-[#B71C1C] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isDeleting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>

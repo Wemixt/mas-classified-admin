@@ -106,4 +106,28 @@ export const categoryService = {
       throw error;
     }
   },
+
+  /**
+   * Toggle main category status
+   */
+  async toggleCategoryStatus(uuid: string, currentStatus: boolean): Promise<void> {
+    try {
+      await categoryApi.updateMainCategoryStatus(uuid, !currentStatus);
+    } catch (error) {
+      console.error("Error toggling category status:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Toggle subcategory status
+   */
+  async toggleSubCategoryStatus(uuid: string, currentStatus: boolean): Promise<void> {
+    try {
+      await categoryApi.updateSubCategoryStatus(uuid, !currentStatus);
+    } catch (error) {
+      console.error("Error toggling subcategory status:", error);
+      throw error;
+    }
+  },
 };

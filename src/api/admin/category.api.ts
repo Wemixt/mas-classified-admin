@@ -68,4 +68,20 @@ export const categoryApi = {
     const response = await apiClient.delete(`/api/v1/categories/sub/delete/${uuid}`);
     return response.data;
   },
+
+  /**
+   * Update main category status (Admin access)
+   */
+  updateMainCategoryStatus: async (uuid: string, isActive: boolean): Promise<any> => {
+    const response = await apiClient.put(`/api/v1/categories/admin/main/status/${uuid}`, { isActive });
+    return response.data;
+  },
+
+  /**
+   * Update subcategory status (Admin access)
+   */
+  updateSubCategoryStatus: async (uuid: string, isActive: boolean): Promise<any> => {
+    const response = await apiClient.put(`/api/v1/categories/admin/sub/status/${uuid}`, { isActive });
+    return response.data;
+  },
 };
