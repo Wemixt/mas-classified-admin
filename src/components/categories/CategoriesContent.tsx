@@ -55,6 +55,9 @@ export default function CategoriesContent() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDoneModal, setShowDoneModal] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryDescription, setNewCategoryDescription] = useState("");
+  const [newCategoryIcon, setNewCategoryIcon] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
 
   const gridClasses = "grid grid-cols-[1.5fr_1.5fr_1.2fr_1.2fr_1fr] items-center";
 
@@ -71,6 +74,33 @@ export default function CategoriesContent() {
       toast.error("Failed to fetch categories");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim()) {
+      toast.error("Category name is required");
+      return;
+    }
+
+    try {
+      setIsCreating(true);
+      await categoryService.createCategory({
+        name: newCategoryName,
+        description: newCategoryDescription || undefined,
+        icon: newCategoryIcon || undefined,
+      });
+      
+      setShowAddModal(false);
+      setShowDoneModal(true);
+      setNewCategoryName("");
+      setNewCategoryDescription("");
+      setNewCategoryIcon("");
+      fetchCategories(); // Refresh the list
+    } catch (error) {
+      toast.error("Failed to create category");
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -274,32 +304,60 @@ export default function CategoriesContent() {
             className="bg-[#F4F5F7] w-full max-w-[500px] rounded-[16px] p-[24px] md:p-[32px] shadow-2xl relative"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mb-[24px]">
-              <input
-                type="text"
-                placeholder="Type here..."
-                value={newCategoryName}
-                onChange={(e) => setNewCategoryName(e.target.value)}
-                className="w-full h-[52px] bg-white rounded-[8px] px-[16px] text-[#333] text-[14px] md:text-[15px] outline-none shadow-sm placeholder:text-[#A0A0A0]"
-              />
+            <div className="flex flex-col gap-[16px] mb-[24px]">
+              <div>
+                <label className="text-[13px] text-[#5E5E5E] mb-[6px] block font-medium">Category Name *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Electronics"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  className="w-full h-[52px] bg-white rounded-[8px] px-[16px] text-[#333] text-[14px] md:text-[15px] outline-none shadow-sm placeholder:text-[#A0A0A0]"
+                />
+              </div>
+              <div>
+                <label className="text-[13px] text-[#5E5E5E] mb-[6px] block font-medium">Description</label>
+                <input
+                  type="text"
+                  placeholder="e.g. All electronic items"
+                  value={newCategoryDescription}
+                  onChange={(e) => setNewCategoryDescription(e.target.value)}
+                  className="w-full h-[52px] bg-white rounded-[8px] px-[16px] text-[#333] text-[14px] md:text-[15px] outline-none shadow-sm placeholder:text-[#A0A0A0]"
+                />
+              </div>
+              <div>
+                <label className="text-[13px] text-[#5E5E5E] mb-[6px] block font-medium">Icon Class (FontAwesome)</label>
+                <input
+                  type="text"
+                  placeholder="e.g. fa-plug"
+                  value={newCategoryIcon}
+                  onChange={(e) => setNewCategoryIcon(e.target.value)}
+                  className="w-full h-[52px] bg-white rounded-[8px] px-[16px] text-[#333] text-[14px] md:text-[15px] outline-none shadow-sm placeholder:text-[#A0A0A0]"
+                />
+              </div>
             </div>
             
             <div className="flex items-center gap-[16px]">
               <button
                 onClick={() => setShowAddModal(false)}
-                className="flex-1 h-[48px] bg-white border border-[#D0D0D0] rounded-[8px] text-[#000] text-[15px] md:text-[16px] font-medium hover:bg-gray-50 transition-colors shadow-sm"
+                disabled={isCreating}
+                className="flex-1 h-[48px] bg-white border border-[#D0D0D0] rounded-[8px] text-[#000] text-[15px] md:text-[16px] font-medium hover:bg-gray-50 transition-colors shadow-sm disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  setShowAddModal(false);
-                  setShowDoneModal(true);
-                  setNewCategoryName("");
-                }}
-                className="flex-1 h-[48px] bg-[#114A82] text-white rounded-[8px] text-[15px] md:text-[16px] font-medium hover:bg-[#0E3A66] transition-colors shadow-sm"
+                onClick={handleAddCategory}
+                disabled={isCreating}
+                className="flex-1 h-[48px] bg-[#114A82] text-white rounded-[8px] text-[15px] md:text-[16px] font-medium hover:bg-[#0E3A66] transition-colors shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                Add Category
+                {isCreating ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Adding...
+                  </>
+                ) : (
+                  "Add Category"
+                )}
               </button>
             </div>
           </div>

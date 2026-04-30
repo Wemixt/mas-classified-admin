@@ -166,3 +166,20 @@ export interface SubCategoryListResponse {
     path: string;
   };
 }
+
+export interface CreateCategoryDto {
+  name: string;
+  description?: string;
+  icon?: string;
+}
+
+export interface CreateCategoryResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: Category;
+  meta: {
+    timestamp: string;
+    path: string;
+  };
+}
