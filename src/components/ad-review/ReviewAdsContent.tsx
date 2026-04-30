@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import AdDetailView, { type AdDetail } from "./AdDetailView";
 import { adService } from "@/services/moderator/ad.service";
 import type { Ad } from "@/types";
+import Pagination from "../common/Pagination";
 
 
 type ReviewAction = "approve" | "reject" | "requestChanges" | null;
@@ -19,12 +20,19 @@ export default function ReviewAdsContent() {
   const [viewingAdId, setViewingAdId] = useState<string | null>(null);
   const [selectedAd, setSelectedAd] = useState<AdDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  const [meta, setMeta] = useState({
+    total: 0,
+    page: 1,
+    limit: 10,
+    totalPages: 1
+  });
 
-  const fetchAds = async () => {
+  const fetchAds = async (page = 1) => {
     try {
       setLoading(true);
-      const response = await adService.getAdminAds("PENDING_REVIEW");
+      const response = await adService.getAdminAds("PENDING_REVIEW", page, 10);
       setAds(response.data.data);
+      setMeta(response.data.meta);
       setError(null);
     } catch (err) {
       setError("Failed to load pending ads");
@@ -134,7 +142,7 @@ export default function ReviewAdsContent() {
       await adService.updateAdStatus(ad.uuid, "ACTIVE");
       setViewingAdId(null);
       setSelectedAd(null);
-      await fetchAds();
+      await fetchAds(meta.page);
     } catch (err) {
       setError("Failed to approve ad");
       console.error(err);
@@ -400,6 +408,13 @@ export default function ReviewAdsContent() {
               </div>
             ))}
           </div>
+
+          <Pagination 
+            currentPage={meta.page}
+            totalPages={meta.totalPages}
+            onPageChange={(page) => fetchAds(page)}
+            isLoading={loading}
+          />
         </div>
       )}
     </div>
