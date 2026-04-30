@@ -52,4 +52,20 @@ export const categoryApi = {
     const response = await apiClient.put(`/api/v1/categories/sub/update/${uuid}`, data);
     return response.data;
   },
+
+  /**
+   * Delete a main category by UUID (Admin access)
+   */
+  deleteMainCategory: async (uuid: string): Promise<any> => {
+    const response = await apiClient.delete(`/api/v1/categories/main/delete/${uuid}`);
+    return response.data;
+  },
+
+  /**
+   * Delete a subcategory by UUID (Admin access)
+   */
+  deleteSubCategory: async (uuid: string): Promise<any> => {
+    const response = await apiClient.delete(`/api/v1/categories/sub/delete/${uuid}`);
+    return response.data;
+  },
 };

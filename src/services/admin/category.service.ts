@@ -82,4 +82,28 @@ export const categoryService = {
       throw error;
     }
   },
+
+  /**
+   * Delete a main category
+   */
+  async deleteCategory(uuid: string): Promise<void> {
+    try {
+      await categoryApi.deleteMainCategory(uuid);
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Delete a subcategory
+   */
+  async deleteSubCategory(uuid: string): Promise<void> {
+    try {
+      await categoryApi.deleteSubCategory(uuid);
+    } catch (error) {
+      console.error("Error deleting subcategory:", error);
+      throw error;
+    }
+  },
 };

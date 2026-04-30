@@ -69,6 +69,11 @@ export default function CategoriesContent() {
   const [editingItemType, setEditingItemType] = useState<"category" | "subcategory">("category");
   const [isUpdating, setIsUpdating] = useState(false);
 
+  // Delete states
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{ uuid: string, type: "category" | "subcategory", name: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const gridClasses = "grid grid-cols-[0.6fr_1.5fr_1.2fr_1.2fr_1.2fr_0.8fr] items-center";
 
   useEffect(() => {
@@ -190,6 +195,28 @@ export default function CategoriesContent() {
       toast.error(`Failed to update ${editingItemType}`);
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      setIsDeleting(true);
+      if (itemToDelete.type === "category") {
+        await categoryService.deleteCategory(itemToDelete.uuid);
+      } else {
+        await categoryService.deleteSubCategory(itemToDelete.uuid);
+      }
+      
+      toast.success(`${itemToDelete.type === "category" ? "Category" : "Subcategory"} deleted successfully`);
+      setShowDeleteConfirm(false);
+      setItemToDelete(null);
+      fetchCategories();
+    } catch (error) {
+      toast.error(`Failed to delete ${itemToDelete.type}`);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -336,8 +363,12 @@ export default function CategoriesContent() {
                           <EditIcon /> Edit
                         </button>
                         <button 
-                          onClick={(e) => e.stopPropagation()}
                           className="flex items-center justify-center transition-opacity hover:opacity-70 p-[6px] hover:bg-[#EAEAEA] rounded-full"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setItemToDelete({ uuid: cat.uuid, type: "category", name: cat.name });
+                            setShowDeleteConfirm(true);
+                          }}
                         >
                           <RedTrashIcon />
                         </button>
@@ -390,6 +421,18 @@ export default function CategoriesContent() {
                                 >
                                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M7 11.5H12M1.5 11.5L5.5 10.5L12 4C12.5 3.5 12.5 2.5 12 2C11.5 1.5 10.5 1.5 10 2L3.5 8.5L2.5 12.5L1.5 11.5Z" stroke="#114A82" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                  </svg>
+                                </button>
+                                <button 
+                                  className="p-[6px] hover:bg-red-50 rounded-full transition-colors group"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setItemToDelete({ uuid: sub.uuid, type: "subcategory", name: sub.name });
+                                    setShowDeleteConfirm(true);
+                                  }}
+                                >
+                                  <svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M1 4H13M2.5 4V13.5C2.5 14.3284 3.17157 15 4 15H10C10.8284 15 11.5 14.3284 11.5 13.5V4M5 4V2C5 1.44772 5.44772 1 6 1H8C8.55228 1 9 1.44772 9 2V4" stroke="#D32F2F" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                                   </svg>
                                 </button>
                               </div>
@@ -572,6 +615,56 @@ export default function CategoriesContent() {
             >
               Done!
             </h2>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setShowDeleteConfirm(false)}
+        >
+          <div 
+            className="bg-white w-full max-w-[400px] rounded-[16px] p-[32px] shadow-2xl relative flex flex-col items-center text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-[60px] h-[60px] bg-red-100 rounded-full flex items-center justify-center mb-[20px]">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 9V14M12 17.01L12.01 16.998M3.05 11C3.05 6.05888 7.05888 2.05 12 2.05C16.9411 2.05 20.95 6.05888 20.95 11C20.95 15.9411 16.9411 19.95 12 19.95C7.05888 19.95 3.05 15.9411 3.05 11Z" stroke="#D32F2F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            
+            <h3 className="text-[#000] text-[20px] font-bold mb-[8px]">Delete {itemToDelete?.type === "category" ? "Category" : "Subcategory"}?</h3>
+            <p className="text-[#5E5E5E] text-[14px] mb-[24px]">
+              Are you sure you want to delete <span className="font-bold">"{itemToDelete?.name}"</span>? 
+              {itemToDelete?.type === "category" && " This will also delete all its subcategories."}
+              This action cannot be undone.
+            </p>
+
+            <div className="flex w-full gap-[12px]">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                className="flex-1 h-[44px] bg-white border border-[#D2D2D2] text-[#000] rounded-[8px] text-[14px] font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="flex-1 h-[44px] bg-[#D32F2F] text-white rounded-[8px] text-[14px] font-medium hover:bg-[#B71C1C] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isDeleting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete"
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}
