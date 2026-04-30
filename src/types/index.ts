@@ -201,3 +201,16 @@ export interface CreateSubCategoryResponse {
     path: string;
   };
 }
+
+export interface UpdateCategoryDto {
+  name?: string;
+  description?: string;
+  icon?: string;
+}
+
+export interface UpdateSubCategoryDto {
+  name?: string;
+  description?: string;
+  mainCategoryId?: number;
+  icon?: string;
+}

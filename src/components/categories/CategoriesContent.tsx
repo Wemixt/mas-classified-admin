@@ -63,6 +63,12 @@ export default function CategoriesContent() {
   const [isCreating, setIsCreating] = useState(false);
   const [isCreatingSub, setIsCreatingSub] = useState(false);
 
+  // Edit states
+  const [editingItem, setEditingItem] = useState<Category | SubCategory | null>(null);
+  const [modalMode, setModalMode] = useState<"add" | "edit">("add");
+  const [editingItemType, setEditingItemType] = useState<"category" | "subcategory">("category");
+  const [isUpdating, setIsUpdating] = useState(false);
+
   const gridClasses = "grid grid-cols-[0.6fr_1.5fr_1.2fr_1.2fr_1.2fr_0.8fr] items-center";
 
   useEffect(() => {
@@ -133,6 +139,69 @@ export default function CategoriesContent() {
     } finally {
       setIsCreatingSub(false);
     }
+  };
+
+  const handleOpenEditModal = (item: Category | SubCategory, type: "category" | "subcategory") => {
+    setEditingItem(item);
+    setModalMode("edit");
+    setEditingItemType(type);
+    
+    if (type === "category") {
+      const cat = item as Category;
+      setNewCategoryName(cat.name);
+      setNewCategoryDescription(cat.description || "");
+      setNewCategoryIcon(cat.icon || "");
+    } else {
+      const sub = item as SubCategory;
+      setNewSubCategoryName(sub.name);
+      setNewSubCategoryDescription(sub.description || "");
+      setNewSubCategoryIcon(sub.icon || "");
+    }
+    
+    setShowAddModal(true);
+  };
+
+  const handleUpdate = async () => {
+    if (!editingItem) return;
+
+    try {
+      setIsUpdating(true);
+      if (editingItemType === "category") {
+        await categoryService.updateCategory(editingItem.uuid, {
+          name: newCategoryName,
+          description: newCategoryDescription || undefined,
+          icon: newCategoryIcon || undefined,
+        });
+      } else {
+        const sub = editingItem as SubCategory;
+        await categoryService.updateSubCategory(editingItem.uuid, {
+          name: newSubCategoryName,
+          description: newSubCategoryDescription || undefined,
+          mainCategoryId: sub.mainCategoryId,
+          icon: newSubCategoryIcon || undefined,
+        });
+      }
+
+      toast.success(`${editingItemType === "category" ? "Category" : "Subcategory"} updated successfully`);
+      setShowAddModal(false);
+      resetForm();
+      fetchCategories();
+    } catch (error) {
+      toast.error(`Failed to update ${editingItemType}`);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const resetForm = () => {
+    setEditingItem(null);
+    setModalMode("add");
+    setNewCategoryName("");
+    setNewCategoryDescription("");
+    setNewCategoryIcon("");
+    setNewSubCategoryName("");
+    setNewSubCategoryDescription("");
+    setNewSubCategoryIcon("");
   };
 
   const filteredCategories = useMemo(() => {
@@ -258,7 +327,10 @@ export default function CategoriesContent() {
                       {/* Actions */}
                       <div className="flex items-center gap-[12px]">
                         <button 
-                          onClick={(e) => e.stopPropagation()}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenEditModal(cat, "category");
+                          }}
                           className="h-[30px] px-[16px] bg-[#14487A] text-white text-[12px] font-medium rounded-full flex items-center gap-[6px] hover:bg-[#0E365E] transition-colors"
                         >
                           <EditIcon /> Edit
@@ -308,7 +380,19 @@ export default function CategoriesContent() {
                                 <Toggle active={sub.isActive} />
                                 <span className="text-[#000000] text-[13px] font-bold">{sub.isActive ? "Active" : "Disabled"}</span>
                               </div>
-                              <div />
+                              <div className="flex items-center gap-[8px]">
+                                <button 
+                                  className="p-[6px] hover:bg-gray-200 rounded-full transition-colors"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenEditModal(sub, "subcategory");
+                                  }}
+                                >
+                                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M7 11.5H12M1.5 11.5L5.5 10.5L12 4C12.5 3.5 12.5 2.5 12 2C11.5 1.5 10.5 1.5 10 2L3.5 8.5L2.5 12.5L1.5 11.5Z" stroke="#114A82" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                  </svg>
+                                </button>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -374,24 +458,31 @@ export default function CategoriesContent() {
         </div>
       </div>
 
-      {/* Add Category Modal */}
+      {/* Add/Edit Modal */}
       {showAddModal && (
         <div 
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
-          onClick={() => setShowAddModal(false)}
+          onClick={() => {
+            setShowAddModal(false);
+            resetForm();
+          }}
         >
           <div 
             className="bg-[#F4F5F7] w-full max-w-[500px] rounded-[16px] p-[24px] md:p-[32px] shadow-2xl relative"
             onClick={(e) => e.stopPropagation()}
           >
+            <h2 className="text-[#114A82] text-[20px] font-bold mb-[24px]">
+              {modalMode === "add" ? "Add New" : "Edit"} {editingItemType === "category" ? "Category" : "Subcategory"}
+            </h2>
+
             <div className="flex flex-col gap-[16px] mb-[24px]">
               <div>
-                <label className="text-[13px] text-[#5E5E5E] mb-[6px] block font-medium">Category Name *</label>
+                <label className="text-[13px] text-[#5E5E5E] mb-[6px] block font-medium">Name *</label>
                 <input
                   type="text"
                   placeholder="e.g. Electronics"
-                  value={newCategoryName}
-                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  value={editingItemType === "category" ? newCategoryName : newSubCategoryName}
+                  onChange={(e) => editingItemType === "category" ? setNewCategoryName(e.target.value) : setNewSubCategoryName(e.target.value)}
                   className="w-full h-[52px] bg-white rounded-[8px] px-[16px] text-[#333] text-[14px] md:text-[15px] outline-none shadow-sm placeholder:text-[#A0A0A0]"
                 />
               </div>
@@ -400,18 +491,18 @@ export default function CategoriesContent() {
                 <input
                   type="text"
                   placeholder="e.g. All electronic items"
-                  value={newCategoryDescription}
-                  onChange={(e) => setNewCategoryDescription(e.target.value)}
+                  value={editingItemType === "category" ? newCategoryDescription : newSubCategoryDescription}
+                  onChange={(e) => editingItemType === "category" ? setNewCategoryDescription(e.target.value) : setNewSubCategoryDescription(e.target.value)}
                   className="w-full h-[52px] bg-white rounded-[8px] px-[16px] text-[#333] text-[14px] md:text-[15px] outline-none shadow-sm placeholder:text-[#A0A0A0]"
                 />
               </div>
               <div>
-                <label className="text-[13px] text-[#5E5E5E] mb-[6px] block font-medium">Icon Class (FontAwesome)</label>
+                <label className="text-[13px] text-[#5E5E5E] mb-[6px] block font-medium">Icon Class</label>
                 <input
                   type="text"
                   placeholder="e.g. fa-plug"
-                  value={newCategoryIcon}
-                  onChange={(e) => setNewCategoryIcon(e.target.value)}
+                  value={editingItemType === "category" ? newCategoryIcon : newSubCategoryIcon}
+                  onChange={(e) => editingItemType === "category" ? setNewCategoryIcon(e.target.value) : setNewSubCategoryIcon(e.target.value)}
                   className="w-full h-[52px] bg-white rounded-[8px] px-[16px] text-[#333] text-[14px] md:text-[15px] outline-none shadow-sm placeholder:text-[#A0A0A0]"
                 />
               </div>
@@ -419,24 +510,27 @@ export default function CategoriesContent() {
             
             <div className="flex items-center gap-[16px]">
               <button
-                onClick={() => setShowAddModal(false)}
-                disabled={isCreating}
+                onClick={() => {
+                  setShowAddModal(false);
+                  resetForm();
+                }}
+                disabled={isCreating || isUpdating}
                 className="flex-1 h-[48px] bg-white border border-[#D0D0D0] rounded-[8px] text-[#000] text-[15px] md:text-[16px] font-medium hover:bg-gray-50 transition-colors shadow-sm disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
-                onClick={handleAddCategory}
-                disabled={isCreating}
+                onClick={modalMode === "add" ? handleAddCategory : handleUpdate}
+                disabled={isCreating || isUpdating}
                 className="flex-1 h-[48px] bg-[#114A82] text-white rounded-[8px] text-[15px] md:text-[16px] font-medium hover:bg-[#0E3A66] transition-colors shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {isCreating ? (
+                {(isCreating || isUpdating) ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Adding...
+                    {modalMode === "add" ? "Adding..." : "Updating..."}
                   </>
                 ) : (
-                  "Add Category"
+                  modalMode === "add" ? "Add" : "Update"
                 )}
               </button>
             </div>

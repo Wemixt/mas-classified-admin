@@ -1,5 +1,5 @@
 import apiClient from "../client";
-import { CategoryListResponse, SubCategoryListResponse, CreateCategoryDto, CreateCategoryResponse, CreateSubCategoryDto, CreateSubCategoryResponse } from "@/types";
+import { CategoryListResponse, SubCategoryListResponse, CreateCategoryDto, CreateCategoryResponse, CreateSubCategoryDto, CreateSubCategoryResponse, UpdateCategoryDto, UpdateSubCategoryDto } from "@/types";
 
 /**
  * Category API handlers for Admin
@@ -34,6 +34,22 @@ export const categoryApi = {
    */
   createSubCategory: async (data: CreateSubCategoryDto): Promise<CreateSubCategoryResponse> => {
     const response = await apiClient.post("/api/v1/categories/sub/create", data);
+    return response.data;
+  },
+
+  /**
+   * Update a main category by UUID (Admin access)
+   */
+  updateMainCategory: async (uuid: string, data: UpdateCategoryDto): Promise<CreateCategoryResponse> => {
+    const response = await apiClient.put(`/api/v1/categories/main/update/${uuid}`, data);
+    return response.data;
+  },
+
+  /**
+   * Update a subcategory by UUID (Admin access)
+   */
+  updateSubCategory: async (uuid: string, data: UpdateSubCategoryDto): Promise<CreateSubCategoryResponse> => {
+    const response = await apiClient.put(`/api/v1/categories/sub/update/${uuid}`, data);
     return response.data;
   },
 };
