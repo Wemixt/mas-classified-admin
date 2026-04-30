@@ -1,5 +1,5 @@
 import apiClient from "../client";
-import { CategoryListResponse, SubCategoryListResponse, CreateCategoryDto, CreateCategoryResponse } from "@/types";
+import { CategoryListResponse, SubCategoryListResponse, CreateCategoryDto, CreateCategoryResponse, CreateSubCategoryDto, CreateSubCategoryResponse } from "@/types";
 
 /**
  * Category API handlers for Admin
@@ -26,6 +26,14 @@ export const categoryApi = {
    */
   createMainCategory: async (data: CreateCategoryDto): Promise<CreateCategoryResponse> => {
     const response = await apiClient.post("/api/v1/categories/main/create", data);
+    return response.data;
+  },
+
+  /**
+   * Create a new subcategory (Admin access)
+   */
+  createSubCategory: async (data: CreateSubCategoryDto): Promise<CreateSubCategoryResponse> => {
+    const response = await apiClient.post("/api/v1/categories/sub/create", data);
     return response.data;
   },
 };

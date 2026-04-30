@@ -57,9 +57,13 @@ export default function CategoriesContent() {
   const [newCategoryName, setNewCategoryName] = useState("");
   const [newCategoryDescription, setNewCategoryDescription] = useState("");
   const [newCategoryIcon, setNewCategoryIcon] = useState("");
+  const [newSubCategoryName, setNewSubCategoryName] = useState("");
+  const [newSubCategoryDescription, setNewSubCategoryDescription] = useState("");
+  const [newSubCategoryIcon, setNewSubCategoryIcon] = useState("");
   const [isCreating, setIsCreating] = useState(false);
+  const [isCreatingSub, setIsCreatingSub] = useState(false);
 
-  const gridClasses = "grid grid-cols-[1.5fr_1.5fr_1.2fr_1.2fr_1fr] items-center";
+  const gridClasses = "grid grid-cols-[0.6fr_1.5fr_1.2fr_1.2fr_1.2fr_0.8fr] items-center";
 
   useEffect(() => {
     fetchCategories();
@@ -101,6 +105,33 @@ export default function CategoriesContent() {
       toast.error("Failed to create category");
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  const handleAddSubCategory = async (mainCategoryId: number) => {
+    if (!newSubCategoryName.trim()) {
+      toast.error("Subcategory name is required");
+      return;
+    }
+
+    try {
+      setIsCreatingSub(true);
+      await categoryService.createSubCategory({
+        name: newSubCategoryName,
+        mainCategoryId,
+        description: newSubCategoryDescription || undefined,
+        icon: newSubCategoryIcon || "fa-circle",
+      });
+      
+      toast.success("Subcategory added successfully");
+      setNewSubCategoryName("");
+      setNewSubCategoryDescription("");
+      setNewSubCategoryIcon("");
+      fetchCategories(); // Refresh the list
+    } catch (error) {
+      toast.error("Failed to add subcategory");
+    } finally {
+      setIsCreatingSub(false);
     }
   };
 
@@ -162,6 +193,7 @@ export default function CategoriesContent() {
           {/* Table Header */}
           {role === "admin" || role === "super_admin" ? (
             <div className={`bg-[#1174BB] rounded-[8px] h-[47px] mb-[16px] px-[24px] ${gridClasses}`}>
+              <div className="text-white text-[13px] md:text-[14px] font-medium" style={{ fontFamily: "Eurostile, sans-serif" }}>Icon</div>
               <div className="text-white text-[13px] md:text-[14px] font-medium" style={{ fontFamily: "Eurostile, sans-serif" }}>Category Name</div>
               <div className="text-white text-[13px] md:text-[14px] font-medium" style={{ fontFamily: "Eurostile, sans-serif" }}>Code</div>
               <div className="text-white text-[13px] md:text-[14px] font-medium" style={{ fontFamily: "Eurostile, sans-serif" }}>Subcategories</div>
@@ -169,7 +201,8 @@ export default function CategoriesContent() {
               <div className="text-white text-[13px] md:text-[14px] font-medium" style={{ fontFamily: "Eurostile, sans-serif" }}>Statue</div>
             </div>
           ) : (
-            <div className="grid grid-cols-[2fr_1.5fr_1.5fr_1fr] bg-[#1174BB] rounded-[8px] h-[47px] items-center px-[24px] mb-[16px]">
+            <div className="grid grid-cols-[0.6fr_2fr_1.5fr_1.5fr_1fr] bg-[#1174BB] rounded-[8px] h-[47px] items-center px-[24px] mb-[16px]">
+              <div className="text-white text-[12px] md:text-[14px] font-medium" style={{ fontFamily: "Eurostile, sans-serif" }}>Icon</div>
               <div className="text-white text-[12px] md:text-[14px] font-medium" style={{ fontFamily: "Eurostile, sans-serif" }}>Category Name</div>
               <div className="text-white text-[12px] md:text-[14px] font-medium" style={{ fontFamily: "Eurostile, sans-serif" }}>Code</div>
               <div className="text-white text-[12px] md:text-[14px] font-medium" style={{ fontFamily: "Eurostile, sans-serif" }}>Published Ads</div>
@@ -191,7 +224,10 @@ export default function CategoriesContent() {
 
                 if (role === "moderator") {
                   return (
-                    <div key={cat.id} className="grid grid-cols-[2fr_1.5fr_1.5fr_1fr] items-center min-h-[58px] px-[24px] bg-[#F5F5F5] rounded-[10px]">
+                    <div key={cat.id} className="grid grid-cols-[0.6fr_2fr_1.5fr_1.5fr_1fr] items-center min-h-[58px] px-[24px] bg-[#F5F5F5] rounded-[10px]">
+                      <div className="flex justify-center text-[#1174BB]">
+                        <i className={`fas ${cat.icon || 'fa-box'}`}></i>
+                      </div>
                       <div className="text-[#000000] text-[13px] md:text-[14px] font-medium leading-[150%]">{cat.name}</div>
                       <div className="text-[#000000] text-[13px] md:text-[14px] font-bold leading-[150%]">{cat.slug}</div>
                       <div className="text-[#000000] text-[13px] md:text-[14px] font-medium leading-[150%]">{cat.subCategories?.length || 0}</div>
@@ -212,6 +248,9 @@ export default function CategoriesContent() {
                       className={`px-[24px] bg-[#F5F5F5] transition-colors cursor-pointer min-h-[58px] py-[8px] ${gridClasses} ${isExpanded ? 'rounded-t-[10px]' : 'rounded-[10px]'}`}
                       onClick={() => toggleExpand(cat.id)}
                     >
+                      <div className="flex justify-center text-[#1174BB]">
+                        <i className={`fas ${cat.icon || 'fa-box'}`}></i>
+                      </div>
                       <div className="text-[#000000] text-[13px] md:text-[14px] font-medium leading-[150%]">{cat.name}</div>
                       <div className="text-[#000000] text-[13px] md:text-[14px] font-bold leading-[150%]">{cat.slug}</div>
                       <div className="text-[#000000] text-[13px] md:text-[14px] font-medium leading-[150%]">{cat.subCategories?.length || 0}</div>
@@ -247,40 +286,81 @@ export default function CategoriesContent() {
                     {/* Expanded Subcategories */}
                     {isExpanded && (
                       <div className="bg-[#EBEBEB] rounded-b-[10px] px-[24px] py-[20px]">
-                        <div className="grid grid-cols-[1.5fr_1.5fr_3.4fr] border-b border-[#D4D4D4] pb-[12px] mb-[12px]">
+                        <div className="grid grid-cols-[0.6fr_1.5fr_2fr_1.2fr_1fr] border-b border-[#D4D4D4] pb-[12px] mb-[12px]">
+                          <div className="text-[#333333] text-[13px] font-bold text-center">Icon</div>
                           <div className="text-[#333333] text-[13px] font-bold pl-[8px] md:pl-[16px]">Subcategory Name</div>
-                          <div className="text-[#333333] text-[13px] font-bold">Code</div>
+                          <div className="text-[#333333] text-[13px] font-bold">Description</div>
                           <div className="text-[#333333] text-[13px] font-bold">Statue</div>
+                          <div />
                         </div>
                         
                         <div className="flex flex-col">
                           {cat.subCategories?.map((sub) => (
-                            <div key={sub.id} className="grid grid-cols-[1.5fr_1.5fr_3.4fr] items-center border-b border-[#D4D4D4] py-[12px]">
+                            <div key={sub.id} className="grid grid-cols-[0.6fr_1.5fr_2fr_1.2fr_1fr] items-center border-b border-[#D4D4D4] py-[12px]">
+                              <div className="flex justify-center text-[#555555]">
+                                <i className={`fas ${sub.icon || 'fa-circle'}`}></i>
+                              </div>
                               <div className="text-[#555555] text-[13px] font-medium pl-[8px] md:pl-[16px]">{sub.name}</div>
-                              <div className="text-[#555555] text-[13px] font-medium">{sub.slug}</div>
+                              <div className="text-[#555555] text-[13px] font-medium truncate pr-4" title={sub.description || ""}>
+                                {sub.description || "-"}
+                              </div>
                               <div className="flex items-center gap-[8px]">
                                 <Toggle active={sub.isActive} />
                                 <span className="text-[#000000] text-[13px] font-bold">{sub.isActive ? "Active" : "Disabled"}</span>
                               </div>
+                              <div />
                             </div>
                           ))}
                         </div>
 
                         {/* Add subcategory inputs */}
-                        <div className="grid grid-cols-[1.5fr_1.5fr_3.4fr] items-center pt-[16px]">
-                          <div className="pl-[8px] md:pl-[16px]">
-                            <input type="text" placeholder="Type here..." className="h-[38px] w-[90%] max-w-[200px] bg-white rounded-full px-[16px] text-[13px] outline-none border border-transparent focus:border-[#1174BB]" onClick={(e) => e.stopPropagation()} />
+                        <div className="grid grid-cols-[0.6fr_1.5fr_2fr_1.2fr_1.2fr] items-center pt-[16px] gap-2">
+                          <div className="flex justify-center">
+                            <input 
+                              type="text" 
+                              placeholder="Icon (fa-plug)" 
+                              value={newSubCategoryIcon}
+                              onChange={(e) => setNewSubCategoryIcon(e.target.value)}
+                              className="h-[38px] w-full bg-white rounded-full px-[12px] text-[12px] outline-none border border-transparent focus:border-[#1174BB]" 
+                              onClick={(e) => e.stopPropagation()} 
+                            />
                           </div>
                           <div>
-                            <input type="text" placeholder="Type here..." className="h-[38px] w-[90%] max-w-[200px] bg-white rounded-full px-[16px] text-[13px] outline-none border border-transparent focus:border-[#1174BB]" onClick={(e) => e.stopPropagation()} />
+                            <input 
+                              type="text" 
+                              placeholder="Subcategory Name..." 
+                              value={newSubCategoryName}
+                              onChange={(e) => setNewSubCategoryName(e.target.value)}
+                              className="h-[38px] w-full bg-white rounded-full px-[16px] text-[13px] outline-none border border-transparent focus:border-[#1174BB]" 
+                              onClick={(e) => e.stopPropagation()} 
+                            />
                           </div>
+                          <div>
+                            <input 
+                              type="text" 
+                              placeholder="Description..." 
+                              value={newSubCategoryDescription}
+                              onChange={(e) => setNewSubCategoryDescription(e.target.value)}
+                              className="h-[38px] w-full bg-white rounded-full px-[16px] text-[13px] outline-none border border-transparent focus:border-[#1174BB]" 
+                              onClick={(e) => e.stopPropagation()} 
+                            />
+                          </div>
+                          <div />
                           <div>
                             <button 
-                              onClick={(e) => e.stopPropagation()}
-                              className="h-[38px] px-[20px] bg-[#114A82] text-white text-[13px] font-medium rounded-full flex items-center gap-[8px] hover:bg-[#0E3A66] transition-colors whitespace-nowrap w-fit"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddSubCategory(cat.id);
+                              }}
+                              disabled={isCreatingSub}
+                              className="h-[38px] px-[20px] bg-[#114A82] text-white text-[13px] font-medium rounded-full flex items-center gap-[8px] hover:bg-[#0E3A66] transition-colors whitespace-nowrap w-fit disabled:opacity-50"
                             >
-                              <PlusCircleIcon color="#114A82" />
-                              <span className="text-white">Add Subcategories</span>
+                              {isCreatingSub ? (
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                              ) : (
+                                <PlusCircleIcon color="#114A82" />
+                              )}
+                              <span className="text-white">{isCreatingSub ? "Adding..." : "Add"}</span>
                             </button>
                           </div>
                         </div>

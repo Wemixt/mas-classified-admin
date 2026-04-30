@@ -1,5 +1,5 @@
 import { categoryApi } from "@/api/admin/category.api";
-import { Category, SubCategory, CreateCategoryDto } from "@/types";
+import { Category, SubCategory, CreateCategoryDto, CreateSubCategoryDto } from "@/types";
 
 /**
  * Service to handle category related business logic for Admin
@@ -40,6 +40,19 @@ export const categoryService = {
       return response.data;
     } catch (error) {
       console.error("Error creating category:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Create a new subcategory
+   */
+  async createSubCategory(data: CreateSubCategoryDto): Promise<SubCategory> {
+    try {
+      const response = await categoryApi.createSubCategory(data);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating subcategory:", error);
       throw error;
     }
   },

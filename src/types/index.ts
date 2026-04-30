@@ -183,3 +183,21 @@ export interface CreateCategoryResponse {
     path: string;
   };
 }
+
+export interface CreateSubCategoryDto {
+  name: string;
+  mainCategoryId: number;
+  description?: string;
+  icon?: string;
+}
+
+export interface CreateSubCategoryResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: SubCategory;
+  meta: {
+    timestamp: string;
+    path: string;
+  };
+}
