@@ -214,3 +214,47 @@ export interface UpdateSubCategoryDto {
   mainCategoryId?: number;
   icon?: string;
 }
+
+export interface AdminAd {
+  id: string;
+  uuid: string;
+  title: string;
+  slug: string;
+  brand: string;
+  model: string;
+  contactDetails: string;
+  price: string;
+  currency: string;
+  isNegotiable: boolean;
+  condition: string;
+  status: string;
+  viewCount: number;
+  createdAt: string;
+  countryName: string;
+  districtName: string;
+  cityName: string;
+  categoryName: string;
+  userName: string;
+  userEmail: string;
+}
+
+export interface AdminAdListResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: {
+    data: AdminAd[];
+    meta: {
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+    };
+  };
+  meta: {
+    timestamp: string;
+    path: string;
+  };
+}
