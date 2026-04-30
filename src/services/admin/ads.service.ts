@@ -16,4 +16,16 @@ export const adsService = {
       throw error;
     }
   },
+
+  /**
+   * Get ad details for admin
+   */
+  async getAdminAdDetails(uuid: string): Promise<any> {
+    try {
+      return await adsApi.getAdminAd(uuid);
+    } catch (error) {
+      console.error("Error fetching admin ad details:", error);
+      throw error;
+    }
+  },
 };

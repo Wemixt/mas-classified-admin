@@ -12,4 +12,12 @@ export const adsApi = {
     const response = await apiClient.get(`/api/v1/ads/admin/list?page=${page}&limit=${limit}`);
     return response.data;
   },
+
+  /**
+   * Get single ad details (Admin/Moderator access)
+   */
+  getAdminAd: async (uuid: string): Promise<any> => {
+    const response = await apiClient.get(`/api/v1/ads/admin/get/${uuid}`);
+    return response.data;
+  },
 };

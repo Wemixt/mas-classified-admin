@@ -11,5 +11,5 @@ export const adApi = {
     if (rejectionReason) body.rejectionReason = rejectionReason;
     return apiClient.put(`/api/v1/ads/status/update/${id}`, body);
   },
-  getAd: (id: string) => apiClient.get(`/api/v1/ads/get/${id}`),
+  getAd: (id: string) => apiClient.get(`/api/v1/ads/admin/get/${id}`),
 };
