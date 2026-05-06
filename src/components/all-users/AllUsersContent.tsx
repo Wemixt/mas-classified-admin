@@ -26,7 +26,6 @@ export default function AllUsersContent() {
   const [userList, setUserList] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [meta, setMeta] = useState({
@@ -76,14 +75,7 @@ export default function AllUsersContent() {
 
   const tabs: TabType[] = ["All Users", "Moderators", "Sellers", "Visitors"];
 
-  const toggleDropdown = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setOpenDropdown(openDropdown === id ? null : id);
-  };
 
-  const handleContainerClick = () => {
-    if (openDropdown) setOpenDropdown(null);
-  };
 
   const handleUpdateStatus = async (userId: string, newStatus: "ACTIVE" | "SUSPENDED") => {
     try {
@@ -96,7 +88,6 @@ export default function AllUsersContent() {
             : user
         )
       );
-      setOpenDropdown(null);
     } catch (err) {
       console.error("Failed to update user status", err);
       alert("Failed to update user status");
@@ -115,7 +106,6 @@ export default function AllUsersContent() {
   return (
     <div
       className="py-4 md:pt-[28px] md:pb-[28px] px-4 md:pl-[28px] md:pr-4 flex flex-col"
-      onClick={handleContainerClick}
     >
       {/* Title */}
       <div>
@@ -168,7 +158,7 @@ export default function AllUsersContent() {
         <div className="mt-[20px] md:mt-[24px] flex-1 overflow-x-auto">
           <div className="min-w-[600px] md:min-w-[900px]">
             {/* Table Header */}
-            <div className="grid grid-cols-[2fr_1.2fr_1.2fr_1.2fr_1fr] bg-[#1174BB] h-[47px] items-center">
+            <div className="grid grid-cols-[2fr_1.2fr_1.2fr_1.2fr_1.5fr] bg-[#1174BB] h-[47px] items-center">
               {["Name", "Employee ID", "Registered", "User Role", "Actions"].map((h, i) => (
                 <div
                   key={h}
@@ -193,7 +183,7 @@ export default function AllUsersContent() {
                 <div
                   key={user.id}
                   onClick={() => setSelectedUser(user)}
-                  className="bg-[#F4F4F4] rounded-[8px] grid grid-cols-[2fr_1.2fr_1.2fr_1.2fr_1fr] items-center h-[52px] md:h-[57px] cursor-pointer hover:bg-[#EBEBEB] transition-colors"
+                  className="bg-[#F4F4F4] rounded-[8px] grid grid-cols-[2fr_1.2fr_1.2fr_1.2fr_1.5fr] items-center h-[52px] md:h-[57px] cursor-pointer hover:bg-[#EBEBEB] transition-colors"
                 >
                   <div className="px-[12px] md:px-[24px] flex items-center gap-[8px] md:gap-[14px]">
                     <div className="w-[34px] h-[34px] md:w-[42px] md:h-[42px] rounded-full overflow-hidden shrink-0 bg-[#D9D9D9]">
@@ -220,47 +210,30 @@ export default function AllUsersContent() {
                       {user.role}
                     </span>
                   </div>
-                  <div className="px-[12px] md:px-[16px] relative flex items-center">
+                  <div className="px-[12px] md:px-[16px] flex items-center gap-[10px] md:gap-[16px]">
+                    {/* Status Toggle */}
                     <button
-                      onClick={(e) => toggleDropdown(user.id, e)}
-                      className="h-[28px] md:h-[32px] px-[10px] md:px-[14px] border border-[#5E5E5E] bg-white rounded-[14px] md:rounded-[16px] flex items-center justify-between gap-[6px] hover:bg-[#F5F5F5] transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUpdateStatus(user.id, user.status === "Active" ? "SUSPENDED" : "ACTIVE");
+                      }}
+                      className={`relative w-[28px] md:w-[32px] h-[16px] md:h-[18px] rounded-full transition-colors shrink-0 ${user.status === "Active" ? "bg-[#0F792F]" : "bg-[#CCCCCC]"}`}
                     >
-                      <span className="text-[#222222] text-[11px] md:text-[13px] font-medium leading-[100%] whitespace-nowrap">View</span>
-                      <svg
-                        width="8" height="5" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg"
-                        className={`transition-transform duration-200 ${openDropdown === user.id ? "rotate-180" : ""}`}
-                      >
-                        <path d="M1 1L5 5L9 1" stroke="#5E5E5E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
+                      <span
+                        className={`absolute top-[2px] w-[12px] md:w-[14px] h-[12px] md:h-[14px] rounded-full bg-white transition-all ${user.status === "Active" ? "left-[14px] md:left-[16px]" : "left-[2px]"}`}
+                      />
                     </button>
-
-                    {/* Dropdown Menu */}
-                    {openDropdown === user.id && (
-                      <div className="absolute right-auto left-[12px] md:left-[16px] top-[100%] mt-[6px] w-[120px] md:w-[130px] bg-white border border-[#E0E0E0] rounded-[8px] shadow-sm z-50 flex flex-col p-[4px]" onClick={(e) => e.stopPropagation()}>
-                        <button 
-                          onClick={() => handleUpdateStatus(user.id, "ACTIVE")}
-                          className={`flex items-center gap-[10px] w-full px-[12px] h-[34px] rounded-[4px] transition-colors ${user.status === "Active" ? "bg-[#1174BB] text-white" : "hover:bg-[#F5F5F5] text-[#222222]"}`}
-                        >
-                          <div className={`w-[14px] h-[14px] rounded-full flex items-center justify-center shrink-0 ${user.status === "Active" ? "bg-white" : "bg-[#0F792F]"}`}>
-                            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M2.5 6.5L4.5 8.5L9.5 3.5" stroke={user.status === "Active" ? "#1174BB" : "white"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                          </div>
-                          <span className="text-[13px] font-medium">Active</span>
-                        </button>
-                        <button 
-                          onClick={() => handleUpdateStatus(user.id, "SUSPENDED")}
-                          className={`flex items-center gap-[10px] w-full px-[12px] h-[34px] rounded-[4px] transition-colors mt-[2px] ${user.status === "Blocked" ? "bg-[#D32F2F] text-white" : "hover:bg-[#F5F5F5] text-[#222222]"}`}
-                        >
-                          <div className={`w-[14px] h-[14px] rounded-full flex items-center justify-center shrink-0 ${user.status === "Blocked" ? "bg-white" : "bg-[#D32F2F]"}`}>
-                            <svg width="6" height="6" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M1 1L9 9M9 1L1 9" stroke={user.status === "Blocked" ? "#D32F2F" : "white"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                          </div>
-                          <span className="text-[13px] font-medium">Block</span>
-                        </button>
-                      </div>
-                    )}
+                    
+                    {/* View Profile Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedUser(user);
+                      }}
+                      className="h-[28px] md:h-[32px] px-[10px] md:px-[14px] bg-[#EBEBEB] border border-[#D2D2D2] rounded-[14px] md:rounded-[16px] flex items-center justify-center hover:bg-[#E0E0E0] transition-colors cursor-pointer"
+                    >
+                      <span className="text-[#222222] text-[11px] md:text-[13px] font-medium leading-[100%] whitespace-nowrap">View Profile</span>
+                    </button>
                   </div>
                 </div>
                 ))

@@ -5,6 +5,7 @@ import { AuthContext } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import LoginImage from "@/assets/login-image.png";
+import LoginImageLogo from "@/assets/massLogo.png";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -18,14 +19,14 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    
+
     if (auth) {
       setIsLoading(true);
       const result = await auth.login(email, password);
-      
+
       if (result.success && result.user) {
         const user = result.user;
-        
+
         // Check if user is active
         if (user.status !== "ACTIVE") {
           setError("Your account is not active. Please contact administration.");
@@ -50,16 +51,17 @@ export default function LoginPage() {
       <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:w-1/2 lg:px-20 xl:px-24">
         <div className="mx-auto w-full max-w-sm lg:w-96 flex flex-col items-center">
           <div className="mb-6">
-            <Image 
-              src="/logos/mass logo.png" 
-              alt="MAS Logo" 
-              width={220} 
-              height={80} 
-              className="mx-auto" 
+            <Image
+              src={LoginImageLogo}
+              alt="MAS Logo"
+              width={220}
+              height={80}
+              className="mx-auto"
               priority
+              unoptimized
             />
           </div>
-          
+
           <h2 className="mt-2 text-center text-[28px] font-normal text-[#164b85]">
             Welcome Back !
           </h2>
@@ -159,11 +161,10 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`flex w-full justify-center rounded-md px-3 py-3.5 text-sm font-semibold text-white transition-all shadow-sm ${
-                    isLoading 
-                      ? "bg-blue-400 cursor-not-allowed" 
-                      : "bg-[#144880] hover:bg-[#0f3661] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#144880]"
-                  }`}
+                  className={`flex w-full justify-center rounded-md px-3 py-3.5 text-sm font-semibold text-white transition-all shadow-sm ${isLoading
+                    ? "bg-blue-400 cursor-not-allowed"
+                    : "bg-[#144880] hover:bg-[#0f3661] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#144880]"
+                    }`}
                 >
                   {isLoading ? (
                     <span className="flex items-center gap-2">
@@ -182,7 +183,7 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
-      
+
       {/* Right side - Image */}
       <div className="relative hidden w-0 flex-1 lg:block">
         <Image

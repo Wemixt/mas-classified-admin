@@ -35,14 +35,7 @@ export default function DashboardContent() {
       {/* Divider */}
       <div className="border-t border-[#5E5E5E] opacity-70 mt-[16px]" />
 
-      {/* Subtitle */}
-      <p
-        className="text-[#333333] text-[12px] md:text-[14px] font-normal leading-[100%] tracking-normal opacity-60 mt-[10px]"
-        style={{ fontFamily: "Eurostile, sans-serif" }}
-      >
-        Overview Of ad and user statistics in your marketplace.
-      </p>
-
+      
       {/* Stat Cards — 1 col mobile, 2 col sm, 4 col xl */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-[12px] md:gap-[16px] mt-[20px]">
         {stats.map((stat) => (

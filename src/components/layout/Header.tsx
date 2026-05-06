@@ -4,6 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/hooks";
 import { useSidebar } from "@/context/SidebarContext";
+import LoginImageLogo from "@/assets/massLogo.png";
+import user_profilelogo from "@/assets/user_profilelogo.jpg";
+
 
 export default function Header() {
   const { user } = useAuth();
@@ -49,16 +52,14 @@ export default function Header() {
         {/* ── Logo ── */}
         <Link href="/" className="flex-shrink-0">
           <Image
-            src="/logos/mass logo.png"
+            src={LoginImageLogo}
             alt="MAS Logo"
-            width={156}
-            height={60}
             priority
             className="object-contain h-auto
-              w-[68px]
+              w-[64px]
               sm:w-[96px]
               md:w-[120px]
-              xl:w-[156px]"
+              xl:w-[126px]"
           />
         </Link>
 
@@ -83,28 +84,6 @@ export default function Header() {
         {/* ── Spacer between All Ads and right section ── */}
         <div className="flex-1 max-w-[12px] sm:max-w-none" />
 
-        {/* ── Avatar (hidden below sm) ── */}
-        <div className="hidden sm:block flex-shrink-0 rounded-full overflow-hidden
-          w-[28px] h-[28px] sm:w-[30px] sm:h-[30px] md:w-[34px] md:h-[34px] xl:w-[38px] xl:h-[38px]
-          mr-[6px] xl:mr-[7px]">
-          <Image
-            src={user?.avatar || "/logos/mass logo.png"}
-            alt="Profile"
-            width={38}
-            height={38}
-            className="object-cover w-full h-full"
-          />
-        </div>
-
-        {/* ── Name (hidden below md) ── */}
-        <span
-          className="hidden md:block flex-shrink-0 text-[#5E5E5E] font-normal leading-[100%] tracking-normal whitespace-nowrap
-            text-[14px] md:text-[16px] xl:text-[20px]
-            mr-[10px] xl:mr-[30px]"
-          style={{ fontFamily: "Eurostile, sans-serif" }}
-        >
-          {user?.fullName || "Guest Account"}
-        </span>
 
         {/* ── Notification bell (always visible) ── */}
         <button
@@ -112,7 +91,7 @@ export default function Header() {
             w-[26px] h-[26px]
             sm:w-[29px] sm:h-[30px]
             md:w-[32px] md:h-[34px]
-            xl:w-[35px] xl:h-[37px]"
+            xl:w-[35px] xl:h-[37px] mr-[18px]"
         >
           <svg
             viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"
@@ -126,25 +105,26 @@ export default function Header() {
           </span>
         </button>
 
-        {/* ── Heart / Favorites (always visible) ── */}
-        <button
-          className="flex-shrink-0 relative flex items-center justify-center rounded-[4px] bg-[#E9E9E9] hover:bg-[#DFDFDF] transition-colors
-            w-[26px] h-[26px]
-            sm:w-[29px] sm:h-[30px]
-            md:w-[32px] md:h-[34px]
-            xl:w-[35px] xl:h-[37px]
-            ml-[4px] sm:ml-[6px] md:ml-[8px] xl:ml-[13px]"
+
+        {/* ── Avatar (hidden below sm) ── */}
+        <div className="hidden sm:block flex-shrink-0 rounded-full overflow-hidden
+          w-[28px] h-[28px] sm:w-[30px] sm:h-[30px] md:w-[34px] md:h-[34px] xl:w-[38px] xl:h-[38px]
+          mr-[6px] xl:mr-[7px]">
+          <Image
+            src={user?.avatar || user_profilelogo}
+            alt="Profile"
+            className="object-cover w-full h-full"
+          />
+        </div>
+
+        {/* ── Name (hidden below md) ── */}
+        <span
+          className="hidden md:block flex-shrink-0 text-[#5E5E5E] font-normal leading-[100%] tracking-normal whitespace-nowrap
+            text-[12px] md:text-[14px] xl:text-[16px]
+            mr-[10px] xl:mr-[2px]"
+          style={{ fontFamily: "Eurostile, sans-serif" }}
         >
-          <svg
-            viewBox="0 0 24 22" fill="none" xmlns="http://www.w3.org/2000/svg"
-            className="w-[13px] h-[13px] sm:w-[15px] sm:h-[15px] md:w-[17px] md:h-[17px] xl:w-[18px] xl:h-[18px]"
-          >
-            <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z" fill="#757575" />
-          </svg>
-          <span className="absolute -top-[3px] -right-[3px] w-[10px] h-[10px] sm:w-[11px] sm:h-[11px] xl:w-[12px] xl:h-[12px] bg-[#0F467F] text-white text-[5px] xl:text-[6px] font-bold rounded-full flex items-center justify-center">
-            1
-          </span>
-        </button>
+          {user?.fullName?.split(" ")[0] || "Guest Account"}        </span>
 
       </div>
     </header>
