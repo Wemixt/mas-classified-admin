@@ -1,29 +1,53 @@
 "use client";
 
-import { useState } from "react";
-
-const weeklyData = [
-  { day: "Monday", published: 67, pending: 15 },
-  { day: "Tuesday", published: 74, pending: 8 },
-  { day: "Wednesday", published: 52, pending: 10 },
-  { day: "Thursday", published: 71, pending: 12 },
-  { day: "Friday", published: 65, pending: 5 },
-  { day: "Saturday", published: 74, pending: 20 },
-  { day: "Sunday", published: 83, pending: 35 },
-];
-
-const dayLabelShort = (day: string) => day.slice(0, 3); // Mon, Tue etc.
+import { useEffect, useState } from "react";
+import { dashboardService } from "@/services/dashboard.service";
+import { AdChartItem } from "@/types";
 
 export default function AdStatistics() {
   const [period, setPeriod] = useState<"weekly" | "monthly">("weekly");
-  const maxValue = 90;
-  const yTicks = [90, 80, 70, 60, 50, 0];
+  const [chartData, setChartData] = useState<AdChartItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchChartData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await dashboardService.getAdChartData(period);
+        if (response.success) {
+          setChartData(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching ad chart data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchChartData();
+  }, [period]);
+
+  // Dynamically calculate max value for scaling
+  const allValues = chartData.flatMap(item => [item.published, item.submitted]);
+  const maxValueRaw = allValues.length > 0 ? Math.max(...allValues, 10) : 10;
+  // Round up to nearest 10 for cleaner y-axis
+  const maxValue = Math.ceil(maxValueRaw / 10) * 10;
+  
+  const yTicks = [maxValue, Math.round(maxValue * 0.8), Math.round(maxValue * 0.6), Math.round(maxValue * 0.4), Math.round(maxValue * 0.2), 0];
+  
   // Chart height: shorter on mobile (140px), full size on md+
   const chartHeightMobile = 130;
   const chartHeightDesktop = 180;
 
+  const getLabel = (label: string) => {
+    if (label === "Wednesday") return "Wednes\nday";
+    return label;
+  };
+
+  const dayLabelShort = (label: string) => label.slice(0, 3);
+
   return (
-    <div className="bg-[#DAECFF] rounded-[10px] p-[14px] md:p-[20px] pb-[12px] md:pb-[16px] mt-4">
+    <div className="bg-[#DAECFF] rounded-[10px] p-[14px] md:p-[20px] pb-[12px] md:pb-[16px] mt-4 h-full flex flex-col">
       {/* Header row */}
       <div className="flex items-center justify-between mb-[12px] md:mb-[16px]">
         <h3 className="text-[#202020] text-[16px] md:text-[20px] font-semibold leading-[1.3]">
@@ -54,97 +78,131 @@ export default function AdStatistics() {
         </div>
       </div>
 
-      {/* Chart area — using CSS custom property via inline style for height */}
-      <div className="flex">
-        {/* Y-axis labels */}
-        <div
-          className="flex flex-col justify-between pr-[6px] md:pr-[8px]"
-          style={{ height: `${chartHeightMobile}px` }}
-        >
-          {yTicks.map((v) => (
-            <span key={v} className="text-[8px] md:text-[9px] text-[#999999] leading-none text-right min-w-[14px] font-normal">
-              {v}
-            </span>
-          ))}
+      {isLoading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-[#555555] text-[12px]">Loading chart data...</p>
         </div>
-
-        {/* Chart + X-axis — mobile version */}
-        <div className="flex-1 flex flex-col md:hidden">
-          <div className="relative" style={{ height: `${chartHeightMobile}px` }}>
-            {yTicks.map((v) => (
+      ) : (
+        <div className="flex flex-1">
+          {/* Chart + X-axis — mobile version */}
+          <div className="flex-1 flex flex-col md:hidden">
+            <div className="flex">
+              {/* Y-axis labels (Mobile) */}
               <div
-                key={v}
-                className={`absolute left-0 right-0 border-t ${v === 0 ? "border-[#BBBBBB]/60" : "border-[#CCCCCC]/25"}`}
-                style={{ top: `${((maxValue - v) / maxValue) * chartHeightMobile}px` }}
-              />
-            ))}
-            <div
-              className="absolute left-0 right-0 border-t-[1.5px] border-dashed border-[#90B8D8]/60"
-              style={{ top: `${((maxValue - 65) / maxValue) * chartHeightMobile}px` }}
-            />
-            <div className="absolute inset-0 flex items-end justify-around px-[2px]">
-              {weeklyData.map((item) => (
-                <div key={item.day} className="flex items-end gap-[2px]">
+                className="relative pr-[6px] w-[20px]"
+                style={{ height: `${chartHeightMobile}px` }}
+              >
+                {yTicks.map((v) => (
+                  <span 
+                    key={v} 
+                    className="absolute right-[6px] text-[8px] text-[#999999] font-normal leading-none -translate-y-1/2"
+                    style={{ top: `${((maxValue - v) / maxValue) * chartHeightMobile}px` }}
+                  >
+                    {v}
+                  </span>
+                ))}
+              </div>
+
+              {/* Chart Grid + Bars (Mobile) */}
+              <div className="flex-1 relative" style={{ height: `${chartHeightMobile}px` }}>
+                {yTicks.map((v) => (
                   <div
-                    className="w-[8px] bg-[#0095FF] rounded-[2px]"
-                    style={{ height: `${(item.published / maxValue) * chartHeightMobile}px` }}
+                    key={v}
+                    className={`absolute left-0 right-0 border-t ${v === 0 ? "border-[#BBBBBB]/60" : "border-[#CCCCCC]/25"}`}
+                    style={{ top: `${((maxValue - v) / maxValue) * chartHeightMobile}px` }}
                   />
-                  <div
-                    className="w-[8px] bg-[#00E096] rounded-[2px]"
-                    style={{ height: `${(item.pending / maxValue) * chartHeightMobile}px` }}
-                  />
+                ))}
+                <div
+                  className="absolute left-0 right-0 border-t-[1.5px] border-dashed border-[#90B8D8]/60"
+                  style={{ top: `${((maxValue - (maxValue * 0.7)) / maxValue) * chartHeightMobile}px` }}
+                />
+                <div className="absolute inset-0 flex items-end justify-around px-[2px]">
+                  {chartData.map((item, idx) => (
+                    <div key={`${item.label}-${idx}`} className="flex items-end gap-[2px]">
+                      <div
+                        className="w-[8px] bg-[#0095FF] rounded-[2px] transition-all duration-300"
+                        style={{ height: `${(item.published / maxValue) * chartHeightMobile}px` }}
+                      />
+                      <div
+                        className="w-[8px] bg-[#00E096] rounded-[2px] transition-all duration-300"
+                        style={{ height: `${(item.submitted / maxValue) * chartHeightMobile}px` }}
+                      />
+                    </div>
+                  ))}
                 </div>
+              </div>
+            </div>
+            
+            {/* X-axis — short labels on mobile */}
+            <div className="flex justify-around pt-[8px] px-[2px] pl-[20px]">
+              {chartData.map((item, idx) => (
+                <span key={`${item.label}-${idx}`} className="text-[8px] text-[#555555] text-center font-normal leading-[1.2] min-w-[20px]">
+                  {period === "weekly" ? dayLabelShort(item.label) : item.label.replace("Week ", "W")}
+                </span>
               ))}
             </div>
           </div>
-          {/* X-axis — short labels on mobile */}
-          <div className="flex justify-around pt-[8px] px-[2px]">
-            {weeklyData.map((item) => (
-              <span key={item.day} className="text-[8px] text-[#555555] text-center font-normal leading-[1.2]">
-                {dayLabelShort(item.day)}
-              </span>
-            ))}
-          </div>
-        </div>
 
-        {/* Chart + X-axis — desktop version */}
-        <div className="hidden md:flex flex-1 flex-col">
-          <div className="relative" style={{ height: `${chartHeightDesktop}px` }}>
-            {yTicks.map((v) => (
+          {/* Chart + X-axis — desktop version */}
+          <div className="hidden md:flex flex-1 flex-col">
+            <div className="flex">
+              {/* Y-axis labels (Desktop) */}
               <div
-                key={v}
-                className={`absolute left-0 right-0 border-t ${v === 0 ? "border-[#BBBBBB]/60" : "border-[#CCCCCC]/25"}`}
-                style={{ top: `${((maxValue - v) / maxValue) * chartHeightDesktop}px` }}
-              />
-            ))}
-            <div
-              className="absolute left-0 right-0 border-t-[1.5px] border-dashed border-[#90B8D8]/60"
-              style={{ top: `${((maxValue - 65) / maxValue) * chartHeightDesktop}px` }}
-            />
-            <div className="absolute inset-0 flex items-end justify-around px-[4px]">
-              {weeklyData.map((item) => (
-                <div key={item.day} className="flex items-end gap-[3px]">
+                className="relative pr-[8px] w-[24px]"
+                style={{ height: `${chartHeightDesktop}px` }}
+              >
+                {yTicks.map((v) => (
+                  <span 
+                    key={v} 
+                    className="absolute right-[8px] text-[9px] text-[#999999] font-normal leading-none -translate-y-1/2"
+                    style={{ top: `${((maxValue - v) / maxValue) * chartHeightDesktop}px` }}
+                  >
+                    {v}
+                  </span>
+                ))}
+              </div>
+
+              {/* Chart Grid + Bars (Desktop) */}
+              <div className="flex-1 relative" style={{ height: `${chartHeightDesktop}px` }}>
+                {yTicks.map((v) => (
                   <div
-                    className="w-[12px] bg-[#0095FF] rounded-[2px]"
-                    style={{ height: `${(item.published / maxValue) * chartHeightDesktop}px` }}
+                    key={v}
+                    className={`absolute left-0 right-0 border-t ${v === 0 ? "border-[#BBBBBB]/60" : "border-[#CCCCCC]/25"}`}
+                    style={{ top: `${((maxValue - v) / maxValue) * chartHeightDesktop}px` }}
                   />
-                  <div
-                    className="w-[12px] bg-[#00E096] rounded-[2px]"
-                    style={{ height: `${(item.pending / maxValue) * chartHeightDesktop}px` }}
-                  />
+                ))}
+                <div
+                  className="absolute left-0 right-0 border-t-[1.5px] border-dashed border-[#90B8D8]/60"
+                  style={{ top: `${((maxValue - (maxValue * 0.7)) / maxValue) * chartHeightDesktop}px` }}
+                />
+                <div className="absolute inset-0 flex items-end justify-around px-[4px]">
+                  {chartData.map((item, idx) => (
+                    <div key={`${item.label}-${idx}`} className="flex items-end gap-[3px]">
+                      <div
+                        className="w-[12px] bg-[#0095FF] rounded-[2px] transition-all duration-300"
+                        style={{ height: `${(item.published / maxValue) * chartHeightDesktop}px` }}
+                      />
+                      <div
+                        className="w-[12px] bg-[#00E096] rounded-[2px] transition-all duration-300"
+                        style={{ height: `${(item.submitted / maxValue) * chartHeightDesktop}px` }}
+                      />
+                    </div>
+                  ))}
                 </div>
+              </div>
+            </div>
+
+            {/* X-axis (Desktop) */}
+            <div className="flex justify-around pt-[10px] px-[4px] pl-[24px]">
+              {chartData.map((item, idx) => (
+                <span key={`${item.label}-${idx}`} className="text-[10px] text-[#555555] text-center font-normal whitespace-pre-line leading-[1.2] min-w-[30px]">
+                  {getLabel(item.label)}
+                </span>
               ))}
             </div>
           </div>
-          <div className="flex justify-around pt-[10px] px-[4px]">
-            {weeklyData.map((item) => (
-              <span key={item.day} className="text-[10px] text-[#555555] text-center font-normal whitespace-pre-line leading-[1.2]">
-                {item.day === "Wednesday" ? "Wednes\nday" : item.day}
-              </span>
-            ))}
-          </div>
         </div>
-      </div>
+      )}
 
       {/* Legend */}
       <div className="flex items-center justify-center gap-[20px] md:gap-[28px] mt-[12px] md:mt-[16px]">

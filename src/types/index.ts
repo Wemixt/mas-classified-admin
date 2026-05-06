@@ -258,3 +258,66 @@ export interface AdminAdListResponse {
     path: string;
   };
 }
+
+export interface DashboardOverviewData {
+  totalAds: number;
+  publishedAds: number;
+  pendingAds: number;
+  rejectedAds: number;
+  adminCount: number;
+  moderatorCount: number;
+}
+
+export interface DashboardOverviewResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: DashboardOverviewData;
+  meta: {
+    timestamp: string;
+    path: string;
+  };
+}
+
+export interface RecentAd {
+  id: string;
+  uuid: string;
+  title: string;
+  price: string;
+  status: string;
+  createdAt: string;
+  sellerName: string;
+  categoryName: string;
+  imageUrl?: string;
+}
+
+export interface RecentAdsResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: {
+    data: RecentAd[];
+  };
+  meta: {
+    timestamp: string;
+    path: string;
+  };
+}export interface AdChartItem {
+  label: string;
+  submitted: number;
+  published: number;
+}
+
+export interface AdChartResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: {
+    data: AdChartItem[];
+    period: "weekly" | "monthly";
+  };
+  meta: {
+    timestamp: string;
+    path: string;
+  };
+}

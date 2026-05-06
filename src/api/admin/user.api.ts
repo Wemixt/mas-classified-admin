@@ -9,4 +9,8 @@ export const userApi = {
     apiClient.put(`/api/v1/users/admin/status/update/${id}`, { status }),
   registerStaff: (data: any) => 
     apiClient.post(`/api/v1/auth/register/staff`, data),
+  searchUsers: (query: string) => 
+    apiClient.get(`/api/v1/search/admin/users`, {
+      params: { query }
+    }),
 };

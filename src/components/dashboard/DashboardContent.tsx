@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks";
 import StatCard from "./StatCard";
 import QuickActions from "./QuickActions";
@@ -7,18 +8,40 @@ import AdStatistics from "./AdStatistics";
 import RecentAds from "./RecentAds";
 import RecentActivity from "./RecentActivity";
 import Messages from "./Messages";
-
-const stats = [
-  { value: 245, label: "Total Ads", bgColor: "#0F467F" },
-  { value: 180, label: "Published Ads", bgColor: "#1174BB" },
-  { value: 26, label: "Pending Ads", bgColor: "#005AA1" },
-  { value: 11, label: "Rejected Ads", bgColor: "#0F467F" },
-];
+import { dashboardService } from "@/services/dashboard.service";
+import { DashboardOverviewData } from "@/types";
 
 export default function DashboardContent() {
-  const { role, isLoading } = useAuth();
+  const { role, isLoading: authLoading } = useAuth();
+  const [statsData, setStatsData] = useState<DashboardOverviewData | null>(null);
+  const [isDataLoading, setIsDataLoading] = useState(true);
 
-  if (isLoading) {
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      try {
+        setIsDataLoading(true);
+        const response = await dashboardService.getOverview();
+        if (response.success) {
+          setStatsData(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard stats:", error);
+      } finally {
+        setIsDataLoading(false);
+      }
+    };
+
+    fetchDashboardStats();
+  }, []);
+
+  const stats = [
+    { value: statsData?.totalAds ?? 0, label: "Total Ads", bgColor: "#0F467F" },
+    { value: statsData?.publishedAds ?? 0, label: "Published Ads", bgColor: "#1174BB" },
+    { value: statsData?.pendingAds ?? 0, label: "Pending Ads", bgColor: "#005AA1" },
+    { value: statsData?.rejectedAds ?? 0, label: "Rejected Ads", bgColor: "#0F467F" },
+  ];
+
+  if (authLoading || isDataLoading) {
     return <div className="p-8">Loading dashboard...</div>;
   }
 
@@ -35,6 +58,7 @@ export default function DashboardContent() {
       {/* Divider */}
       <div className="border-t border-[#5E5E5E] opacity-70 mt-[16px]" />
 
+     
       
       {/* Stat Cards — 1 col mobile, 2 col sm, 4 col xl */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-[12px] md:gap-[16px] mt-[20px]">

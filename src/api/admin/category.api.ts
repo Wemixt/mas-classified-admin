@@ -8,8 +8,10 @@ export const categoryApi = {
   /**
    * Get all main categories with their subcategories (Admin/Moderator access)
    */
-  getMainCategories: async (): Promise<CategoryListResponse> => {
-    const response = await apiClient.get("/api/v1/categories/admin/main/list");
+  getMainCategories: async (page = 1, limit = 10): Promise<CategoryListResponse> => {
+    const response = await apiClient.get("/api/v1/categories/admin/main/list", {
+      params: { page, limit }
+    });
     return response.data;
   },
 

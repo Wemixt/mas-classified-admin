@@ -13,4 +13,8 @@ export const userService = {
     const response = await userApi.registerStaff(data);
     return response.data;
   },
+  searchUsers: async (query: string) => {
+    const response = await userApi.searchUsers(query);
+    return response.data;
+  },
 };

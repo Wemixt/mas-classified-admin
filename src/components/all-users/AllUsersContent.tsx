@@ -40,14 +40,21 @@ export default function AllUsersContent() {
       setLoading(true);
       setError(null);
       
-      let roleParam: any = undefined;
-      if (activeTab === "Moderators") roleParam = "MODERATOR";
-      else if (activeTab === "Sellers") roleParam = "USER";
-      else if (activeTab === "Visitors") roleParam = "GUEST";
+      let response;
+      if (searchQuery.trim()) {
+        response = await adminUserService.searchUsers(searchQuery);
+      } else {
+        let roleParam: any = undefined;
+        if (activeTab === "Moderators") roleParam = "MODERATOR";
+        else if (activeTab === "Sellers") roleParam = "USER";
+        else if (activeTab === "Visitors") roleParam = "GUEST";
+        response = await adminUserService.getAdminUsers(roleParam, page, 10);
+      }
 
-      const response = await adminUserService.getAdminUsers(roleParam, page, 10);
       if (response.success && response.data) {
-        const mappedUsers: User[] = response.data.data.map((u: any) => ({
+        // Handle both search results (which might not be paginated the same way) and list results
+        const dataArray = Array.isArray(response.data) ? response.data : response.data.data;
+        const mappedUsers: User[] = (dataArray || []).map((u: any) => ({
           id: u.id,
           uuid: u.uuid,
           name: u.fullName || "Unknown",
@@ -59,7 +66,11 @@ export default function AllUsersContent() {
           avatar: u.profileImage || "/logos/mass logo.png",
         }));
         setUserList(mappedUsers);
-        setMeta(response.data.meta);
+        if (!Array.isArray(response.data)) {
+          setMeta(response.data.meta || { total: mappedUsers.length, page: 1, limit: 10, totalPages: 1 });
+        } else {
+          setMeta({ total: mappedUsers.length, page: 1, limit: mappedUsers.length, totalPages: 1 });
+        }
       }
     } catch (err) {
       console.error("Failed to fetch users", err);
@@ -70,12 +81,24 @@ export default function AllUsersContent() {
   };
 
   useEffect(() => {
-    fetchUsers(1);
+    if (!searchQuery.trim()) {
+      fetchUsers(1);
+    }
   }, [activeTab]);
 
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchQuery.trim()) {
+        fetchUsers(1);
+      } else {
+        fetchUsers(1);
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
+
   const tabs: TabType[] = ["All Users", "Moderators", "Sellers", "Visitors"];
-
-
 
   const handleUpdateStatus = async (userId: string, newStatus: "ACTIVE" | "SUSPENDED") => {
     try {
@@ -93,15 +116,6 @@ export default function AllUsersContent() {
       alert("Failed to update user status");
     }
   };
-
-  const filteredUsers = userList.filter((user) => {
-    const matchesSearch =
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.employeeId.toLowerCase().includes(searchQuery.toLowerCase());
-
-    return matchesSearch;
-  });
 
   return (
     <div
@@ -176,10 +190,10 @@ export default function AllUsersContent() {
                 <div className="py-[32px] text-center text-[#5E5E5E]">Loading users...</div>
               ) : error ? (
                 <div className="py-[32px] text-center text-red-500">{error}</div>
-              ) : filteredUsers.length === 0 ? (
+              ) : userList.length === 0 ? (
                 <div className="py-[32px] text-center text-[#5E5E5E]">No users found.</div>
               ) : (
-                filteredUsers.map((user) => (
+                userList.map((user) => (
                 <div
                   key={user.id}
                   onClick={() => setSelectedUser(user)}

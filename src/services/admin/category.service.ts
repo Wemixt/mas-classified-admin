@@ -6,12 +6,12 @@ import { Category, SubCategory, CreateCategoryDto, CreateSubCategoryDto, UpdateC
  */
 export const categoryService = {
   /**
-   * Fetch all main categories for administrative management
+   * Fetch all main categories for administrative management (with pagination)
    */
-  async getMainCategories(): Promise<Category[]> {
+  async getMainCategories(page = 1, limit = 10): Promise<any> {
     try {
-      const response = await categoryApi.getMainCategories();
-      return response.data;
+      const response = await categoryApi.getMainCategories(page, limit);
+      return response;
     } catch (error) {
       console.error("Error fetching main categories:", error);
       throw error;

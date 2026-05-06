@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo } from "react";
 import { categoryService } from "@/services/admin/category.service";
 import { Category, SubCategory } from "@/types";
 import toast from "react-hot-toast";
+import Pagination from "../common/Pagination";
 
 const Toggle = ({ active }: { active: boolean }) => (
   <div className={`w-[36px] h-[20px] rounded-[10px] flex items-center p-[2.5px] transition-colors ${active ? 'bg-[#4CAF50] justify-end' : 'bg-[#A0A0A0] justify-start'}`}>
@@ -51,6 +52,12 @@ export default function CategoriesContent() {
   const [expandedCategoryId, setExpandedCategoryId] = useState<number | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [meta, setMeta] = useState({
+    total: 0,
+    page: 1,
+    limit: 10,
+    totalPages: 1
+  });
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDoneModal, setShowDoneModal] = useState(false);
@@ -77,14 +84,25 @@ export default function CategoriesContent() {
   const gridClasses = "grid grid-cols-[0.6fr_1.5fr_1.2fr_1.2fr_1.2fr_0.8fr] items-center";
 
   useEffect(() => {
-    fetchCategories();
+    fetchCategories(1);
   }, []);
 
-  const fetchCategories = async () => {
+  const fetchCategories = async (page = 1) => {
     try {
       setIsLoading(true);
-      const data = await categoryService.getMainCategories();
-      setCategories(data);
+      const response = await categoryService.getMainCategories(page, 10);
+      if (response.success && response.data) {
+        setCategories(response.data.data || []);
+        if (response.data.meta) {
+          const { currentPage, lastPage, total, perPage } = response.data.meta;
+          setMeta({
+            page: currentPage || 1,
+            totalPages: lastPage || 1,
+            total: total || 0,
+            limit: perPage || 10
+          });
+        }
+      }
     } catch (error) {
       toast.error("Failed to fetch categories");
     } finally {
@@ -531,6 +549,14 @@ export default function CategoriesContent() {
           </div>
         </div>
       </div>
+
+      {/* Pagination */}
+      <Pagination 
+        currentPage={meta.page}
+        totalPages={meta.totalPages}
+        onPageChange={(page) => fetchCategories(page)}
+        isLoading={isLoading}
+      />
 
       {/* Add/Edit Modal */}
       {showAddModal && (

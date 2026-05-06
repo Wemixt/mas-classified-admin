@@ -13,7 +13,7 @@ interface QuickAction {
 const actionsByRole: Record<UserRole, QuickAction[]> = {
   admin: [
     { label: "Ads review", icon: "review", path: "/ad-review" },
-    { label: "Manage\nModerator", icon: "moderator", path: "/moderators" },
+    { label: "Manage\nModerators", icon: "moderator", path: "/moderators" },
     { label: "Setting", icon: "setting", path: "/settings" },
     { label: "View\nCategories", icon: "categories", path: "/categories" },
   ],
@@ -25,7 +25,7 @@ const actionsByRole: Record<UserRole, QuickAction[]> = {
   ],
   super_admin: [
     { label: "Ads review", icon: "review", path: "/ad-review" },
-    { label: "Manage\nModerator", icon: "moderator", path: "/moderators" },
+    { label: "Manage\nModerators", icon: "moderator", path: "/moderators" },
     { label: "Setting", icon: "setting", path: "/settings" },
     { label: "View\nCategories", icon: "categories", path: "/categories" },
   ],
