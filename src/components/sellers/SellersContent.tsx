@@ -98,15 +98,51 @@ export default function SellersContent() {
     }
   };
 
+  const handleExport = () => {
+    if (sellerList.length === 0) {
+      alert("No data to export");
+      return;
+    }
+
+    const headers = ["Name", "Email", "Phone", "Total Ads", "Status"];
+    const csvContent = [
+      headers.join(","),
+      ...sellerList.map(seller => [
+        `"${seller.name}"`,
+        `"${seller.email}"`,
+        `"${seller.phone}"`,
+        `"${seller.totalAds}"`,
+        `"${seller.active ? "Active" : "Inactive"}"`
+      ].join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `sellers_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="p-[16px] md:py-[28px] md:px-[28px] w-full max-w-full overflow-hidden">
-      {/* Title */}
-      <h1
-        className="text-[#5E5E5E] text-[18px] md:text-[22px] font-normal leading-[100%] tracking-normal"
-        style={{ fontFamily: "Eurostile, sans-serif" }}
-      >
-        Sellers
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1
+          className="text-[#5E5E5E] text-[18px] md:text-[22px] font-normal leading-[100%] tracking-normal"
+          style={{ fontFamily: "Eurostile, sans-serif" }}
+        >
+          Sellers
+        </h1>
+        <button 
+          onClick={handleExport}
+          className="bg-[#EBEBEB] hover:bg-[#E0E0E0] text-[#222222] h-[36px] md:h-[40px] px-[12px] md:px-[20px] rounded-[8px] text-[12px] md:text-[14px] font-semibold border border-[#D2D2D2] transition-colors shrink-0"
+        >
+          Export
+        </button>
+      </div>
 
       {/* Divider */}
       <div className="border-t border-[#5E5E5E] opacity-70 mt-[16px]" />

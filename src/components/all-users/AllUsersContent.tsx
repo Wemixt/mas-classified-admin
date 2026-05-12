@@ -117,6 +117,36 @@ export default function AllUsersContent() {
     }
   };
 
+  const handleExport = () => {
+    if (userList.length === 0) {
+      alert("No data to export");
+      return;
+    }
+
+    const headers = ["Name", "Username", "Employee ID", "Registered Date", "Role", "Status"];
+    const csvContent = [
+      headers.join(","),
+      ...userList.map(user => [
+        `"${user.name}"`,
+        `"${user.username}"`,
+        `"${user.employeeId}"`,
+        `"${user.registeredDate}"`,
+        `"${user.role}"`,
+        `"${user.status}"`
+      ].join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `users_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div
       className="py-4 md:pt-[28px] md:pb-[28px] px-4 md:pl-[28px] md:pr-4 flex flex-col"
@@ -147,7 +177,10 @@ export default function AllUsersContent() {
               className="flex-1 outline-none text-[14px] md:text-[15px] font-normal leading-[100%] text-[#000000] placeholder:text-[#5E5E5E]/70"
             />
           </div>
-          <button className="bg-[#1174BB] hover:bg-[#0E63A0] transition-colors text-white h-[40px] md:h-[44px] px-[20px] md:px-[42px] rounded-[8px] text-[13px] md:text-[15px] font-normal shrink-0">
+          <button 
+            onClick={handleExport}
+            className="bg-[#1174BB] hover:bg-[#0E63A0] transition-colors text-white h-[40px] md:h-[44px] px-[20px] md:px-[42px] rounded-[8px] text-[13px] md:text-[15px] font-normal shrink-0"
+          >
             Export
           </button>
         </div>

@@ -89,6 +89,9 @@ export default function ModeratorsContent() {
     role: "MODERATOR",
   });
   const [formErrors, setFormErrors] = useState<string[]>([]);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
 
   const handleToggleStatus = async (moderatorId: string, currentStatus: boolean) => {
     try {
@@ -124,6 +127,8 @@ export default function ModeratorsContent() {
       role: "MODERATOR",
     });
     setFormErrors([]);
+    setShowPassword(false);
+    setShowConfirmPassword(false);
   };
 
   const handleCloseSuccess = () => {
@@ -180,6 +185,35 @@ export default function ModeratorsContent() {
     if (mod) setSelectedModerator(mod);
   };
 
+  const handleExport = () => {
+    if (moderatorList.length === 0) {
+      alert("No data to export");
+      return;
+    }
+
+    const headers = ["Name", "Username", "Employee ID", "Registered Date", "Status"];
+    const csvContent = [
+      headers.join(","),
+      ...moderatorList.map(mod => [
+        `"${mod.name}"`,
+        `"${mod.username}"`,
+        `"${mod.employeeId}"`,
+        `"${mod.registeredDate}"`,
+        `"${mod.active ? "Active" : "Suspended"}"`
+      ].join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `moderators_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="py-4 md:pt-[28px] md:pb-[28px] px-4 md:pl-[28px] md:pr-4">
       {/* Create Moderator Modal */}
@@ -231,20 +265,53 @@ export default function ModeratorsContent() {
                   { label: "Phone Number", key: "phoneNo", type: "text", placeholder: "Enter phone number" },
                   { label: "Password", key: "password", type: "password", placeholder: "Enter password" },
                   { label: "Confirm Password", key: "confirmPassword", type: "password", placeholder: "Confirm password" },
-                ].map(({ label, key, type, placeholder }) => (
-                  <div key={key} className="flex flex-col gap-[6px] md:gap-[8px]">
-                    <label className="text-[#000000] text-[13px] md:text-[14px] font-semibold leading-[100%] tracking-normal">
-                      {label}
-                    </label>
-                    <input
-                      type={type}
-                      placeholder={placeholder}
-                      value={formData[key as keyof typeof formData]}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, [key]: e.target.value }))}
-                      className="h-[42px] md:h-[44px] px-[14px] md:px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal placeholder:text-[#A0A0A0] outline-none focus:border-[#1174BB] transition-colors"
-                    />
-                  </div>
-                ))}
+                ].map(({ label, key, type, placeholder }) => {
+                  const isPassword = key === "password" || key === "confirmPassword";
+                  const isVisible = key === "password" ? showPassword : showConfirmPassword;
+                  const toggleVisibility = () => {
+                    if (key === "password") setShowPassword(!showPassword);
+                    else setShowConfirmPassword(!showConfirmPassword);
+                  };
+
+                  return (
+                    <div key={key} className="flex flex-col gap-[6px] md:gap-[8px]">
+                      <label className="text-[#000000] text-[13px] md:text-[14px] font-semibold leading-[100%] tracking-normal">
+                        {label}
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={isPassword ? (isVisible ? "text" : "password") : type}
+                          placeholder={placeholder}
+                          value={formData[key as keyof typeof formData]}
+                          onChange={(e) => setFormData((prev) => ({ ...prev, [key]: e.target.value }))}
+                          className="w-full h-[42px] md:h-[44px] px-[14px] md:px-[16px] border border-[#D0D0D0] rounded-[8px] text-[#000000] text-[14px] font-normal leading-[100%] tracking-normal placeholder:text-[#A0A0A0] outline-none focus:border-[#1174BB] transition-colors pr-[44px]"
+                        />
+                        {isPassword && (
+                          <button
+                            type="button"
+                            onClick={toggleVisibility}
+                            className="absolute right-[12px] top-1/2 -translate-y-1/2 text-[#9A9A9A] hover:text-[#555] transition-colors cursor-pointer"
+                            aria-label={`Toggle ${label} visibility`}
+                          >
+                            {isVisible ? (
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                                <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                                <path d="M1 1l22 22" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                              </svg>
+                            ) : (
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                                <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8"/>
+                              </svg>
+                            )}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+
 
                 {/* Role hidden - always MODERATOR */}
               </div>
@@ -326,17 +393,25 @@ export default function ModeratorsContent() {
         >
           Moderators
         </h1>
-        <button
-          onClick={handleAddModerator}
-          className="flex items-center gap-[6px] md:gap-[8px] h-[36px] md:h-[40px] px-[12px] md:px-[20px] bg-[#1174BB] rounded-[8px] text-white text-[12px] md:text-[14px] font-semibold leading-[100%] tracking-normal hover:bg-[#0E63A0] transition-colors shrink-0"
-        >
-          <svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="9" cy="9" r="9" fill="white" />
-            <path d="M9 5V13M5 9H13" stroke="#1174BB" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-          <span className="hidden sm:inline">Add Moderator</span>
-          <span className="sm:hidden">Add</span>
-        </button>
+        <div className="flex items-center gap-[8px] md:gap-[12px]">
+          <button 
+            onClick={handleExport}
+            className="bg-[#EBEBEB] hover:bg-[#E0E0E0] text-[#222222] h-[36px] md:h-[40px] px-[12px] md:px-[20px] rounded-[8px] text-[12px] md:text-[14px] font-semibold border border-[#D2D2D2] transition-colors shrink-0"
+          >
+            Export
+          </button>
+          <button
+            onClick={handleAddModerator}
+            className="flex items-center gap-[6px] md:gap-[8px] h-[36px] md:h-[40px] px-[12px] md:px-[20px] bg-[#1174BB] rounded-[8px] text-white text-[12px] md:text-[14px] font-semibold leading-[100%] tracking-normal hover:bg-[#0E63A0] transition-colors shrink-0"
+          >
+            <svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="9" cy="9" r="9" fill="white" />
+              <path d="M9 5V13M5 9H13" stroke="#1174BB" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+            <span className="hidden sm:inline">Add Moderator</span>
+            <span className="sm:hidden">Add</span>
+          </button>
+        </div>
       </div>
 
       {/* Divider */}

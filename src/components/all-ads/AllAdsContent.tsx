@@ -239,6 +239,38 @@ export default function AllAdsContent() {
     }
   };
 
+  const handleExport = () => {
+    if (ads.length === 0) {
+      toast.error("No data to export");
+      return;
+    }
+
+    const headers = ["Title", "Category", "Condition", "Location", "Price", "Currency", "Status", "Created At"];
+    const csvContent = [
+      headers.join(","),
+      ...ads.map(ad => [
+        `"${ad.title}"`,
+        `"${ad.categoryName}"`,
+        `"${ad.condition}"`,
+        `"${ad.cityName}, ${ad.districtName}"`,
+        `"${ad.price}"`,
+        `"${ad.currency}"`,
+        `"${ad.status}"`,
+        `"${new Date(ad.createdAt).toLocaleDateString()}"`
+      ].join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `ads_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const filteredAds = useMemo(() => {
     if (!searchQuery.trim()) return ads;
     const q = searchQuery.toLowerCase();
@@ -254,14 +286,24 @@ export default function AllAdsContent() {
 
   return (
     <div className="py-4 md:pt-[28px] md:pb-[40px] px-4 md:pl-[28px] md:pr-4 w-full max-w-full overflow-hidden">
-      <div className="flex items-baseline gap-[8px] flex-wrap">
-        <h1 className="text-[#5E5E5E] text-[18px] md:text-[22px] font-normal leading-[100%] tracking-normal" style={{ fontFamily: "Eurostile, sans-serif" }}>
-          All Ads
-        </h1>
-        {selectedAd && (
-          <span className="text-[#5E5E5E] text-[14px] md:text-[18px] font-normal leading-[100%] tracking-normal opacity-60 truncate max-w-[200px] sm:max-w-none" style={{ fontFamily: "Eurostile, sans-serif" }}>
-            /&nbsp;{selectedAd.title}
-          </span>
+      <div className="flex items-center justify-between gap-[8px] flex-wrap">
+        <div className="flex items-baseline gap-[8px]">
+          <h1 className="text-[#5E5E5E] text-[18px] md:text-[22px] font-normal leading-[100%] tracking-normal" style={{ fontFamily: "Eurostile, sans-serif" }}>
+            All Ads
+          </h1>
+          {selectedAd && (
+            <span className="text-[#5E5E5E] text-[14px] md:text-[18px] font-normal leading-[100%] tracking-normal opacity-60 truncate max-w-[200px] sm:max-w-none" style={{ fontFamily: "Eurostile, sans-serif" }}>
+              /&nbsp;{selectedAd.title}
+            </span>
+          )}
+        </div>
+        {!selectedAd && (
+          <button 
+            onClick={handleExport}
+            className="bg-[#EBEBEB] hover:bg-[#E0E0E0] text-[#222222] h-[36px] md:h-[40px] px-[12px] md:px-[20px] rounded-[8px] text-[12px] md:text-[14px] font-semibold border border-[#D2D2D2] transition-colors shrink-0"
+          >
+            Export
+          </button>
         )}
       </div>
 

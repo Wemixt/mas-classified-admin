@@ -275,6 +275,36 @@ export default function CategoriesContent() {
     setExpandedCategoryId(prev => prev === id ? null : id);
   };
 
+  const handleExport = () => {
+    if (categories.length === 0) {
+      alert("No data to export");
+      return;
+    }
+
+    const headers = ["ID", "Name", "Code", "Description", "Subcategories Count", "Status"];
+    const csvContent = [
+      headers.join(","),
+      ...categories.map(cat => [
+        `"${cat.id}"`,
+        `"${cat.name}"`,
+        `"${cat.slug}"`,
+        `"${cat.description || ""}"`,
+        `"${cat.subCategories?.length || 0}"`,
+        `"${cat.isActive ? "Active" : "Disabled"}"`
+      ].join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `categories_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="p-[16px] md:p-[28px] flex flex-col min-h-full max-w-full overflow-hidden">
       {/* Page Title */}
@@ -300,15 +330,24 @@ export default function CategoriesContent() {
           />
         </div>
         
-        {(role === "admin" || role === "super_admin") && (
+        <div className="flex items-center gap-[12px] w-full md:w-auto">
           <button 
-            onClick={() => setShowAddModal(true)}
-            className="h-[44px] px-[20px] bg-[#1174BB] text-white rounded-[6px] text-[14.5px] font-medium flex items-center gap-[10px] hover:bg-[#0E63A0] transition-colors w-full md:w-auto justify-center md:justify-start shrink-0"
+            onClick={handleExport}
+            className="h-[44px] px-[20px] bg-[#EBEBEB] text-[#222222] rounded-[6px] text-[14.5px] font-medium flex items-center gap-[10px] border border-[#D2D2D2] hover:bg-[#E0E0E0] transition-colors w-full md:w-auto justify-center md:justify-start shrink-0"
           >
-            <PlusCircleIcon color="#1174BB" />
-            Add Category
+            Export
           </button>
-        )}
+          
+          {(role === "admin" || role === "super_admin") && (
+            <button 
+              onClick={() => setShowAddModal(true)}
+              className="h-[44px] px-[20px] bg-[#1174BB] text-white rounded-[6px] text-[14.5px] font-medium flex items-center gap-[10px] hover:bg-[#0E63A0] transition-colors w-full md:w-auto justify-center md:justify-start shrink-0"
+            >
+              <PlusCircleIcon color="#1174BB" />
+              Add Category
+            </button>
+          )}
+        </div>
       </div>
 
       {/* All Categories Section */}
@@ -326,7 +365,7 @@ export default function CategoriesContent() {
               <div className="text-white text-[13px] md:text-[14px] font-medium" style={{ fontFamily: "Eurostile, sans-serif" }}>Code</div>
               <div className="text-white text-[13px] md:text-[14px] font-medium" style={{ fontFamily: "Eurostile, sans-serif" }}>Subcategories</div>
               <div className="text-white text-[13px] md:text-[14px] font-medium" style={{ fontFamily: "Eurostile, sans-serif" }}>Actions</div>
-              <div className="text-white text-[13px] md:text-[14px] font-medium" style={{ fontFamily: "Eurostile, sans-serif" }}>Statue</div>
+              <div className="text-white text-[13px] md:text-[14px] font-medium" style={{ fontFamily: "Eurostile, sans-serif" }}>Status</div>
             </div>
           ) : (
             <div className="grid grid-cols-[0.6fr_2fr_1.5fr_1.5fr_1fr] bg-[#1174BB] rounded-[8px] h-[47px] items-center px-[24px] mb-[16px]">
@@ -436,7 +475,7 @@ export default function CategoriesContent() {
                           <div className="text-[#333333] text-[13px] font-bold text-center">Icon</div>
                           <div className="text-[#333333] text-[13px] font-bold pl-[8px] md:pl-[16px]">Subcategory Name</div>
                           <div className="text-[#333333] text-[13px] font-bold">Description</div>
-                          <div className="text-[#333333] text-[13px] font-bold">Statue</div>
+                          <div className="text-[#333333] text-[13px] font-bold">Status</div>
                           <div />
                         </div>
                         
