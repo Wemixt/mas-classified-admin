@@ -7,8 +7,8 @@ import { Category, SubCategory } from "@/types";
 import toast from "react-hot-toast";
 import Pagination from "../common/Pagination";
 
-const Toggle = ({ active }: { active: boolean }) => (
-  <div className={`w-[36px] h-[20px] rounded-[10px] flex items-center p-[2.5px] transition-colors ${active ? 'bg-[#4CAF50] justify-end' : 'bg-[#A0A0A0] justify-start'}`}>
+const Toggle = ({ active, disabled }: { active: boolean; disabled?: boolean }) => (
+  <div className={`w-[36px] h-[20px] rounded-[10px] flex items-center p-[2.5px] transition-colors ${active ? 'bg-[#4CAF50] justify-end' : 'bg-[#A0A0A0] justify-start'} ${disabled ? 'opacity-50' : ''}`}>
     <div className="w-[15px] h-[15px] bg-white rounded-full shadow-sm" />
   </div>
 );
@@ -423,18 +423,20 @@ export default function CategoriesContent() {
                       <div className="text-[#000000] text-[13px] md:text-[14px] font-medium leading-[150%]">{cat.subCategories?.length || 0}</div>
                       
                       {/* Actions */}
-                      <div className="flex items-center gap-[12px]">
+                      <div className={`flex items-center gap-[12px] ${!cat.isActive ? 'opacity-50' : ''}`}>
                         <button 
+                          disabled={!cat.isActive}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleOpenEditModal(cat, "category");
                           }}
-                          className="h-[30px] px-[16px] bg-[#14487A] text-white text-[12px] font-medium rounded-full flex items-center gap-[6px] hover:bg-[#0E365E] transition-colors"
+                          className="h-[30px] px-[16px] bg-[#14487A] text-white text-[12px] font-medium rounded-full flex items-center gap-[6px] hover:bg-[#0E365E] transition-colors disabled:cursor-not-allowed"
                         >
                           <EditIcon /> Edit
                         </button>
                         <button 
-                          className="flex items-center justify-center transition-opacity hover:opacity-70 p-[6px] hover:bg-[#EAEAEA] rounded-full"
+                          disabled={!cat.isActive}
+                          className="flex items-center justify-center transition-opacity hover:opacity-70 p-[6px] hover:bg-[#EAEAEA] rounded-full disabled:cursor-not-allowed"
                           onClick={(e) => {
                             e.stopPropagation();
                             setItemToDelete({ 
@@ -490,18 +492,21 @@ export default function CategoriesContent() {
                                 {sub.description || "-"}
                               </div>
                               <div 
-                                className="flex items-center gap-[8px] cursor-pointer"
+                                className={`flex items-center gap-[8px] ${!cat.isActive ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleToggleStatus(sub.uuid, "subcategory", sub.isActive);
+                                  if (cat.isActive) {
+                                    handleToggleStatus(sub.uuid, "subcategory", sub.isActive);
+                                  }
                                 }}
                               >
-                                <Toggle active={sub.isActive} />
+                                <Toggle active={sub.isActive} disabled={!cat.isActive} />
                                 <span className="text-[#000000] text-[13px] font-bold">{sub.isActive ? "Active" : "Disabled"}</span>
                               </div>
-                              <div className="flex items-center gap-[8px]">
+                              <div className={`flex items-center gap-[8px] ${(!cat.isActive || !sub.isActive) ? 'opacity-50' : ''}`}>
                                 <button 
-                                  className="p-[6px] hover:bg-gray-200 rounded-full transition-colors"
+                                  disabled={!cat.isActive || !sub.isActive}
+                                  className="p-[6px] hover:bg-gray-200 rounded-full transition-colors disabled:cursor-not-allowed"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleOpenEditModal(sub, "subcategory");
@@ -512,7 +517,8 @@ export default function CategoriesContent() {
                                   </svg>
                                 </button>
                                 <button 
-                                  className="p-[6px] hover:bg-red-50 rounded-full transition-colors group"
+                                  disabled={!cat.isActive || !sub.isActive}
+                                  className="p-[6px] hover:bg-red-50 rounded-full transition-colors group disabled:cursor-not-allowed"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setItemToDelete({ uuid: sub.uuid, type: "subcategory", name: sub.name });
@@ -529,14 +535,15 @@ export default function CategoriesContent() {
                         </div>
 
                         {/* Add subcategory inputs */}
-                        <div className="grid grid-cols-[0.6fr_1.5fr_2fr_1.2fr_1.2fr] items-center pt-[16px] gap-2">
+                        <div className={`grid grid-cols-[0.6fr_1.5fr_2fr_1.2fr_1.2fr] items-center pt-[16px] gap-2 ${!cat.isActive ? 'opacity-50' : ''}`}>
                           <div className="flex justify-center">
                             <input 
                               type="text" 
                               placeholder="Icon (fa-plug)" 
+                              disabled={!cat.isActive}
                               value={newSubCategoryIcon}
                               onChange={(e) => setNewSubCategoryIcon(e.target.value)}
-                              className="h-[38px] w-full bg-white rounded-full px-[12px] text-[12px] outline-none border border-transparent focus:border-[#1174BB]" 
+                              className="h-[38px] w-full bg-white rounded-full px-[12px] text-[12px] outline-none border border-transparent focus:border-[#1174BB] disabled:cursor-not-allowed" 
                               onClick={(e) => e.stopPropagation()} 
                             />
                           </div>
@@ -544,9 +551,10 @@ export default function CategoriesContent() {
                             <input 
                               type="text" 
                               placeholder="Subcategory Name..." 
+                              disabled={!cat.isActive}
                               value={newSubCategoryName}
                               onChange={(e) => setNewSubCategoryName(e.target.value)}
-                              className="h-[38px] w-full bg-white rounded-full px-[16px] text-[13px] outline-none border border-transparent focus:border-[#1174BB]" 
+                              className="h-[38px] w-full bg-white rounded-full px-[16px] text-[13px] outline-none border border-transparent focus:border-[#1174BB] disabled:cursor-not-allowed" 
                               onClick={(e) => e.stopPropagation()} 
                             />
                           </div>
@@ -554,9 +562,10 @@ export default function CategoriesContent() {
                             <input 
                               type="text" 
                               placeholder="Description..." 
+                              disabled={!cat.isActive}
                               value={newSubCategoryDescription}
                               onChange={(e) => setNewSubCategoryDescription(e.target.value)}
-                              className="h-[38px] w-full bg-white rounded-full px-[16px] text-[13px] outline-none border border-transparent focus:border-[#1174BB]" 
+                              className="h-[38px] w-full bg-white rounded-full px-[16px] text-[13px] outline-none border border-transparent focus:border-[#1174BB] disabled:cursor-not-allowed" 
                               onClick={(e) => e.stopPropagation()} 
                             />
                           </div>
@@ -567,8 +576,8 @@ export default function CategoriesContent() {
                                 e.stopPropagation();
                                 handleAddSubCategory(cat.id);
                               }}
-                              disabled={isCreatingSub}
-                              className="h-[38px] px-[20px] bg-[#114A82] text-white text-[13px] font-medium rounded-full flex items-center gap-[8px] hover:bg-[#0E3A66] transition-colors whitespace-nowrap w-fit disabled:opacity-50"
+                              disabled={isCreatingSub || !cat.isActive}
+                              className="h-[38px] px-[20px] bg-[#114A82] text-white text-[13px] font-medium rounded-full flex items-center gap-[8px] hover:bg-[#0E3A66] transition-colors whitespace-nowrap w-fit disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {isCreatingSub ? (
                                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
