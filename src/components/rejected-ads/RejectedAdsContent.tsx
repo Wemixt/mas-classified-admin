@@ -67,6 +67,33 @@ export default function RejectedAdsContent() {
     setDeleteModalState({ adId, step: "confirm" });
   };
 
+  const performDelete = async (adId: string) => {
+    const ad = ads.find(a => a.id === adId);
+    if (!ad) return false;
+
+    try {
+      setLoading(true);
+      await adService.updateAdStatus(ad.uuid, "DELETED");
+      await fetchAds(meta.page);
+      return true;
+    } catch (err) {
+      setError("Failed to delete ad");
+      console.error(err);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteModalState) return;
+    const { adId } = deleteModalState;
+    const success = await performDelete(adId);
+    if (success) {
+      setDeleteModalState({ ...deleteModalState, step: "done" });
+    }
+  };
+
   const handleSendMessage = (adId: string) => {
     setMessageModalState({ adId, step: "compose" });
   };
@@ -147,7 +174,7 @@ export default function RejectedAdsContent() {
             ad={viewingAd}
             onBack={handleBackToList}
             onReconsider={handleReconsider}
-            onDeletePermanently={handleDeletePermanently}
+            onDeletePermanently={performDelete}
           />
         </div>
       ) : (
@@ -417,13 +444,12 @@ export default function RejectedAdsContent() {
                 </p>
                 <div className="flex items-center justify-center gap-[16px] md:gap-[24px] w-full max-w-[360px]">
                   <button
-                    onClick={() => {
-                      setDeleteModalState({ ...deleteModalState, step: "done" });
-                    }}
-                    className="flex-1 h-[48px] md:h-[52px] bg-[#EEEEEE] rounded-[8px] text-[#0F467F] font-semibold text-[15px] md:text-[16px] transition-colors hover:bg-[#E0E0E0] cursor-pointer shadow-sm"
+                    onClick={handleConfirmDelete}
+                    disabled={loading}
+                    className="flex-1 h-[48px] md:h-[52px] bg-[#EEEEEE] rounded-[8px] text-[#0F467F] font-semibold text-[15px] md:text-[16px] transition-colors hover:bg-[#E0E0E0] cursor-pointer shadow-sm disabled:opacity-50"
                     style={{ fontFamily: "Poppins, sans-serif" }}
                   >
-                    Delete
+                    {loading ? "Deleting..." : "Delete"}
                   </button>
                   <button
                     onClick={() => {

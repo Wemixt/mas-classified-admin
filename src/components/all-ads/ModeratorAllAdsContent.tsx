@@ -32,7 +32,7 @@ function AdThumbnail({ src, alt }: { src?: string; alt: string }) {
   );
 
   return (
-    <div className="w-[140px] md:w-[160px] shrink-0 self-stretch rounded-[6px] overflow-hidden bg-[#D9D9D9]">
+    <div className="w-[100px] sm:w-[140px] md:w-[160px] shrink-0 self-stretch rounded-l-[8px] sm:rounded-[6px] overflow-hidden bg-[#D9D9D9]">
       {!src || imgError ? (
         <Placeholder />
       ) : (
@@ -57,15 +57,15 @@ function AdCard({ ad }: { ad: AdminAd }) {
       : ad.cityName || ad.districtName;
 
   return (
-    <div className="bg-[#F4F4F4] rounded-[8px] flex items-stretch overflow-hidden cursor-pointer hover:shadow-md hover:bg-[#EBEBEB] transition-all duration-200 group min-h-[110px]">
+    <div className="bg-[#F4F4F4] rounded-[8px] flex items-stretch overflow-hidden cursor-pointer hover:shadow-md hover:bg-[#EBEBEB] transition-all duration-200 group min-h-[120px] sm:min-h-[110px]">
       <AdThumbnail src={undefined} alt={ad.title} />
 
-      <div className="flex flex-col flex-1 min-w-0 px-[14px] md:px-[18px] py-[14px] md:py-[16px]">
+      <div className="flex flex-col flex-1 min-w-0 px-[10px] sm:px-[14px] md:px-[18px] py-[12px] sm:py-[14px] md:py-[16px]">
         <div className="flex justify-between items-start gap-2">
-          <h3 className="text-[#1A1A1A] text-[14px] md:text-[15px] font-bold leading-[140%] tracking-normal line-clamp-2 group-hover:text-[#1174BB] transition-colors" style={{ fontFamily: "Eurostile, sans-serif" }}>
+          <h3 className="text-[#1A1A1A] text-[13px] sm:text-[14px] md:text-[15px] font-bold leading-[140%] tracking-normal line-clamp-2 group-hover:text-[#1174BB] transition-colors" style={{ fontFamily: "Eurostile, sans-serif" }}>
             {ad.title}
           </h3>
-          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold whitespace-nowrap ${
+          <span className={`text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full font-bold whitespace-nowrap shrink-0 ${
             ad.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 
             ad.status === 'PENDING_REVIEW' ? 'bg-yellow-100 text-yellow-700' : 
             'bg-gray-100 text-gray-700'
@@ -74,21 +74,21 @@ function AdCard({ ad }: { ad: AdminAd }) {
           </span>
         </div>
 
-        <span className="text-[#5E5E5E] text-[12px] md:text-[13px] font-normal leading-[100%] mt-[6px]" style={{ fontFamily: "Eurostile, sans-serif" }}>
+        <span className="text-[#5E5E5E] text-[11px] sm:text-[12px] md:text-[13px] font-normal leading-[100%] mt-[4px] sm:mt-[6px]" style={{ fontFamily: "Eurostile, sans-serif" }}>
           {ad.condition.replace('_', ' ')} • {ad.categoryName}
         </span>
 
         {locationText && (
-          <span className="text-[#5E5E5E] text-[12px] md:text-[13px] font-normal leading-[100%] mt-[8px]" style={{ fontFamily: "Eurostile, sans-serif" }}>
+          <span className="text-[#5E5E5E] text-[11px] sm:text-[12px] md:text-[13px] font-normal leading-[100%] mt-[6px] sm:mt-[8px] opacity-80" style={{ fontFamily: "Eurostile, sans-serif" }}>
             {locationText}
           </span>
         )}
 
-        <div className="flex justify-between items-end mt-auto pt-[14px]">
-          <span className="text-[#ED1C24] text-[13px] md:text-[14px] font-bold leading-[100%]" style={{ fontFamily: "Eurostile, sans-serif" }}>
+        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 mt-auto pt-[10px] sm:pt-[14px]">
+          <span className="text-[#ED1C24] text-[12px] sm:text-[13px] md:text-[14px] font-bold leading-[100%] whitespace-nowrap" style={{ fontFamily: "Eurostile, sans-serif" }}>
             {formatPrice(ad.price, ad.currency)}
           </span>
-          <span className="text-[#9E9E9E] text-[11px]">
+          <span className="text-[#9E9E9E] text-[10px] sm:text-[11px] whitespace-nowrap">
             {new Date(ad.createdAt).toLocaleDateString()}
           </span>
         </div>
@@ -254,12 +254,12 @@ export default function ModeratorAllAdsContent() {
 
   return (
     <div className="py-4 md:pt-[28px] md:pb-[40px] px-4 md:pl-[28px] md:pr-4 w-full max-w-full overflow-hidden">
-      <div className="flex items-baseline gap-[8px] flex-wrap">
-        <h1 className="text-[#5E5E5E] text-[18px] md:text-[22px] font-normal leading-[100%] tracking-normal" style={{ fontFamily: "Eurostile, sans-serif" }}>
+      <div className="flex items-center gap-[12px] flex-wrap">
+        <h1 className="text-[#5E5E5E] text-[18px] md:text-[22px] font-normal leading-[100%] tracking-normal whitespace-nowrap" style={{ fontFamily: "Eurostile, sans-serif" }}>
           All Ads
         </h1>
         {selectedAd && (
-          <span className="text-[#5E5E5E] text-[14px] md:text-[18px] font-normal leading-[100%] tracking-normal opacity-60 truncate max-w-[200px] sm:max-w-none" style={{ fontFamily: "Eurostile, sans-serif" }}>
+          <span className="text-[#5E5E5E] text-[14px] md:text-[18px] font-normal leading-[100%] tracking-normal opacity-60 truncate" style={{ fontFamily: "Eurostile, sans-serif" }}>
             /&nbsp;{selectedAd.title}
           </span>
         )}
@@ -283,13 +283,13 @@ export default function ModeratorAllAdsContent() {
         </div>
       ) : (
         <>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-[16px] sm:gap-[24px] mt-[24px]">
-            <h2 className="text-[#1A1A1A] text-[20px] md:text-[22px] font-bold leading-[100%] tracking-normal whitespace-nowrap underline decoration-[#1A1A1A] underline-offset-[3px]" style={{ fontFamily: "Eurostile, sans-serif" }}>
+          <div className="flex flex-col lg:flex-row lg:items-center gap-[16px] lg:gap-[24px] mt-[24px]">
+            <h2 className="text-[#1A1A1A] text-[18px] md:text-[22px] font-bold leading-[100%] tracking-normal whitespace-nowrap underline decoration-[#1A1A1A] underline-offset-[4px] decoration-2" style={{ fontFamily: "Eurostile, sans-serif" }}>
               All Categories
             </h2>
 
-            <div className="flex-1">
-              <div className={`flex items-center gap-[10px] h-[44px] md:h-[46px] rounded-[8px] border px-[14px] md:px-[16px] bg-white transition-all duration-150 ${
+            <div className="flex-1 w-full">
+              <div className={`flex items-center gap-[10px] h-[44px] md:h-[48px] rounded-[8px] border px-[14px] md:px-[16px] bg-white transition-all duration-150 ${
                 searchFocused ? "border-[#1174BB] shadow-[0_0_0_3px_rgba(17,116,187,0.13)]" : "border-[#C5C5C5]"
               }`}>
                 <SearchIcon focused={searchFocused} />
@@ -300,7 +300,7 @@ export default function ModeratorAllAdsContent() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setSearchFocused(true)}
                   onBlur={() => setSearchFocused(false)}
-                  className="flex-1 bg-transparent text-[#242424] text-[13px] md:text-[14px] font-normal outline-none placeholder:text-[#B0B0B0]"
+                  className="flex-1 bg-transparent text-[#242424] text-[13px] md:text-[14px] font-normal outline-none placeholder:text-[#B0B0B0] w-full"
                   style={{ fontFamily: "Eurostile, sans-serif" }}
                 />
               </div>

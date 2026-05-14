@@ -25,7 +25,7 @@ interface RejectedAdDetailViewProps {
   ad: RejectedAdDetail;
   onBack: () => void;
   onReconsider: (adId: string) => void;
-  onDeletePermanently: (adId: string) => void;
+  onDeletePermanently: (adId: string) => Promise<boolean>;
 }
 
 export default function RejectedAdDetailView({
@@ -250,7 +250,7 @@ export default function RejectedAdDetailView({
                 <button
                   onClick={() => {
                     setDeleteModalState(null);
-                    onDeletePermanently(ad.id);
+                    onBack();
                   }}
                   className="absolute top-[24px] right-[24px] w-[28px] h-[28px] flex items-center justify-center rounded-full bg-[#6B6B6B] hover:bg-[#555555] transition-colors cursor-pointer"
                 >
@@ -293,8 +293,11 @@ export default function RejectedAdDetailView({
                 </p>
                 <div className="flex items-center justify-center gap-[16px] md:gap-[24px] w-full max-w-[360px]">
                   <button
-                    onClick={() => {
-                      setDeleteModalState("done");
+                    onClick={async () => {
+                      const success = await onDeletePermanently(ad.id);
+                      if (success) {
+                        setDeleteModalState("done");
+                      }
                     }}
                     className="flex-1 h-[48px] md:h-[52px] bg-[#EEEEEE] rounded-[8px] text-[#0F467F] font-semibold text-[15px] md:text-[16px] transition-colors hover:bg-[#E0E0E0] cursor-pointer shadow-sm"
                     style={{ fontFamily: "Poppins, sans-serif" }}

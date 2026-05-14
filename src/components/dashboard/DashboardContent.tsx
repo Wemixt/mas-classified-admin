@@ -65,7 +65,7 @@ export default function DashboardContent() {
         {stats.map((stat) => (
           <StatCard
             key={stat.label}
-            value={stat.value}
+              value={stat.value}
             label={stat.label}
             bgColor={stat.bgColor}
           />
