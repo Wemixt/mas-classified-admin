@@ -7,7 +7,7 @@ import type { Ad } from "@/types";
 import Pagination from "../common/Pagination";
 
 
-type ReviewAction = "approve" | "reject" | "requestChanges" | null;
+type ReviewAction = "approve" | "reject" | null;
 
 export default function ReviewAdsContent() {
   const [ads, setAds] = useState<Ad[]>([]);
@@ -62,7 +62,7 @@ export default function ReviewAdsContent() {
     try {
       setLoading(true);
       const status = action === "approve" ? "ACTIVE" : "REJECTED";
-      const reason = (action === "reject" || action === "requestChanges") ? feedback[adId] : undefined;
+      const reason = action === "reject" ? feedback[adId] : undefined;
       
       await adService.updateAdStatus(ad.uuid, status, reason);
       
@@ -105,7 +105,7 @@ export default function ReviewAdsContent() {
           category: fullAd.categoryName,
           condition: fullAd.condition,
           location: `${fullAd.cityName}, ${fullAd.districtName}`,
-          contactNo: fullAd.contactDetails || "N/A",
+          contactNo: fullAd.contactPhone || "N/A",
           brand: fullAd.brand,
           model: fullAd.model,
           deviceType: fullAd.categoryName, // Usually category for tech
@@ -168,23 +168,7 @@ export default function ReviewAdsContent() {
     }
   };
 
-  const handleRequestChanges = async (adId: string, reason: string) => {
-    const ad = ads.find(a => a.id === adId);
-    if (!ad) return;
-    try {
-      setLoading(true);
-      // Following user instruction: "both same" (REJECTED)
-      await adService.updateAdStatus(ad.uuid, "REJECTED", reason);
-      setViewingAdId(null);
-      setSelectedAd(null);
-      await fetchAds();
-    } catch (err) {
-      setError("Failed to request changes");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const viewingAdData = ads.find(a => a.id === viewingAdId);
   const viewingAd = selectedAd;
@@ -212,7 +196,6 @@ export default function ReviewAdsContent() {
             onBack={handleBackToList}
             onAccept={handleAccept}
             onReject={handleReject}
-            onRequestChanges={handleRequestChanges}
           />
         </div>
       ) : (
@@ -348,25 +331,11 @@ export default function ReviewAdsContent() {
                       </span>
                     </label>
 
-                    {/* Request Changes */}
-                    <label className="flex items-center gap-[6px] md:gap-[8px] cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={selectedActions[ad.id] === "requestChanges"}
-                        onChange={() =>
-                          handleActionChange(ad.id, "requestChanges")
-                        }
-                        className="appearance-none w-[14px] h-[14px] md:w-[16px] md:h-[16px] rounded-[5px] border border-black/70 cursor-pointer checked:bg-[#E3800F] checked:border-[#E3800F] relative after:content-['✓'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:text-white after:text-[9px] md:after:text-[10px] after:font-bold after:opacity-0 checked:after:opacity-100"
-                      />
-                      <span className="text-[#E3800F] text-[11px] md:text-[12px] font-semibold leading-[100%] tracking-normal">
-                        Request Changes
-                      </span>
-                    </label>
+
                   </div>
 
                   {/* Submit Button — shown here only when NO textarea row is needed */}
-                  {selectedActions[ad.id] !== "reject" &&
-                    selectedActions[ad.id] !== "requestChanges" && (
+                  {selectedActions[ad.id] !== "reject" && (
                       <div className="w-full md:w-[100px] xl:w-[120px] shrink-0 flex items-center md:justify-center">
                         <button
                           onClick={() => handleSubmit(ad.id)}
@@ -380,8 +349,7 @@ export default function ReviewAdsContent() {
                 </div>
 
                 {/* Inline Textarea Row — shown below action row for Reject / Request Changes */}
-                {(selectedActions[ad.id] === "reject" ||
-                  selectedActions[ad.id] === "requestChanges") && (
+                {selectedActions[ad.id] === "reject" && (
                   <div className="flex items-center gap-[12px] px-[12px] md:px-[16px] pb-[14px] pt-[2px]">
                     <input
                       autoFocus

@@ -16,6 +16,16 @@ export const categoryApi = {
   },
 
   /**
+   * Search categories (Admin/Moderator access)
+   */
+  searchCategories: async (query: string, type = "main"): Promise<CategoryListResponse> => {
+    const response = await apiClient.get("/api/v1/search/admin/categories", {
+      params: { query, type }
+    });
+    return response.data;
+  },
+
+  /**
    * Get all subcategories (Admin/Moderator access)
    */
   getSubCategories: async (): Promise<SubCategoryListResponse> => {

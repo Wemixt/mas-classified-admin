@@ -32,7 +32,6 @@ interface AdDetailViewProps {
   onBack: () => void;
   onAccept: (adId: string) => void;
   onReject: (adId: string, reason: string) => void;
-  onRequestChanges?: (adId: string, reason: string) => void;
 }
 
 export default function AdDetailView({
@@ -40,10 +39,9 @@ export default function AdDetailView({
   onBack,
   onAccept,
   onReject,
-  onRequestChanges,
 }: AdDetailViewProps) {
   const [selectedImage, setSelectedImage] = useState(0);
-  const [modalAction, setModalAction] = useState<"reject" | "requestChanges" | "done" | null>(null);
+  const [modalAction, setModalAction] = useState<"reject" | "done" | null>(null);
   const [reason, setReason] = useState("");
 
   const formattedPrice = new Intl.NumberFormat("en-LK").format(ad.price);
@@ -260,7 +258,7 @@ export default function AdDetailView({
             </div>
           </div>
 
-          {/* Action buttons — Figma: Reject (dark red pill) + Request Changes (orange pill) */}
+          {/* Action buttons — Figma: Reject (dark red pill) */}
           <div className="flex items-center gap-[12px] md:gap-[16px]">
             {/* Reject button */}
             <button
@@ -277,20 +275,6 @@ export default function AdDetailView({
               Reject
             </button>
 
-            {/* Request Changes button */}
-            <button
-              onClick={() => setModalAction("requestChanges")}
-              className="h-[40px] md:h-[44px] px-[20px] md:px-[28px] rounded-full text-white text-[13px] md:text-[15px] font-bold leading-[100%] tracking-wide transition-all duration-200 cursor-pointer"
-              style={{
-                fontFamily: "Poppins, sans-serif",
-                background: "#C85A00",
-                boxShadow: "0 2px 8px rgba(200,90,0,0.35)",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#B55000")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "#C85A00")}
-            >
-              Request Changes
-            </button>
           </div>
         </div>
       </div>
@@ -357,8 +341,6 @@ export default function AdDetailView({
                     onClick={() => {
                       if (modalAction === "reject") {
                         onReject(ad.id, reason);
-                      } else if (modalAction === "requestChanges" && onRequestChanges) {
-                        onRequestChanges(ad.id, reason);
                       }
                       setModalAction("done");
                     }}

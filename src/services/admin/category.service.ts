@@ -19,6 +19,19 @@ export const categoryService = {
   },
 
   /**
+   * Search categories
+   */
+  async searchCategories(query: string, type = "main"): Promise<any> {
+    try {
+      const response = await categoryApi.searchCategories(query, type);
+      return response;
+    } catch (error) {
+      console.error("Error searching categories:", error);
+      throw error;
+    }
+  },
+
+  /**
    * Fetch all subcategories for administrative management
    */
   async getSubCategories(): Promise<SubCategory[]> {

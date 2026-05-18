@@ -80,7 +80,7 @@ export default function PublishedAdsContent() {
           publishedTime: new Date(fullAd.createdAt).toLocaleTimeString(),
           approvedDate: new Date(fullAd.createdAt).toLocaleDateString(),
           approvedTime: new Date(fullAd.createdAt).toLocaleTimeString(),
-          sellerMobile: fullAd.contactDetails || "+94 7 xxx xxx",
+          sellerMobile: fullAd.contactPhone || "+94 7 xxx xxx",
           revisions: [],
           reviews: { totalCount: 0, items: [] },
         });

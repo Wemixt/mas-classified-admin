@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/hooks";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { categoryService } from "@/services/admin/category.service";
 import { Category, SubCategory } from "@/types";
 import toast from "react-hot-toast";
@@ -83,17 +83,21 @@ export default function CategoriesContent() {
 
   const gridClasses = "grid grid-cols-[0.6fr_1.5fr_1.2fr_1.2fr_1.2fr_0.8fr] items-center";
 
-  useEffect(() => {
-    fetchCategories(1);
-  }, []);
+  const isInitialMount = useRef(true);
 
   const fetchCategories = async (page = 1) => {
     try {
       setIsLoading(true);
-      const response = await categoryService.getMainCategories(page, 10);
+      let response;
+      if (searchQuery.trim()) {
+        response = await categoryService.searchCategories(searchQuery.trim(), "main");
+      } else {
+        response = await categoryService.getMainCategories(page, 10);
+      }
       if (response.success && response.data) {
-        setCategories(response.data.data || []);
-        if (response.data.meta) {
+        const dataArray = Array.isArray(response.data) ? response.data : (response.data.data || []);
+        setCategories(dataArray);
+        if (!Array.isArray(response.data) && response.data.meta) {
           const { currentPage, lastPage, total, perPage } = response.data.meta;
           setMeta({
             page: currentPage || 1,
@@ -101,14 +105,35 @@ export default function CategoriesContent() {
             total: total || 0,
             limit: perPage || 10
           });
+        } else {
+          setMeta({
+            page: 1,
+            totalPages: 1,
+            total: dataArray.length,
+            limit: 10
+          });
         }
       }
     } catch (error) {
-      toast.error("Failed to fetch categories");
+      toast.error(searchQuery.trim() ? "Failed to search categories" : "Failed to fetch categories");
     } finally {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      fetchCategories(1);
+      return;
+    }
+
+    const delayDebounceFn = setTimeout(() => {
+      fetchCategories(1);
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
 
   const handleAddCategory = async () => {
     if (!newCategoryName.trim()) {
@@ -263,13 +288,7 @@ export default function CategoriesContent() {
     setNewSubCategoryIcon("");
   };
 
-  const filteredCategories = useMemo(() => {
-    if (!searchQuery) return categories;
-    return categories.filter(cat => 
-      cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      cat.slug.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [categories, searchQuery]);
+  const filteredCategories = categories;
 
   const toggleExpand = (id: number) => {
     setExpandedCategoryId(prev => prev === id ? null : id);

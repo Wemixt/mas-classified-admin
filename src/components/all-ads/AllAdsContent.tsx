@@ -168,7 +168,7 @@ export default function AllAdsContent() {
           category: fullAd.categoryName,
           condition: fullAd.condition,
           location: `${fullAd.cityName}, ${fullAd.districtName}`,
-          contactNo: fullAd.contactDetails || "N/A",
+          contactNo: fullAd.contactPhone || "N/A",
           brand: fullAd.brand,
           model: fullAd.model,
           deviceType: fullAd.categoryName,
