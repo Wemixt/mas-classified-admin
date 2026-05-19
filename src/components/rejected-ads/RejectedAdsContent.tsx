@@ -112,14 +112,14 @@ export default function RejectedAdsContent() {
           id: fullAd.id,
           title: fullAd.title,
           seller: { 
-            name: fullAd.userName || fullAd.user?.fullName || fullAd.seller?.name || "Unknown Seller",
-            username: fullAd.userEmail?.split('@')[0] || fullAd.user?.email?.split('@')[0] || "unknown" 
+            name: fullAd.contactPersonName || fullAd.userName || fullAd.user?.fullName || fullAd.seller?.name || "Unknown Seller",
+            username: fullAd.contactEmail || fullAd.userEmail?.split('@')[0] || fullAd.user?.email?.split('@')[0] || "unknown" 
           },
-          category: fullAd.categoryName,
+          category: fullAd.subCategory?.mainCategory?.name || fullAd.categoryName || "",
           status: fullAd.status,
-          reviewedBy: fullAd.reviewedByName || "System",
-          reviewedOnDate: new Date(fullAd.reviewedAt || fullAd.createdAt).toLocaleDateString("en-US", { timeZone: "Asia/Colombo" }),
-          reviewedOnTime: new Date(fullAd.reviewedAt || fullAd.createdAt).toLocaleTimeString("en-US", { timeZone: "Asia/Colombo" }),
+          reviewedBy: fullAd.reviewedByUser?.fullName || fullAd.reviewedByName || "System",
+          reviewedOnDate: fullAd.reviewedAt ? new Date(fullAd.reviewedAt).toLocaleDateString("en-US", { timeZone: "Asia/Colombo" }) : "N/A",
+          reviewedOnTime: fullAd.reviewedAt ? new Date(fullAd.reviewedAt).toLocaleTimeString("en-US", { timeZone: "Asia/Colombo" }) : "",
           rejection: {
             heading: fullAd.rejectionReason || "Ad was rejected",
             details: "No further details provided.",

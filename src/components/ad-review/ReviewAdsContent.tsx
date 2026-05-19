@@ -104,7 +104,7 @@ export default function ReviewAdsContent() {
           negotiable: fullAd.isNegotiable,
           category: fullAd.categoryName,
           condition: fullAd.condition,
-          location: `${fullAd.cityName}, ${fullAd.districtName}`,
+          location: [fullAd.city?.name || fullAd.cityName, fullAd.district?.name || fullAd.districtName].filter(Boolean).join(", ") || "N/A",
           contactNo: fullAd.contactPhone || "N/A",
           brand: fullAd.brand,
           model: fullAd.model,

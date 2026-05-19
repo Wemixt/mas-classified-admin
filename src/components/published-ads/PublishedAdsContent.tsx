@@ -75,7 +75,7 @@ export default function PublishedAdsContent() {
             name: fullAd.userName || fullAd.user?.fullName || fullAd.seller?.name || "Unknown Seller",
             badge: "Gold" 
           },
-          approvedBy: fullAd.reviewedByName || "System",
+          approvedBy: fullAd.reviewedByUser?.fullName || fullAd.reviewedByName || "System",
           publishedDate: new Date(fullAd.reviewedAt || fullAd.createdAt).toLocaleDateString("en-US", { timeZone: "Asia/Colombo" }),
           publishedTime: new Date(fullAd.reviewedAt || fullAd.createdAt).toLocaleTimeString("en-US", { timeZone: "Asia/Colombo" }),
           approvedDate: new Date(fullAd.reviewedAt || fullAd.createdAt).toLocaleDateString("en-US", { timeZone: "Asia/Colombo" }),

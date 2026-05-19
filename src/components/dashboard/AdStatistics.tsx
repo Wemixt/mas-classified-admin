@@ -212,7 +212,7 @@ export default function AdStatistics() {
         </div>
         <div className="flex items-center gap-[6px]">
           <span className="w-[8px] md:w-[10px] h-[8px] md:h-[10px] rounded-full bg-[#00E096] shrink-0" />
-          <span className="text-[9px] md:text-[10px] text-[#555555] font-normal">Pending ads</span>
+          <span className="text-[9px] md:text-[10px] text-[#555555] font-normal">Submitted ads</span>
         </div>
       </div>
     </div>

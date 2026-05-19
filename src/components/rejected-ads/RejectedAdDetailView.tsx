@@ -189,14 +189,7 @@ export default function RejectedAdDetailView({
             </span>
           </div>
 
-          <h3
-            className="text-[#000000] text-[16px] md:text-[20px] font-semibold leading-[150%]"
-            style={{ fontFamily: "Poppins, sans-serif" }}
-          >
-            {ad.rejection.heading}
-          </h3>
-
-          <div className="mt-[10px]">
+          <div>
             <div
               className="text-[#000000] text-[14px] md:text-[16px] font-medium leading-[150%]"
               style={{ fontFamily: "Poppins, sans-serif" }}
@@ -207,32 +200,7 @@ export default function RejectedAdDetailView({
               className="text-[#000000] text-[13px] md:text-[16px] font-normal leading-[150%] opacity-80 mt-[8px]"
               style={{ fontFamily: "Poppins, sans-serif" }}
             >
-              {ad.rejection.details}
-            </div>
-          </div>
-
-          <div className="mt-[16px]">
-            <p
-              className="text-[#000000] text-[14px] md:text-[16px] font-semibold leading-[150%]"
-              style={{ fontFamily: "Poppins, sans-serif" }}
-            >
-              Issues Found
-            </p>
-
-            <div className="mt-[8px] flex flex-col gap-[6px]">
-              {ad.rejection.issuesFound.map((issue, idx) => (
-                <div key={idx} className="flex items-start gap-[8px]">
-                  <span className="text-[#ED1C24] leading-[150%] mt-[1px]">
-                    ✕
-                  </span>
-                  <p
-                    className="text-[#000000] text-[13px] md:text-[14px] font-normal leading-[150%] opacity-80"
-                    style={{ fontFamily: "Poppins, sans-serif" }}
-                  >
-                    {issue}
-                  </p>
-                </div>
-              ))}
+              {ad.rejection.heading}
             </div>
           </div>
         </div>

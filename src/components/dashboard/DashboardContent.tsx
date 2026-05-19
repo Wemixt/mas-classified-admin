@@ -37,7 +37,7 @@ export default function DashboardContent() {
   const stats = [
     { value: statsData?.totalAds ?? 0, label: "Total Ads", bgColor: "#0F467F" },
     { value: statsData?.publishedAds ?? 0, label: "Published Ads", bgColor: "#1174BB" },
-    { value: statsData?.pendingAds ?? 0, label: "Pending Ads", bgColor: "#005AA1" },
+    { value: statsData?.pendingAds ?? 0, label: "Submitted Ads", bgColor: "#005AA1" },
     { value: statsData?.rejectedAds ?? 0, label: "Rejected Ads", bgColor: "#0F467F" },
   ];
 
