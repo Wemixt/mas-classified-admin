@@ -75,7 +75,7 @@ function AdCard({ ad }: { ad: AdminAd }) {
         </div>
 
         <span className="text-[#5E5E5E] text-[11px] sm:text-[12px] md:text-[13px] font-normal leading-[100%] mt-[4px] sm:mt-[6px]" style={{ fontFamily: "Eurostile, sans-serif" }}>
-          {ad.condition.replace('_', ' ')} • {ad.categoryName}
+          {ad.condition ? `${ad.condition.replace('_', ' ')} • ` : ''}{ad.categoryName}
         </span>
 
         {locationText && (

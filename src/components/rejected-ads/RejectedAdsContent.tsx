@@ -117,9 +117,9 @@ export default function RejectedAdsContent() {
           },
           category: fullAd.categoryName,
           status: fullAd.status,
-          reviewedBy: "System",
-          reviewedOnDate: new Date(fullAd.createdAt).toLocaleDateString(),
-          reviewedOnTime: new Date(fullAd.createdAt).toLocaleTimeString(),
+          reviewedBy: fullAd.reviewedByName || "System",
+          reviewedOnDate: new Date(fullAd.reviewedAt || fullAd.createdAt).toLocaleDateString("en-US", { timeZone: "Asia/Colombo" }),
+          reviewedOnTime: new Date(fullAd.reviewedAt || fullAd.createdAt).toLocaleTimeString("en-US", { timeZone: "Asia/Colombo" }),
           rejection: {
             heading: fullAd.rejectionReason || "Ad was rejected",
             details: "No further details provided.",
@@ -222,7 +222,7 @@ export default function RejectedAdsContent() {
               <div className="py-20 text-center text-red-500">{error}</div>
             ) : ads.length === 0 ? (
               <div className="py-20 text-center text-[#5E5E5E]">No rejected ads found.</div>
-            ) : ads.map((ad) => (
+            ) : [...ads].sort((a, b) => new Date(b.reviewedAt || b.createdAt).getTime() - new Date(a.reviewedAt || a.createdAt).getTime()).map((ad) => (
               <div
                 key={ad.id}
                 className="bg-[#F4F4F4] rounded-[8px] overflow-hidden"
@@ -294,7 +294,7 @@ export default function RejectedAdsContent() {
                   <div className="flex flex-wrap items-center gap-[8px] md:gap-[12px]">
                     <span className="text-[#242424] text-[11px] md:text-[12px] font-normal leading-[150%] tracking-normal whitespace-nowrap">
                       Rejected by{" "}
-                      <strong className="font-semibold">System</strong>
+                      <strong className="font-semibold">{ad.reviewedByName || "System"}</strong>
                     </span>
                     <button
                       onClick={() => handleSendMessage(ad.id)}

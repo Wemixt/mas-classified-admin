@@ -50,7 +50,7 @@ export default function SellersContent() {
           name: u.fullName || "Unknown",
           email: u.email,
           phone: u.phoneNo || "N/A",
-          totalAds: 0, // Not provided in user list API
+          totalAds: u.totalAds ?? 0,
           avatar: u.profileImage || "/logos/mass logo.png",
           active: u.status === "ACTIVE",
         }));

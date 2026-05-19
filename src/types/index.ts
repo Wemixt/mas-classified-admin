@@ -88,6 +88,8 @@ export interface Ad {
   categoryName: string;
   userName: string;
   userEmail: string;
+  reviewedByName?: string;
+  reviewedAt?: string;
 }
 
 export interface PaginatedResponse<T> {

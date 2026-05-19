@@ -75,11 +75,11 @@ export default function PublishedAdsContent() {
             name: fullAd.userName || fullAd.user?.fullName || fullAd.seller?.name || "Unknown Seller",
             badge: "Gold" 
           },
-          approvedBy: "System",
-          publishedDate: new Date(fullAd.createdAt).toLocaleDateString(),
-          publishedTime: new Date(fullAd.createdAt).toLocaleTimeString(),
-          approvedDate: new Date(fullAd.createdAt).toLocaleDateString(),
-          approvedTime: new Date(fullAd.createdAt).toLocaleTimeString(),
+          approvedBy: fullAd.reviewedByName || "System",
+          publishedDate: new Date(fullAd.reviewedAt || fullAd.createdAt).toLocaleDateString("en-US", { timeZone: "Asia/Colombo" }),
+          publishedTime: new Date(fullAd.reviewedAt || fullAd.createdAt).toLocaleTimeString("en-US", { timeZone: "Asia/Colombo" }),
+          approvedDate: new Date(fullAd.reviewedAt || fullAd.createdAt).toLocaleDateString("en-US", { timeZone: "Asia/Colombo" }),
+          approvedTime: new Date(fullAd.reviewedAt || fullAd.createdAt).toLocaleTimeString("en-US", { timeZone: "Asia/Colombo" }),
           sellerMobile: fullAd.contactPhone || "+94 7 xxx xxx",
           revisions: [],
           reviews: { totalCount: 0, items: [] },
@@ -184,7 +184,7 @@ export default function PublishedAdsContent() {
               <div className="py-20 text-center text-red-500">{error}</div>
             ) : ads.length === 0 ? (
               <div className="py-20 text-center text-[#5E5E5E]">No published ads found.</div>
-            ) : ads.map((ad) => (
+            ) : [...ads].sort((a, b) => new Date(b.reviewedAt || b.createdAt).getTime() - new Date(a.reviewedAt || a.createdAt).getTime()).map((ad) => (
               <div
                 key={ad.id}
                 className="bg-[#F4F4F4] rounded-[8px] overflow-hidden"
@@ -251,7 +251,7 @@ export default function PublishedAdsContent() {
                         Published Date
                       </span>
                       <span className="text-[#000000] text-[12px] md:text-[14px] font-semibold leading-[150%] tracking-normal ml-[8px]">
-                        {new Date(ad.createdAt).toLocaleDateString()}
+                        {new Date(ad.reviewedAt || ad.createdAt).toLocaleDateString("en-US", { timeZone: "Asia/Colombo" })}
                       </span>
                     </div>
                     <div className="flex items-center">
@@ -262,7 +262,7 @@ export default function PublishedAdsContent() {
                         Published Time
                       </span>
                       <span className="text-[#000000] text-[12px] md:text-[14px] font-semibold leading-[150%] tracking-normal ml-[8px]">
-                        {new Date(ad.createdAt).toLocaleTimeString()}
+                        {new Date(ad.reviewedAt || ad.createdAt).toLocaleTimeString("en-US", { timeZone: "Asia/Colombo" })}
                       </span>
                     </div>
                   </div>
@@ -270,7 +270,7 @@ export default function PublishedAdsContent() {
                     <span className="text-[#242424] text-[11px] md:text-[12px] font-normal leading-[150%] tracking-normal whitespace-nowrap">
                       Approved by{" "}
                       <strong className="font-semibold">
-                        System
+                        {ad.reviewedByName || "System"}
                       </strong>
                     </span>
                     <button
